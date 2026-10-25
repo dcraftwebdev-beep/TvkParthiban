@@ -92,10 +92,19 @@ await t("citizen sees the result and the dates in tracking", async () => {
   assert.ok(a.progressAt && a.resolvedAt && a.createdAt <= a.progressAt && a.progressAt <= a.resolvedAt);
   assert.equal(a.street, "Main St"); assert.equal(a.note, "Work on Monday"); assert.equal(a.name, undefined);
 });
-await t("public work gallery only shows consented, finished work", async () => {
-  const w = (await call("/api/work")).data.items; assert.equal(w.length, 1); assert.equal(w[0].image, resultUrl); assert.equal(w[0].id, undefined);
-  db.rows[0].consent_public = false;
+await t("public work page lists published finished work with paging and no private data", async () => {
+  const r = (await call("/api/work")).data; const w = r.items;
+  assert.equal(w.length, 1); assert.equal(w[0].image, resultUrl); assert.equal(w[0].id, undefined); assert.equal(w[0].name, undefined); assert.equal(w[0].street, "Main St");
+  assert.ok(w[0].at >= w[0].raisedAt); assert.equal(typeof w[0].days, "number"); assert.equal(r.more, false);
+  assert.equal((await call("/api/work?cat=water")).data.items.length, 0);
+  assert.equal((await call("/api/work?cat=road")).data.items.length, 1);
+  assert.equal((await call("/api/work?offset=1")).data.items.length, 0);
+});
+await t("admin can unpublish and publish a result", async () => {
+  assert.equal((await call(`/api/admin/complaints/${id}`, { method: "PATCH", token, body: { publish: false } })).data.consent, false);
   assert.equal((await call("/api/work")).data.items.length, 0);
+  assert.equal((await call(`/api/admin/complaints/${id}`, { method: "PATCH", token, body: { publish: true } })).data.consent, true);
+  assert.equal((await call("/api/work")).data.items.length, 1);
 });
 await t("csv export", async () => {
   const c = await call(`/api/admin/export.csv?t=${encodeURIComponent(token)}`); assert.equal(c.status, 200); assert.ok(c.data.includes(id));

@@ -37,3 +37,20 @@ Object.assign(T.en, {
   tRaised: "Complaint raised", tDone: "Completed on", tPending: "Pending", tTaken: "Time taken", tOpenFor: "Open for",
   tDays: "days", tSameDay: "Same day", tWaiting: "Waiting", tNote: "From the ward office: "
 });
+
+Object.assign(T.ta, {
+  okIdLabel: "உங்கள் புகார் எண்", okShort: "இந்த எண்ணை வைத்துக்கொள்ளுங்கள். 'நிலை' பகுதியில் எப்போதும் பார்க்கலாம்.",
+  okBell: "தீர்வு கிடைத்ததும் இந்த போனுக்கு அறிவிப்பு வரும்.",
+  wTitle: "தீர்க்கப்பட்ட புகார்கள்", wSub: "வார்டு 38 இல் முடிந்த பணிகளின் முன் / பின் படங்கள்.",
+  wpTitle: "தீர்க்கப்பட்ட புகார்கள்", wpSub: "வார்டு 38 இல் முடிந்த அனைத்துப் பணிகளும். மக்களின் அனுமதியுடன், பெயர் இல்லாமல்.",
+  viewAll: "அனைத்தையும் பார்", all: "அனைத்தும்", loadMore: "மேலும் காண்க", download: "பதிவிறக்கு",
+  wpEmpty: "இந்தப் பிரிவில் இன்னும் தீர்க்கப்பட்ட புகார்கள் இல்லை."
+});
+Object.assign(T.en, {
+  okIdLabel: "Your complaint number", okShort: "Keep this number. You can check it anytime in Track.",
+  okBell: "This phone will get an alert when it is resolved.",
+  wTitle: "Resolved complaints", wSub: "Before and after photos of work finished in Ward 38.",
+  wpTitle: "Resolved complaints", wpSub: "All finished work in Ward 38, shown with the citizen's permission and without names.",
+  viewAll: "View all", all: "All", loadMore: "Show more", download: "Download",
+  wpEmpty: "No resolved complaints in this category yet."
+});

@@ -17,7 +17,7 @@ export function memDb() {
     },
     async update(id, patch) { Object.assign(rows.find(x => x.id === id), patch); },
     async summary() { return rows.map(({ cat, status, created_at }) => ({ cat, status, created_at })); },
-    async work(limit = 12) { return rows.filter(r => r.has_result && r.consent_public).sort((a, b) => b.resolved_at - a.resolved_at).slice(0, limit).map(({ id, cat, resolved_at }) => ({ id, cat, resolved_at })); },
+    async work({ limit = 12, offset = 0, cat = "" } = {}) { return rows.filter(r => r.has_result && r.consent_public && (!cat || r.cat === cat)).sort((a, b) => b.resolved_at - a.resolved_at).slice(offset, offset + limit).map(({ id, cat, street, created_at, resolved_at }) => ({ id, cat, street, created_at, resolved_at })); },
     async saveAdminPush(sub) { const i = admins.findIndex(a => a.endpoint === sub.endpoint); const row = { endpoint: sub.endpoint, sub }; if (i >= 0) admins[i] = row; else admins.push(row); },
     async listAdminPush() { return admins.map(a => ({ ...a })); },
     async deleteAdminPush(endpoint) { const i = admins.findIndex(a => a.endpoint === endpoint); if (i >= 0) admins.splice(i, 1); },

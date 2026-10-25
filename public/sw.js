@@ -9,6 +9,11 @@ self.addEventListener("push", e => {
     body: d.body || "",
     icon: "/flag.jpg",
     badge: "/flag.jpg",
+    tag: d.tag || undefined,
+    renotify: !!d.renotify,
+    requireInteraction: !!d.requireInteraction,
+    vibrate: d.vibrate || [200, 100, 200],
+    silent: false,
     data: { url: d.url || "/" }
   }));
 });

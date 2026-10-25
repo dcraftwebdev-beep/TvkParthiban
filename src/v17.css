@@ -1,0 +1,48 @@
+/* v17: small success message, resolved complaints page */
+
+/* success message */
+.sheet{align-items:center;padding:16px}
+.ok-card{position:relative;width:100%;max-width:340px;background:var(--paper);border-radius:24px;overflow:hidden;animation:pop .28s cubic-bezier(.2,.9,.3,1.2)}
+.ok-x{position:absolute;right:10px;top:10px;width:32px;height:32px;border-radius:50%;border:0;background:#ffffff26;color:#fff;display:grid;place-items:center;z-index:2}
+.ok-head{background:linear-gradient(160deg,var(--maroon),var(--maroon-d));color:#fff;text-align:center;padding:22px 20px 20px;border-bottom:5px solid var(--gold)}
+.ok-tick{display:grid;place-items:center;width:54px;height:54px;border-radius:50%;background:var(--gold);margin:0 auto 10px}
+.ok-tick svg{fill:none;stroke:var(--maroon-dd);stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:30;stroke-dashoffset:30;animation:draw .5s .15s ease forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.ok-head h3{font-size:19px;font-weight:700;line-height:1.3}
+.ok-body{padding:16px 18px 18px;text-align:center}
+.ok-label{font-size:12px;color:var(--mute);margin-bottom:6px}
+.ok-id{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:10px 10px 10px 16px;border-radius:14px;border:1.5px dashed #c9b88c;background:#fff;color:var(--maroon)}
+.ok-id b{font-size:clamp(18px,5.6vw,22px);font-weight:700;letter-spacing:.04em;white-space:nowrap;font-family:var(--f-head)}
+.ok-id span{display:inline-flex;align-items:center;gap:5px;padding:7px 11px;border-radius:10px;background:var(--maroon);color:#fff;font-size:12.5px;font-weight:700;white-space:nowrap}
+.ok-id.done span{background:#1faa59}
+.ok-note{margin-top:12px;font-size:13px;line-height:1.5;color:var(--mute)}
+.ok-bell{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:8px;font-size:12.5px;color:var(--maroon-d);font-weight:700}
+.ok-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+.ok-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;border-radius:12px;border:1.5px solid var(--maroon);color:var(--maroon);font-weight:700;font-size:14px;background:transparent;text-decoration:none}
+.ok-btn.wa{background:#1faa59;border-color:#1faa59;color:#fff}
+
+/* resolved complaints */
+.work-grid{display:grid;gap:14px;grid-template-columns:1fr}
+.work-card{display:block;width:100%;text-align:left;padding:0;border:2px solid var(--maroon);border-radius:16px;overflow:hidden;background:#fff;cursor:pointer;transition:transform .2s,border-color .2s}
+.work-card:hover{transform:translateY(-3px);border-color:var(--gold)}
+.work-card img{display:block;width:100%;aspect-ratio:4/5;object-fit:cover;object-position:top}
+.work-meta{display:block;padding:11px 14px 13px}
+.work-meta b{display:block;font-size:15px;color:var(--maroon-d)}
+.work-meta small{display:block;margin-top:2px;font-size:12.5px;color:var(--mute);line-height:1.4}
+.work-all{margin:22px auto 0;display:flex;max-width:260px}
+.workpage{padding-top:84px;min-height:70vh;background:var(--paper2)}
+.workpage .sec{padding-top:26px}
+.wp-back{display:inline-flex;align-items:center;gap:6px;margin-bottom:18px;font-weight:700;font-size:14px;color:var(--maroon)}
+.wp-chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -16px 20px;padding:0 16px 4px}
+.wp-chips::-webkit-scrollbar{display:none}
+.wp-chips button{flex:none;min-height:40px;padding:0 16px;border-radius:99px;border:1.5px solid #d9c9a3;background:#fff;font-weight:700;font-size:13.5px;color:var(--maroon-d)}
+.wp-chips button.on{background:var(--maroon);border-color:var(--maroon);color:#fff}
+.wp-empty{padding:40px 0;text-align:center;color:var(--mute)}
+.lightbox{position:fixed;inset:0;z-index:110;background:#1a0306d9;display:grid;place-items:center;padding:14px;animation:fade .2s}
+.lb-card{position:relative;width:100%;max-width:520px;max-height:92vh;overflow:auto;background:var(--paper);border-radius:18px;padding:10px}
+.lb-card img{display:block;width:100%;border-radius:12px}
+.lb-x{position:absolute;right:16px;top:16px;width:36px;height:36px;border-radius:50%;border:0;background:#000000a6;color:#fff;display:grid;place-items:center}
+.lb-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 4px 4px}
+@media (min-width:700px){.work-grid{grid-template-columns:repeat(2,1fr)}}
+@media (min-width:1000px){.work-grid{grid-template-columns:repeat(3,1fr)}.workpage{padding-top:110px}.wp-chips{margin:0 0 20px;padding:0;flex-wrap:wrap}}
+@media (max-width:859px){.workpage{padding-bottom:20px}}

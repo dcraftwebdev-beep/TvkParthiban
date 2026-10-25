@@ -124,8 +124,15 @@ export function makeHandler(getDb, env = process.env) {
       if (path === "/push-key" && method === "GET") return send(res, 200, { key: pushEnabled(env) ? env.VAPID_PUBLIC_KEY : null });
 
       if (path === "/work" && method === "GET") {
-        const rows = await db.work(12);
-        return send(res, 200, { items: rows.map(r => ({ cat: r.cat, at: r.resolved_at, image: resultPath(r.id) })) }, "application/json; charset=utf-8", "public, max-age=60");
+        const sp = url.searchParams;
+        const limit = Math.min(Math.max(+sp.get("limit") || 12, 1), 24), offset = Math.max(+sp.get("offset") || 0, 0);
+        const cat = CATS.includes(sp.get("cat")) ? sp.get("cat") : "";
+        const rows = await db.work({ limit: limit + 1, offset, cat });   // one extra row tells us whether there is a next page
+        const days = r => Math.max(0, Math.round((r.resolved_at - r.created_at) / 86400000));
+        return send(res, 200, {
+          items: rows.slice(0, limit).map(r => ({ cat: r.cat, street: r.street || "", raisedAt: r.created_at, at: r.resolved_at, days: days(r), image: resultPath(r.id), page: resultPage(r.id) })),
+          more: rows.length > limit
+        }, "application/json; charset=utf-8", "public, max-age=60");
       }
 
       if (path === "/complaints" && method === "POST") {
@@ -282,6 +289,7 @@ h1{font-size:22px;margin:18px 0 6px}p{color:#ffffffbf;margin:0 0 18px}a{display:
             if (status === 1 && !c.progress_at) patch.progress_at = Date.now();
             if (status === 2 && c.status !== 2) patch.resolved_at = Date.now();
             if (status !== 2 && c.resolved_at) patch.resolved_at = null;
+            if (typeof b.publish === "boolean") patch.consent_public = b.publish;
             if (b.after !== undefined) {
               const after = jpegB64(b.after, 500 * 1024), result = jpegB64(b.result, 1300 * 1024);
               if (!after || !result) return send(res, 400, { error: "image" });

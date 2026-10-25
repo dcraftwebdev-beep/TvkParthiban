@@ -16,7 +16,7 @@ export const api = {
   stats: () => req("/api/stats"),
   create: payload => req("/api/complaints", { method: "POST", body: payload }),
   track: q => req(`/api/track?q=${encodeURIComponent(q)}`),
-  work: () => req("/api/work"),
+  work: (p = {}) => req(`/api/work?${new URLSearchParams(Object.entries(p).filter(([, v]) => v !== "" && v != null))}`),
   pushKey: () => req("/api/push-key")
 };
 

@@ -43,5 +43,6 @@ export function citizenPush(c, url) {
 export const adminPush = (c, url) => ({
   title: `புதிய புகார் · ${CAT.ta[c.cat] || c.cat}`,
   body: `${c.descr.slice(0, 90)} (${c.name}, ${c.phone})`,
-  url
+  url,
+  tag: "new-complaint", renotify: true, requireInteraction: true, vibrate: [250, 120, 250, 120, 400]
 });

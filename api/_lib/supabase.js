@@ -39,7 +39,7 @@ export function supabaseDb(env = process.env) {
     },
     async update(id, patch) { await rest(`/complaints?id=${eq(id)}`, { method: "PATCH", body: patch, prefer: "return=minimal" }); },
     summary: () => rest("/complaints?select=cat,status,created_at&limit=10000"),
-    work: (limit = 12) => rest(`/complaints?has_result=eq.true&consent_public=eq.true&select=id,cat,resolved_at&order=resolved_at.desc&limit=${limit}`),
+    work: ({ limit = 12, offset = 0, cat = "" } = {}) => rest(`/complaints?has_result=eq.true&consent_public=eq.true${cat ? `&cat=${eq(cat)}` : ""}&select=id,cat,street,created_at,resolved_at&order=resolved_at.desc&limit=${limit}&offset=${offset}`),
 
     /* admin push devices */
     async saveAdminPush(sub) { await rest("/admin_push?on_conflict=endpoint", { method: "POST", body: { endpoint: sub.endpoint, sub, created_at: Date.now() }, prefer: "resolution=merge-duplicates,return=minimal" }); },

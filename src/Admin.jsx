@@ -16,6 +16,21 @@ const ago = ms => {
   return `${Math.round(h / 24)}d ago`;
 };
 
+/** Two short tones. Browsers allow sound after the admin has tapped anything on the page (the login tap counts). */
+function chime() {
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+    const ctx = new AC(), now = ctx.currentTime;
+    [[880, 0], [1175, 0.18], [880, 0.4]].forEach(([f, t0]) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = "sine"; o.frequency.value = f; o.connect(g); g.connect(ctx.destination);
+      g.gain.setValueAtTime(0.0001, now + t0); g.gain.exponentialRampToValueAtTime(0.35, now + t0 + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, now + t0 + 0.28);
+      o.start(now + t0); o.stop(now + t0 + 0.3);
+    });
+    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+  } catch { /* sound is a bonus */ }
+}
+
 const Ico = ({ d, s = 20 }) => <svg viewBox="0 0 24 24" width={s} height={s} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={d} /></svg>;
 const I = {
   phone: "M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z",
@@ -174,16 +189,22 @@ function Detail({ id, token, onClose, onChanged, flash }) {
     finally { setBusy(false); }
   };
 
-  const save = async notify => {
+  const save = async () => {
+    if (status === 2 && !c.hasResult && !afters.length && c.status !== 2) { /* resolving without an after photo is allowed */ }
     setBusy(true);
     try {
-      const body = { status, note, notify };
+      const body = { status, note, notify: true };
       if (status === 2 && afters.length && composed) { body.after = afters[0]; body.result = composed; }
       const r = await admin.patch(token, id, body);
       setC(p => ({ ...p, ...r })); setAfters([]); setComposed(""); onChanged();
-      flash(r.pushed ? "Saved. The citizen's phone was notified" : notify ? "Saved. Send the result from your WhatsApp below" : "Saved");
+      flash(r.pushed ? "Saved. The citizen's phone was notified" : "Saved");
     } catch (e) { flash(e.status === 400 ? "Photo was rejected, try a smaller one" : "Save failed"); }
     finally { setBusy(false); }
+  };
+
+  const publish = async on => {
+    try { const r = await admin.patch(token, id, { publish: on, notify: false }); setC(p => ({ ...p, consent: r.consent })); flash(on ? "Shown on the website" : "Hidden from the website"); onChanged(); }
+    catch { flash("Could not change this"); }
   };
 
   const link = c?.resultPage;
@@ -204,14 +225,11 @@ function Detail({ id, token, onClose, onChanged, flash }) {
     }[kind];
     return `https://wa.me/${intl(c.phone)}?text=${encodeURIComponent(text)}`;
   };
-  const waText = c && (c.lang === "en"
-    ? `✅ Your complaint ${c.id} is resolved.\nBefore and after photos: ${link}`
-    : `✅ உங்கள் புகார் ${c.id} தீர்க்கப்பட்டது.\nமுன் / பின் படங்கள்: ${link}`);
   const share = async () => {
     try {
       const blob = await (await fetch(c.resultUrl)).blob();
       const file = new File([blob], `${c.id}-before-after.jpg`, { type: "image/jpeg" });
-      if (navigator.canShare?.({ files: [file] })) await navigator.share({ files: [file], text: waText });
+      if (navigator.canShare?.({ files: [file] })) await navigator.share({ files: [file], text: link });
       else flash("Sharing files is not supported here. Use Download");
     } catch { /* cancelled */ }
   };
@@ -222,91 +240,80 @@ function Detail({ id, token, onClose, onChanged, flash }) {
       <aside className="ad-drawer" role="dialog" aria-modal="true" aria-label="Complaint details">
         <header className="ad-dh">
           <div><small>{c ? catName(c.cat) : ""}</small><h2>{id}</h2></div>
+          {c && <span className={"ad-pill s" + c.status}>{ST_EN[c.status]}</span>}
           <button className="ad-icon" onClick={onClose} aria-label="Close"><Ico d={I.x} /></button>
         </header>
         {!c ? <p className="ad-pad">Loading…</p> : (
           <div className="ad-db">
-            <section>
+            <section className="ad-top1">
               <p className="ad-desc">{c.desc}</p>
               <p className="ad-meta">{when(c.createdAt)} · {ago(c.createdAt)}</p>
             </section>
 
+            <section className="ad-person">
+              <div className="ad-who"><b>{c.name}</b><span>{c.phone}</span>{c.street && <span className="ad-loc"><Ico d={I.pin} s={14} />{c.street}</span>}</div>
+              <div className="ad-round">
+                <a href={`tel:+${intl(c.phone)}`} aria-label="Call" title="Call"><Ico d={I.phone} /></a>
+                <a className="wa" href={`https://wa.me/${intl(c.phone)}`} target="_blank" rel="noopener" aria-label="WhatsApp" title="WhatsApp"><Ico d={I.chat} /></a>
+                {c.lat != null && <a href={`https://maps.google.com/?q=${c.lat},${c.lng}`} target="_blank" rel="noopener" aria-label="Map" title="Map"><Ico d={I.pin} /></a>}
+              </div>
+            </section>
+
             {c.photoCount > 0 && (
-              <section>
-                <h3>Citizen photos ({c.photoCount})</h3>
-                <div className="ad-photos">
-                  {Array.from({ length: c.photoCount }, (_, i) => (
-                    <a key={i} href={admin.photoUrl(token, c.id, i)} target="_blank" rel="noopener"><img src={admin.photoUrl(token, c.id, i)} alt={`Photo ${i + 1}`} loading="lazy" /></a>
-                  ))}
-                </div>
-                {c.consent && <p className="ad-meta">The citizen allowed showing the photo publicly (without a name).</p>}
+              <section className="ad-strip">
+                {Array.from({ length: c.photoCount }, (_, i) => (
+                  <a key={i} href={admin.photoUrl(token, c.id, i)} target="_blank" rel="noopener"><img src={admin.photoUrl(token, c.id, i)} alt={`Photo ${i + 1}`} loading="lazy" /></a>
+                ))}
               </section>
             )}
 
-            <section className="ad-grid2">
-              <div><small>Name</small><b>{c.name}</b></div>
-              <div><small>Mobile</small><b>{c.phone}</b></div>
-              <div className="ad-span"><small>Location</small><b>{c.street || "-"}</b></div>
-            </section>
-
-            <div className="ad-actions">
-              <a className="ad-btn" href={`tel:+${intl(c.phone)}`}><Ico d={I.phone} />Call</a>
-              <a className="ad-btn wa" href={`https://wa.me/${intl(c.phone)}`} target="_blank" rel="noopener"><Ico d={I.chat} />WhatsApp</a>
-              {c.lat != null && <a className="ad-btn" href={`https://maps.google.com/?q=${c.lat},${c.lng}`} target="_blank" rel="noopener"><Ico d={I.pin} />Map</a>}
-            </div>
-
-            <section>
-              <h3>WhatsApp messages (from your own number)</h3>
-              <div className="ad-actions">
-                <a className="ad-btn wa" href={waLink("received")} target="_blank" rel="noopener">Received</a>
-                <a className="ad-btn wa" href={waLink("progress")} target="_blank" rel="noopener">In progress</a>
-                <a className="ad-btn wa" href={waLink("resolved")} target="_blank" rel="noopener">Resolved</a>
-              </div>
-              <p className="ad-meta">Opens this citizen's chat with the message written. Check it, then tap Send.</p>
-            </section>
-
-            <section>
-              <h3>Status</h3>
+            <section className="ad-panel">
               <div className="ad-seg">
                 {ST_EN.map((l, i) => <button key={l} className={status === i ? "on s" + i : ""} onClick={() => setStatus(i)}>{l}</button>)}
               </div>
-              <textarea rows={2} maxLength={300} value={note} onChange={e => setNote(e.target.value)} placeholder="Note for the citizen (optional), e.g. Work scheduled for Monday" />
+              <input className="ad-line" type="text" maxLength={300} value={note} onChange={e => setNote(e.target.value)} placeholder="Note for the citizen (optional)" />
 
               {status === 2 && (
-                <div className="ad-after">
-                  <label className="ad-btn ad-file">
-                    <Ico d={I.cam} />{c.hasResult || afters.length ? "Change the after photos" : "Add the after photos (up to 3)"}
-                    <input type="file" accept="image/*" multiple hidden onChange={pickAfter} />
-                  </label>
-                  <p className="ad-meta">Your photos are joined with the citizen's photos (red BEFORE, green AFTER) with both dates, into one picture.</p>
-                  {composed && <img className="ad-preview" src={composed} alt="Before and after preview" />}
-                </div>
+                <label className="ad-addafter">
+                  <Ico d={I.cam} />
+                  <span>{afters.length ? `${afters.length} after photo${afters.length > 1 ? "s" : ""} added` : c.hasResult ? "Change the after photos" : "Add the after photos"}</span>
+                  <input type="file" accept="image/*" multiple hidden onChange={pickAfter} />
+                </label>
               )}
+              {composed && <img className="ad-preview" src={composed} alt="Before and after preview" />}
 
-              <p className="ad-meta">{c.canPush ? "This citizen allowed notifications, so Save & notify sends a push to their phone." : "This citizen has no notifications on. Use the WhatsApp button below after saving."}</p>
-              <div className="ad-actions">
-                <button className="ad-btn primary" disabled={busy} onClick={() => save(true)}>{busy ? "Working…" : "Save & notify"}</button>
-                <button className="ad-btn" disabled={busy} onClick={() => save(false)}>Save only</button>
-              </div>
+              <button className="ad-btn primary ad-save" disabled={busy} onClick={save}>{busy ? "Working…" : "Save"}</button>
+              {c.canPush && <p className="ad-meta">The citizen will get a phone alert when the status changes.</p>}
             </section>
 
             {c.hasResult && (
-              <section>
-                <h3>Before / after result</h3>
-                <img className="ad-preview" src={c.resultUrl} alt="Before and after" />
-                <div className="ad-actions">
-                  <a className="ad-btn wa" href={`https://wa.me/${intl(c.phone)}?text=${encodeURIComponent(waText)}`} target="_blank" rel="noopener"><Ico d={I.chat} />Send on my WhatsApp</a>
-                  {typeof navigator !== "undefined" && navigator.canShare && <button className="ad-btn" onClick={share}><Ico d={I.share} />Share photo</button>}
-                  <a className="ad-btn" href={c.resultUrl} download={`${c.id}-before-after.jpg`}><Ico d={I.dl} />Download</a>
-                  <button className="ad-btn" onClick={copy}><Ico d={I.link} />Copy link</button>
+              <section className="ad-result">
+                <img src={c.resultUrl} alt="Before and after" />
+                <div className="ad-round">
+                  <a className="wa" href={waLink("resolved")} target="_blank" rel="noopener" aria-label="Send on WhatsApp" title="Send on WhatsApp"><Ico d={I.chat} /></a>
+                  {typeof navigator !== "undefined" && navigator.canShare && <button onClick={share} aria-label="Share photo" title="Share photo"><Ico d={I.share} /></button>}
+                  <a href={c.resultUrl} download={`${c.id}-before-after.jpg`} aria-label="Download" title="Download"><Ico d={I.dl} /></a>
+                  <button onClick={copy} aria-label="Copy link" title="Copy link"><Ico d={I.link} /></button>
                 </div>
-                <p className="ad-meta">"Send on my WhatsApp" opens the citizen's chat with a link. WhatsApp shows the before/after picture as a preview card. "Share photo" sends the picture itself through any app.</p>
+                <label className="ad-switch">
+                  <input type="checkbox" checked={c.consent} onChange={e => publish(e.target.checked)} />
+                  <span><b>Show on the website</b><small>{c.consent ? "Visible on the Work done page" : "Hidden from the public"}</small></span>
+                </label>
               </section>
             )}
 
+            <details className="ad-more">
+              <summary>Send a WhatsApp message</summary>
+              <div className="ad-chips">
+                <a href={waLink("received")} target="_blank" rel="noopener">Received</a>
+                <a href={waLink("progress")} target="_blank" rel="noopener">In progress</a>
+                <a href={waLink("resolved")} target="_blank" rel="noopener">Resolved</a>
+              </div>
+            </details>
+
             {c.notifications?.length > 0 && (
-              <section>
-                <h3>WhatsApp delivery log</h3>
+              <details className="ad-more">
+                <summary>WhatsApp delivery log</summary>
                 <ul className="ad-log">
                   {c.notifications.map((n, i) => (
                     <li key={i} className={n.ok ? "ok" : n.pending ? "wait" : "bad"}>
@@ -315,7 +322,7 @@ function Detail({ id, token, onClose, onChanged, flash }) {
                     </li>
                   ))}
                 </ul>
-              </section>
+              </details>
             )}
           </div>
         )}
@@ -361,14 +368,14 @@ function Panel({ token, onLogout }) {
     try {
       const [s, l] = await Promise.all([admin.stats(token), admin.list(token, { status, cat, q: search })]);
       setStats(s); setItems(l.items);
-      if (seen.current !== null && s.total > seen.current && quiet) flash(`${s.total - seen.current} new complaint${s.total - seen.current > 1 ? "s" : ""}`);
+      if (seen.current !== null && s.total > seen.current && quiet) { flash(`${s.total - seen.current} new complaint${s.total - seen.current > 1 ? "s" : ""}`); chime(); }
       seen.current = s.total;
     } catch (e) { if (e.status === 401) onLogout(); else flash("Connection problem"); }
     finally { setLoading(false); }
   }, [token, status, cat, search, flash, onLogout]);
 
   useEffect(() => { const h = setTimeout(() => load(false), search ? 250 : 0); return () => clearTimeout(h); }, [load, search]);
-  useEffect(() => { const h = setInterval(() => load(true), 30000); return () => clearInterval(h); }, [load]);
+  useEffect(() => { const h = setInterval(() => load(true), 15000); return () => clearInterval(h); }, [load]);
 
   const cards = useMemo(() => stats ? [
     ["New", stats.received, "s0", ""], ["In progress", stats.progress, "s1", "1"], ["Resolved", stats.resolved, "s2", "2"], ["Last 7 days", stats.week, "s3", null]

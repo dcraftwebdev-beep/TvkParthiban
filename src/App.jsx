@@ -71,7 +71,7 @@ function Stat({ to, label, run }) {
 }
 
 /* ---------- app ---------- */
-function Portal() {
+function Portal({ view }) {
   const [lang, setLang] = useState(() => { try { return localStorage.getItem("tvk38.lang") || "ta"; } catch { return "ta"; } });
   const t = T[lang];
   const [srv, setSrv] = useState({ total: 0, open: 0, done: 0 });
@@ -85,6 +85,14 @@ function Portal() {
   const [micReq, setMicReq] = useState(0);
 
   useReveal();
+
+  // coming back from the work page to a section of the home page: scroll to it once it has rendered
+  useEffect(() => {
+    if (view === "home" && location.hash.length > 1 && !location.hash.startsWith("#/")) {
+      const el = document.getElementById(location.hash.slice(1));
+      if (el) setTimeout(() => el.scrollIntoView(), 60);
+    }
+  }, [view]);
 
   useEffect(() => {
     document.documentElement.lang = lang;
@@ -113,7 +121,7 @@ function Portal() {
     <>
       <Ticker t={t} />
       <TopBar t={t} lang={lang} setLang={setLang} solid={solid} />
-      <main>
+      {view === "work" ? <WorkPage t={t} lang={lang} /> : <main>
         <Hero t={t} onVoice={() => { setMicReq(n => n + 1); }} />
         <Quick t={t} onVoice={() => setMicReq(n => n + 1)} />
         <section className="stats" ref={statRef} aria-label="Statistics">
@@ -136,7 +144,7 @@ function Portal() {
         <Updates t={t} />
         <Faq t={t} />
         <Contact t={t} />
-      </main>
+      </main>}
       <Footer t={t} lang={lang} />
       <TabBar t={t} tab={tab} />
       <div className={"toast" + (toast ? " show" : "")} role="status">{toast}</div>
@@ -205,7 +213,7 @@ function Footer({ t, lang }) {
         <div className="foot-cols">
           <div>
             <h4>{t.fCol1}</h4>
-            <a href="#home">{t.navHome}</a><a href="#leader">{t.navLeader}</a><a href="#tvk">{t.navTvk}</a><a href="#updates">{t.uTitle}</a>
+            <a href="#home">{t.navHome}</a><a href="#leader">{t.navLeader}</a><a href="#tvk">{t.navTvk}</a><a href="#/work">{t.wTitle}</a><a href="#updates">{t.uTitle}</a>
           </div>
           <div>
             <h4>{t.fCol2}</h4>
@@ -365,7 +373,7 @@ function Complaint({ t, lang, say, onDone, micReq }) {
   const [coords, setCoords] = useState(null);
   const [gpsMsg, setGpsMsg] = useState("");
   const [photos, setPhotos] = useState([]);
-  const [consent, setConsent] = useState(false);
+  const [consent, setConsent] = useState(true);
   const [notify, setNotify] = useState(true);
   const [pushKey, setPushKey] = useState(null);
   useEffect(() => { if (pushSupported()) api.pushKey().then(r => setPushKey(r.key)).catch(() => {}); }, []);
@@ -448,7 +456,7 @@ function Complaint({ t, lang, say, onDone, micReq }) {
     if (c.coords) s += `${tt.waMap}: https://maps.google.com/?q=${c.coords.lat},${c.coords.lng}\n`;
     return s + `${tt.waName}: ${c.name}\n${tt.waPhone}: ${c.phone}`;
   };
-  const reset = () => { setStep(0); setCat(null); setDesc(""); setStreet(""); setCoords(null); setGpsMsg(""); setPhotos([]); setConsent(false); setName(""); setPhone(""); setErr(""); };
+  const reset = () => { setStep(0); setCat(null); setDesc(""); setStreet(""); setCoords(null); setGpsMsg(""); setPhotos([]); setConsent(true); setName(""); setPhone(""); setErr(""); };
 
   const submit = async () => {
     const m = check(3); if (m) { setErr(m); say(m); return; }
@@ -720,22 +728,93 @@ function Updates({ t }) {
   );
 }
 
+const fmtDate = (ms, lang) => new Date(ms).toLocaleDateString(lang === "ta" ? "ta-IN" : "en-IN", { day: "numeric", month: "short", year: "numeric" });
+
+function WorkCard({ w, t, lang, onOpen }) {
+  const cat = CATS.find(x => x.id === w.cat)?.[lang];
+  return (
+    <button type="button" className="work-card" onClick={() => onOpen(w)}>
+      <img src={w.image} alt={t.beforeAfter} loading="lazy" />
+      <span className="work-meta">
+        <b>{cat}</b>
+        <small>{w.street ? w.street + " · " : ""}{fmtDate(w.at, lang)} · {w.days === 0 ? t.tSameDay : `${w.days} ${t.tDays}`}</small>
+      </span>
+    </button>
+  );
+}
+
+function Lightbox({ w, t, onClose }) {
+  useEffect(() => {
+    const k = e => { if (e.key === "Escape") onClose(); };
+    document.body.style.overflow = "hidden"; window.addEventListener("keydown", k);
+    return () => { document.body.style.overflow = ""; window.removeEventListener("keydown", k); };
+  }, [onClose]);
+  const text = `${t.wTitle} · ${CFG.leaderName.ta}\n${w.page}`;
+  return (
+    <div className="lightbox" role="dialog" aria-modal="true" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="lb-card">
+        <button type="button" className="lb-x" onClick={onClose} aria-label={t.okClose}><Icon d="M6 6l12 12M18 6 6 18" size={18} /></button>
+        <img src={w.image} alt={t.beforeAfter} />
+        <div className="lb-actions">
+          <a className="ok-btn wa" href={wa(text)} target="_blank" rel="noopener"><WaGlyph size={17} />{t.uShare}</a>
+          <a className="ok-btn" href={w.image} download><Icon d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14" size={17} />{t.download}</a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function WorkDone({ t, lang }) {
   const [items, setItems] = useState([]);
-  useEffect(() => { api.work().then(r => setItems(r.items || [])).catch(() => {}); }, []);
+  const [open, setOpen] = useState(null);
+  useEffect(() => { api.work({ limit: 6 }).then(r => setItems(r.items || [])).catch(() => {}); }, []);
   if (!items.length) return null;
   return (
     <section className="sec workdone" id="work"><div className="wrap">
       <Head eyebrow={t.wEyebrow} title={t.wTitle} sub={t.wSub} />
       <div className="work-grid">
-        {items.map((w, i) => (
-          <a key={i} className="work-card rv" href={w.image} target="_blank" rel="noopener">
-            <img src={w.image} alt={t.beforeAfter} loading="lazy" />
-            <span>{CATS.find(x => x.id === w.cat)?.[lang]} · {new Date(w.at).toLocaleDateString(lang === "ta" ? "ta-IN" : "en-IN", { day: "numeric", month: "short" })}</span>
-          </a>
-        ))}
+        {items.map((w, i) => <WorkCard key={i} w={w} t={t} lang={lang} onOpen={setOpen} />)}
       </div>
+      <a className="btn dark work-all" href="#/work">{t.viewAll}<Icon d="M7 17 17 7M8 7h9v9" size={18} /></a>
+      {open && <Lightbox w={open} t={t} onClose={() => setOpen(null)} />}
     </div></section>
+  );
+}
+
+function WorkPage({ t, lang }) {
+  const [cat, setCat] = useState("");
+  const [items, setItems] = useState([]);
+  const [more, setMore] = useState(false);
+  const [busy, setBusy] = useState(true);
+  const [open, setOpen] = useState(null);
+  const PAGE = 12;
+
+  const load = async (reset, from) => {
+    setBusy(true);
+    try {
+      const r = await api.work({ limit: PAGE, offset: reset ? 0 : from, cat });
+      setItems(p => (reset ? r.items : [...p, ...r.items])); setMore(!!r.more);
+    } catch { /* keep what we have */ }
+    finally { setBusy(false); }
+  };
+  useEffect(() => { window.scrollTo(0, 0); }, []);
+  useEffect(() => { load(true, 0); }, [cat]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return (
+    <main className="workpage"><section className="sec"><div className="wrap">
+      <a className="wp-back" href="#home"><Icon d="M15 5l-7 7 7 7" size={18} />{t.navHome}</a>
+      <Head eyebrow={t.wEyebrow} title={t.wpTitle} sub={t.wpSub} />
+      <div className="wp-chips" role="tablist">
+        <button type="button" className={cat === "" ? "on" : ""} onClick={() => setCat("")}>{t.all}</button>
+        {CATS.map(c => <button key={c.id} type="button" className={cat === c.id ? "on" : ""} onClick={() => setCat(c.id)}>{c[lang]}</button>)}
+      </div>
+      {!busy && !items.length && <p className="wp-empty">{t.wpEmpty}</p>}
+      <div className="work-grid">
+        {items.map((w, i) => <WorkCard key={w.image + i} w={w} t={t} lang={lang} onOpen={setOpen} />)}
+      </div>
+      {more && <button type="button" className="wa-more" disabled={busy} onClick={() => load(false, items.length)}>{busy ? "…" : t.loadMore}</button>}
+      {open && <Lightbox w={open} t={t} onClose={() => setOpen(null)} />}
+    </div></section></main>
   );
 }
 
@@ -783,17 +862,25 @@ function Sheet({ t, c, onClose }) {
   };
   return (
     <div className="sheet" role="dialog" aria-modal="true" aria-labelledby="okT" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="sheet-card">
-        <button type="button" className="sheet-x" onClick={onClose} aria-label={t.okClose}><Icon d="M6 6l12 12M18 6 6 18" size={18} /></button>
-        <div className="tick"><Icon d={P.tick} size={30} /></div>
-        <h3 id="okT">{t.okTitle}</h3>
-        <div className="idbox">
-          <b>{c.id}</b>
-          <button type="button" className={"copy" + (copied ? " ok" : "")} onClick={copy} aria-label={t.copy}><Icon d={copied ? P.tick : P.copy} size={20} /><span>{copied ? t.copied : t.copy}</span></button>
+      <div className="ok-card">
+        <button type="button" className="ok-x" onClick={onClose} aria-label={t.okClose}><Icon d="M6 6l12 12M18 6 6 18" size={16} /></button>
+        <div className="ok-head">
+          <span className="ok-tick"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg></span>
+          <h3 id="okT">{t.okTitle}</h3>
         </div>
-        <p>{c.pushSaved ? t.okPush : t.okText}</p>
-        <a className="btn wa wide" href={c.link} target="_blank" rel="noopener"><Icon d={P.chat} size={18} />{t.okWa}</a>
-        <button type="button" className="btn ghost-d wide" onClick={onClose}>{t.okClose}</button>
+        <div className="ok-body">
+          <p className="ok-label">{t.okIdLabel}</p>
+          <button type="button" className={"ok-id" + (copied ? " done" : "")} onClick={copy} aria-label={t.copy}>
+            <b>{c.id}</b>
+            <span><Icon d={copied ? P.tick : P.copy} size={16} />{copied ? t.copied : t.copy}</span>
+          </button>
+          <p className="ok-note">{t.okShort}</p>
+          {c.pushSaved && <p className="ok-bell"><Icon d="M6 17V11a6 6 0 0 1 12 0v6l2 2H4zM10 21a2 2 0 0 0 4 0" size={16} />{t.okBell}</p>}
+          <div className="ok-actions">
+            <a className="ok-btn wa" href={c.link} target="_blank" rel="noopener"><Icon d={P.chat} size={17} />WhatsApp</a>
+            <a className="ok-btn" href="#track" onClick={onClose}><Icon d={P.search} size={17} />{t.navTrack}</a>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -803,5 +890,5 @@ function Sheet({ t, c, onClose }) {
 export default function App() {
   const [hash, setHash] = useState(() => location.hash);
   useEffect(() => { const h = () => setHash(location.hash); window.addEventListener("hashchange", h); return () => window.removeEventListener("hashchange", h); }, []);
-  return hash.startsWith("#/admin") ? <Admin /> : <Portal />;
+  return hash.startsWith("#/admin") ? <Admin /> : <Portal view={hash.startsWith("#/work") ? "work" : "home"} />;
 }
