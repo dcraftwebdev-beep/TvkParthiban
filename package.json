@@ -9,7 +9,9 @@
     "preview": "vite preview",
     "server": "node --env-file-if-exists=.env server/index.js",
     "server:dev": "node --watch --env-file-if-exists=.env server/index.js",
-    "start": "npm run build && npm run server"
+    "start": "npm run build && npm run server",
+    "worker": "node --env-file-if-exists=.env worker/whatsapp-worker.js",
+    "test": "node test/api.test.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",
@@ -20,5 +22,8 @@
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",
     "vite": "^5.4.11"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

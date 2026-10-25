@@ -74,7 +74,7 @@ function Detail({ id, token, onClose, onChanged, flash }) {
   };
   const send = async () => {
     if (!msg.trim()) return; setBusy(true);
-    try { const r = await admin.message(token, id, msg.trim()); flash(r.sent ? "Message sent" : "Message could not be sent"); if (r.sent) setMsg(""); const fresh = await admin.one(token, id); setC(fresh); }
+    try { const r = await admin.message(token, id, msg.trim()); flash(r.queued ? "Message queued. The WhatsApp worker sends it shortly" : r.sent ? "Message sent" : "Message could not be sent"); if (r.sent || r.queued) setMsg(""); const fresh = await admin.one(token, id); setC(fresh); }
     catch { flash("Send failed"); } finally { setBusy(false); }
   };
 
@@ -129,8 +129,8 @@ function Detail({ id, token, onClose, onChanged, flash }) {
               {!c.notifications?.length ? <p className="ad-meta">Nothing sent yet.</p> : (
                 <ul className="ad-log">
                   {c.notifications.map((n, i) => (
-                    <li key={i} className={n.ok ? "ok" : "bad"}>
-                      <b>{n.ok ? "Sent" : "Failed"}</b> · {n.audience} · {n.kind} · {when(n.at)}
+                    <li key={i} className={n.ok ? "ok" : n.pending ? "wait" : "bad"}>
+                      <b>{n.ok ? "Sent" : n.pending ? "Queued" : "Failed"}</b> · {n.audience} · {n.kind} · {when(n.at)}
                       {!n.ok && n.error && <em>{n.error}</em>}
                     </li>
                   ))}
@@ -190,8 +190,11 @@ function Panel({ token, onLogout }) {
       </header>
 
       <main className="ad-main">
-        {stats && stats.notify.provider !== "mcp" && (
+        {stats && stats.notify.provider === "console" && (
           <div className="ad-banner">WhatsApp is in demo mode. Messages are only printed in the server terminal. Set NOTIFY_PROVIDER=mcp to send real messages.</div>
+        )}
+        {stats && stats.pending > 0 && (
+          <div className="ad-banner">{stats.pending} WhatsApp message{stats.pending > 1 ? "s are" : " is"} waiting to be sent. Make sure the WhatsApp worker (npm run worker) is running and the phone is linked.</div>
         )}
 
         <section className="ad-stats">
