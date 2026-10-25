@@ -15,7 +15,9 @@ async function req(path, { method = "GET", body, token } = {}) {
 export const api = {
   stats: () => req("/api/stats"),
   create: payload => req("/api/complaints", { method: "POST", body: payload }),
-  track: q => req(`/api/track?q=${encodeURIComponent(q)}`)
+  track: q => req(`/api/track?q=${encodeURIComponent(q)}`),
+  work: () => req("/api/work"),
+  pushKey: () => req("/api/push-key")
 };
 
 export const getToken = () => { try { return sessionStorage.getItem(TOKEN_KEY) || ""; } catch { return ""; } };
@@ -28,6 +30,7 @@ export const admin = {
   one: (t, id) => req(`/api/admin/complaints/${id}`, { token: t }),
   patch: (t, id, body) => req(`/api/admin/complaints/${id}`, { method: "PATCH", body, token: t }),
   message: (t, id, message) => req(`/api/admin/complaints/${id}/message`, { method: "POST", body: { message }, token: t }),
-  photoUrl: (t, id) => `/api/admin/photo/${id}?t=${encodeURIComponent(t)}`,
+  savePush: (t, sub) => req("/api/admin/push", { method: "POST", body: { sub }, token: t }),
+  photoUrl: (t, id, i = 0) => `/api/admin/photo/${id}/${i}?t=${encodeURIComponent(t)}`,
   csvUrl: t => `/api/admin/export.csv?t=${encodeURIComponent(t)}`
 };

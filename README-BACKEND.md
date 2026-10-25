@@ -1,74 +1,70 @@
 # TVK Ward 38 (Kattur) complaint portal: backend and admin
 
 Live site: https://tvkparthibankattur.vercel.app
+Everything runs on Vercel and Supabase. Nothing has to run on a laptop.
 
-There are two ways to run the backend. Production uses Vercel + Supabase. Local development can use the built-in SQLite server.
+## What it does
 
-| | Production (Vercel) | Local development |
-|---|---|---|
-| API | `api/[...path].js` (Vercel function) | `server/index.js` (Express) |
-| Data | Supabase Postgres | SQLite file in `server/data/` |
-| WhatsApp | queued in the `outbox` table, sent by `npm run worker` | printed in the terminal, or sent directly with whatsapp-mcp |
+- Citizens file a complaint with up to 4 photos. They can tick "notify this phone" and "you may show my photo".
+- Admins sign in at `/#/admin`, change the status, and when a complaint is resolved add an **after photo**.
+  The admin panel joins the citizen's first photo and the after photo into one branded **before/after** picture.
+- The citizen is told in three free ways, no WhatsApp business account needed:
+  1. **Push notification** on their phone (if they allowed it) with a link to the result.
+  2. **Track page**: the picture shows under their complaint, searchable by ID or mobile number.
+  3. **Your own WhatsApp**: the admin panel's "Send on my WhatsApp" button opens the citizen's chat with a link.
+     WhatsApp shows the before/after picture as a preview card. "Share photo" sends the picture itself.
+- Admins get a push alert on their phone for every new complaint (bell button in the admin panel).
+- Consented, resolved work appears in the public "Before and after" section of the site.
 
-## 1. Production: Vercel + Supabase
+## Setup (once)
 
-### a) Create the tables (once)
-Supabase dashboard, SQL Editor, New query. Paste the contents of `supabase/schema.sql` and press Run.
+### 1. Supabase tables
+SQL Editor, New query, paste and Run, in this order:
+1. `supabase/schema.sql` (only if you have not run it yet)
+2. `supabase/migration-002.sql` (photos, before/after, push)
 
-### b) Add environment variables in Vercel
-Project, Settings, Environment Variables. Add these for Production, then redeploy.
+### 2. Vercel environment variables
+Project, Settings, Environment Variables (Production), then redeploy.
 
 | Name | Value |
 |---|---|
-| `SUPABASE_URL` | Project Settings, API, Project URL |
-| `SUPABASE_SERVICE_KEY` | Project Settings, API, the **service_role** key. Secret. Never commit it. |
-| `ADMIN_PASSWORD` | the login password for `/#/admin` |
-| `ADMIN_SECRET` | any long random text (signs admin sessions) |
-| `PUBLIC_URL` | `https://tvkparthibankattur.vercel.app` |
-| `ADMIN_WHATSAPP` | `7603959394` (comma separate more numbers) |
+| `SUPABASE_URL` | Supabase, Project Settings, API, Project URL |
+| `SUPABASE_SERVICE_KEY` | the service_role (or secret) key. Secret. |
+| `ADMIN_PASSWORD` | login for `/#/admin` |
+| `ADMIN_SECRET` | long random text, signs sessions and result links |
+| `VAPID_PUBLIC_KEY` | generate once: `npx web-push generate-vapid-keys` |
+| `VAPID_PRIVATE_KEY` | from the same command. Secret. |
+| `VAPID_SUBJECT` | `mailto:you@example.com` |
 
-Check it: open `https://tvkparthibankattur.vercel.app/api/health`. It should show `{"ok":true,"storage":"supabase"}`.
+Check `https://tvkparthibankattur.vercel.app/api/health`. You want `configured`, `admin` and `push` all true.
 
-### c) Send the WhatsApp messages (worker)
-Vercel cannot hold a linked WhatsApp session, so the API only queues messages. A small worker sends them. Run it on a PC or server that stays on:
+### 3. Turn on alerts on your phone
+Open `/#/admin` on the phone, sign in, tap the bell. Allow notifications. New complaints now alert that phone.
+On iPhone, first use Share, Add to Home Screen, then open the site from the home screen icon.
 
-```bash
-git clone https://github.com/dynamolabs/whatsapp-mcp.git C:/tools/whatsapp-mcp
-cd C:/tools/whatsapp-mcp && npm install && npm run build
-```
-
-In this project's `.env` (local file, not committed) set `SUPABASE_URL`, `SUPABASE_SERVICE_KEY` and `WHATSAPP_MCP_PATH=C:/tools/whatsapp-mcp/dist/index.js`, then:
-
-```bash
-npm run worker
-```
-
-On first run a QR code prints in the terminal. Scan it from WhatsApp, Linked devices. The worker checks the queue every 8 seconds, retries a failed message up to 3 times, and the admin panel shows each message as Queued, Sent or Failed.
-
-Until the worker runs, complaints still save and show in the admin panel. Only the WhatsApp messages wait.
-
-Notes on whatsapp-mcp: it automates WhatsApp Web and is unofficial, so a number that messages many people who have not contacted it can be banned. Use a dedicated SIM and keep volume low. For heavy use switch to the official WhatsApp Business Cloud API (only `worker/whatsapp-worker.js` changes). Only one WhatsApp Web session can be linked at a time.
-
-## 2. Local development
+## Local development
 
 ```bash
 npm install
 cp .env.example .env
-npm run server      # Express + SQLite API on :8787
-npm run dev         # website on :5188 (proxies /api to :8787)
-npm test            # API tests (in-memory data layer)
+npm run server      # local API on :8787 (in memory unless SUPABASE_URL and SUPABASE_SERVICE_KEY are set)
+npm run dev         # website on :5188, proxies /api to :8787
+npm test            # 20 API checks
 ```
 
-## How a complaint flows
+Careful: if `.env` has your Supabase keys, `npm run server` talks to the real database. Blank them for testing.
 
-1. The form posts to `POST /api/complaints`. The API validates it, saves it and returns an ID like `TVK38-482913`.
-2. It queues a WhatsApp confirmation to the citizen and an alert to each admin number.
-3. In the admin panel, set the status and an optional note, then "Save & notify user". The citizen gets an update.
+## Optional: automatic WhatsApp (needs a computer that stays on)
+
+Not needed for the flow above. If you ever want automatic WhatsApp messages through whatsapp-mcp, set `WHATSAPP_QUEUE=1` in Vercel
+so the API queues messages in the `outbox` table, and run `npm run worker` on a computer that stays on
+(see `worker/whatsapp-worker.js`). WhatsApp can ban numbers that automate messages, so use a dedicated SIM.
 
 ## Security notes
 
-- Change `ADMIN_PASSWORD` before launch. Vercel serves HTTPS by default.
+- Change `ADMIN_PASSWORD` before launch. Vercel serves HTTPS.
 - Create is limited to 5 per phone per hour and 8 per IP per hour, tracking to 30 per 10 minutes, admin login to 10 per 10 minutes.
-- Public tracking only returns category, status, date and the first 80 characters of the description. Never names or phone numbers.
-- Photos (JPEG, up to 500 KB) are stored in Supabase and only served to a signed-in admin.
-- The service_role key bypasses row level security. Keep it only in Vercel and in the worker's local `.env`.
+- Public tracking returns category, status, date, the first 80 characters and the result picture. Never names or phone numbers.
+- Result links carry a signed key, so only people who were sent the link can open them.
+- Citizen photos are only shown to a signed-in admin. A photo is only used publicly if the citizen ticked the consent box.
+- The service_role key bypasses row level security. Keep it only in Vercel and your local `.env`.

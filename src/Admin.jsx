@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { admin, getToken, setToken } from "./api.js";
+import { admin, api, getToken, setToken } from "./api.js";
+import { subscribePush, pushSupported } from "./push.js";
 import { CATS, CFG } from "./config.js";
 import "./admin.css";
 
@@ -20,7 +21,7 @@ const I = {
   phone: "M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z",
   chat: "M4 20l1.4-4.2A8 8 0 1 1 8.3 18.7L4 20z",
   pin: "M12 21s7-6.2 7-11a7 7 0 0 0-14 0c0 4.8 7 11 7 11zM12 7.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z",
-  x: "M6 6l12 12M18 6 6 18", out: "M10 5H5v14h5M14 8l4 4-4 4M18 12H9", dl: "M12 4v11m0 0-4-4m4 4 4-4M5 20h14", re: "M20 11a8 8 0 1 0-2.3 5.700M20 5v6h-6"
+  x: "M6 6l12 12M18 6 6 18", out: "M10 5H5v14h5M14 8l4 4-4 4M18 12H9", dl: "M12 4v11m0 0-4-4m4 4 4-4M5 20h14", re: "M20 11a8 8 0 1 0-2.3 5.700M20 5v6h-6", cam: "M3 7h4l2-2h6l2 2h4v12H3zM12 9a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z", bell: "M6 17V11a6 6 0 0 1 12 0v6l2 2H4zM10 21a2 2 0 0 0 4 0", share: "M12 4v11M8 8l4-4 4 4M5 14v6h14v-6", link: "M10 14a4 4 0 0 0 5.700 0l3-3a4 4 0 0 0-5.700-5.700l-1 1M14 10a4 4 0 0 0-5.700 0l-3 3a4 4 0 0 0 5.700 5.700l1-1"
 };
 
 /* ---------- login ---------- */
@@ -47,12 +48,72 @@ function Login({ onOk }) {
   );
 }
 
+/* ---------- before / after image ---------- */
+const loadImg = src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
+
+async function fileToJpeg(file, max = 1000) {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await loadImg(url);
+    const s = Math.min(1, max / Math.max(img.width, img.height));
+    const c = document.createElement("canvas");
+    c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+    c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+    let q = 0.82, out = c.toDataURL("image/jpeg", q);
+    while (out.length > 560000 && q > 0.4) { q -= 0.1; out = c.toDataURL("image/jpeg", q); }
+    return out;
+  } finally { URL.revokeObjectURL(url); }
+}
+
+function cover(ctx, img, x, y, w, h, r = 18) {
+  ctx.save();
+  ctx.beginPath(); ctx.roundRect(x, y, w, h, r); ctx.clip();
+  const s = Math.max(w / img.width, h / img.height), dw = img.width * s, dh = img.height * s;
+  ctx.drawImage(img, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
+  ctx.restore();
+}
+function chip(ctx, text, x, y) {
+  ctx.font = '700 26px "neythal","Noto Sans Tamil",Arial,sans-serif';
+  const w = ctx.measureText(text).width + 36;
+  ctx.fillStyle = "#f5c400"; ctx.beginPath(); ctx.roundRect(x, y, w, 46, 23); ctx.fill();
+  ctx.fillStyle = "#3d060c"; ctx.textBaseline = "middle"; ctx.fillText(text, x + 18, y + 24);
+}
+
+/** Joins the citizen's first photo (before) and the admin's photo (after) into one 1200x760 picture. */
+async function composeBeforeAfter({ beforeUrl, afterData, id, at }) {
+  try { await Promise.all([document.fonts.load('700 26px neythal'), document.fonts.load('400 24px tamil010')]); } catch { /* fall back to system fonts */ }
+  const [after, before, flag] = await Promise.all([loadImg(afterData), beforeUrl ? loadImg(beforeUrl).catch(() => null) : null, loadImg("/flag.jpg").catch(() => null)]);
+  const c = document.createElement("canvas"); c.width = 1200; c.height = 760;
+  const ctx = c.getContext("2d");
+  ctx.fillStyle = "#5c0a12"; ctx.fillRect(0, 0, 1200, 760);
+  ctx.fillStyle = "#8a0f1b"; ctx.fillRect(0, 0, 1200, 92);
+  ctx.fillStyle = "#f5c400"; ctx.fillRect(0, 92, 1200, 6);
+  if (flag) cover(ctx, flag, 22, 18, 96, 56, 8);
+  ctx.textBaseline = "middle";
+  ctx.fillStyle = "#f5c400"; ctx.font = '700 34px "neythal","Noto Sans Tamil",Arial,sans-serif'; ctx.fillText("தமிழக வெற்றிக் கழகம்", 134, 34);
+  ctx.fillStyle = "#ffffffd9"; ctx.font = '400 24px "tamil010","Noto Sans Tamil",Arial,sans-serif'; ctx.fillText("வார்டு 38 · காட்டூர் · பார்த்திபன்", 134, 68);
+  ctx.textAlign = "right"; ctx.fillStyle = "#fff"; ctx.font = '700 28px Arial,sans-serif'; ctx.fillText(id, 1178, 46); ctx.textAlign = "left";
+
+  const y = 122, h = 560;
+  if (before) {
+    cover(ctx, before, 22, y, 568, h); cover(ctx, after, 610, y, 568, h);
+    chip(ctx, "முன் · BEFORE", 40, y + h - 66); chip(ctx, "பின் · AFTER", 628, y + h - 66);
+  } else {
+    cover(ctx, after, 22, y, 1156, h); chip(ctx, "பின் · AFTER", 40, y + h - 66);
+  }
+  ctx.fillStyle = "#ffffffcc"; ctx.font = '400 24px "tamil010","Noto Sans Tamil",Arial,sans-serif';
+  ctx.fillText("புகார் தீர்க்கப்பட்டது · " + new Date(at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }), 24, 724);
+  ctx.textAlign = "right"; ctx.fillText("tvkparthibankattur.vercel.app", 1178, 724);
+  return c.toDataURL("image/jpeg", 0.84);
+}
+
 /* ---------- detail drawer ---------- */
 function Detail({ id, token, onClose, onChanged, flash }) {
   const [c, setC] = useState(null);
   const [status, setStatus] = useState(0);
   const [note, setNote] = useState("");
-  const [msg, setMsg] = useState("");
+  const [afterData, setAfterData] = useState("");
+  const [composed, setComposed] = useState("");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -67,16 +128,42 @@ function Detail({ id, token, onClose, onChanged, flash }) {
     return () => { document.body.style.overflow = ""; window.removeEventListener("keydown", k); };
   }, [onClose]);
 
+  const pickAfter = async e => {
+    const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+    setBusy(true);
+    try {
+      const data = await fileToJpeg(f);
+      setAfterData(data);
+      setComposed(await composeBeforeAfter({ beforeUrl: c.photoCount ? admin.photoUrl(token, c.id, 0) : null, afterData: data, id: c.id, at: Date.now() }));
+    } catch { flash("Could not read that photo"); }
+    finally { setBusy(false); }
+  };
+
   const save = async notify => {
     setBusy(true);
-    try { const r = await admin.patch(token, id, { status, note, notify }); setC(p => ({ ...p, ...r })); onChanged(); flash(notify ? "Saved. User notified on WhatsApp" : "Saved"); }
-    catch { flash("Save failed"); } finally { setBusy(false); }
+    try {
+      const body = { status, note, notify };
+      if (status === 2 && afterData && composed) { body.after = afterData; body.result = composed; }
+      const r = await admin.patch(token, id, body);
+      setC(p => ({ ...p, ...r })); setAfterData(""); setComposed(""); onChanged();
+      flash(r.pushed ? "Saved. The citizen's phone was notified" : notify ? "Saved. Send the result from your WhatsApp below" : "Saved");
+    } catch (e) { flash(e.status === 400 ? "Photo was rejected, try a smaller one" : "Save failed"); }
+    finally { setBusy(false); }
   };
-  const send = async () => {
-    if (!msg.trim()) return; setBusy(true);
-    try { const r = await admin.message(token, id, msg.trim()); flash(r.queued ? "Message queued. The WhatsApp worker sends it shortly" : r.sent ? "Message sent" : "Message could not be sent"); if (r.sent || r.queued) setMsg(""); const fresh = await admin.one(token, id); setC(fresh); }
-    catch { flash("Send failed"); } finally { setBusy(false); }
+
+  const link = c?.resultPage;
+  const waText = c && (c.lang === "en"
+    ? `✅ Your complaint ${c.id} is resolved.\nBefore and after photos: ${link}`
+    : `✅ உங்கள் புகார் ${c.id} தீர்க்கப்பட்டது.\nமுன் / பின் படங்கள்: ${link}`);
+  const share = async () => {
+    try {
+      const blob = await (await fetch(c.resultUrl)).blob();
+      const file = new File([blob], `${c.id}-before-after.jpg`, { type: "image/jpeg" });
+      if (navigator.canShare?.({ files: [file] })) await navigator.share({ files: [file], text: waText });
+      else flash("Sharing files is not supported here. Use Download");
+    } catch { /* cancelled */ }
   };
+  const copy = async () => { try { await navigator.clipboard.writeText(link); flash("Link copied"); } catch { flash(link); } };
 
   return (
     <div className="ad-drawer-wrap" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
@@ -92,6 +179,18 @@ function Detail({ id, token, onClose, onChanged, flash }) {
               <p className="ad-meta">{when(c.createdAt)} · {ago(c.createdAt)}</p>
             </section>
 
+            {c.photoCount > 0 && (
+              <section>
+                <h3>Citizen photos ({c.photoCount})</h3>
+                <div className="ad-photos">
+                  {Array.from({ length: c.photoCount }, (_, i) => (
+                    <a key={i} href={admin.photoUrl(token, c.id, i)} target="_blank" rel="noopener"><img src={admin.photoUrl(token, c.id, i)} alt={`Photo ${i + 1}`} loading="lazy" /></a>
+                  ))}
+                </div>
+                {c.consent && <p className="ad-meta">The citizen allowed showing the photo publicly (without a name).</p>}
+              </section>
+            )}
+
             <section className="ad-grid2">
               <div><small>Name</small><b>{c.name}</b></div>
               <div><small>Mobile</small><b>{c.phone}</b></div>
@@ -104,29 +203,48 @@ function Detail({ id, token, onClose, onChanged, flash }) {
               {c.lat != null && <a className="ad-btn" href={`https://maps.google.com/?q=${c.lat},${c.lng}`} target="_blank" rel="noopener"><Ico d={I.pin} />Map</a>}
             </div>
 
-            {c.hasPhoto && <img className="ad-photo" src={admin.photoUrl(token, c.id)} alt="Complaint" />}
-
             <section>
               <h3>Status</h3>
               <div className="ad-seg">
                 {ST_EN.map((l, i) => <button key={l} className={status === i ? "on s" + i : ""} onClick={() => setStatus(i)}>{l}</button>)}
               </div>
-              <textarea rows={3} maxLength={300} value={note} onChange={e => setNote(e.target.value)} placeholder="Note for the user (optional), e.g. Work scheduled for Monday" />
+              <textarea rows={2} maxLength={300} value={note} onChange={e => setNote(e.target.value)} placeholder="Note for the citizen (optional), e.g. Work scheduled for Monday" />
+
+              {status === 2 && (
+                <div className="ad-after">
+                  <label className="ad-btn ad-file">
+                    <Ico d={I.cam} />{c.hasResult || afterData ? "Change the after photo" : "Add the after photo"}
+                    <input type="file" accept="image/*" capture="environment" hidden onChange={pickAfter} />
+                  </label>
+                  <p className="ad-meta">The after photo is joined with the citizen's first photo into one before/after picture.</p>
+                  {composed && <img className="ad-preview" src={composed} alt="Before and after preview" />}
+                </div>
+              )}
+
+              <p className="ad-meta">{c.canPush ? "This citizen allowed notifications, so Save & notify sends a push to their phone." : "This citizen has no notifications on. Use the WhatsApp button below after saving."}</p>
               <div className="ad-actions">
-                <button className="ad-btn primary" disabled={busy} onClick={() => save(true)}>Save & notify user</button>
+                <button className="ad-btn primary" disabled={busy} onClick={() => save(true)}>{busy ? "Working…" : "Save & notify"}</button>
                 <button className="ad-btn" disabled={busy} onClick={() => save(false)}>Save only</button>
               </div>
             </section>
 
-            <section>
-              <h3>Send a WhatsApp message</h3>
-              <textarea rows={2} maxLength={800} value={msg} onChange={e => setMsg(e.target.value)} placeholder="Type a message to the user" />
-              <button className="ad-btn wa" disabled={busy || !msg.trim()} onClick={send}><Ico d={I.chat} />Send</button>
-            </section>
+            {c.hasResult && (
+              <section>
+                <h3>Before / after result</h3>
+                <img className="ad-preview" src={c.resultUrl} alt="Before and after" />
+                <div className="ad-actions">
+                  <a className="ad-btn wa" href={`https://wa.me/${intl(c.phone)}?text=${encodeURIComponent(waText)}`} target="_blank" rel="noopener"><Ico d={I.chat} />Send on my WhatsApp</a>
+                  {typeof navigator !== "undefined" && navigator.canShare && <button className="ad-btn" onClick={share}><Ico d={I.share} />Share photo</button>}
+                  <a className="ad-btn" href={c.resultUrl} download={`${c.id}-before-after.jpg`}><Ico d={I.dl} />Download</a>
+                  <button className="ad-btn" onClick={copy}><Ico d={I.link} />Copy link</button>
+                </div>
+                <p className="ad-meta">"Send on my WhatsApp" opens the citizen's chat with a link. WhatsApp shows the before/after picture as a preview card. "Share photo" sends the picture itself through any app.</p>
+              </section>
+            )}
 
-            <section>
-              <h3>WhatsApp delivery log</h3>
-              {!c.notifications?.length ? <p className="ad-meta">Nothing sent yet.</p> : (
+            {c.notifications?.length > 0 && (
+              <section>
+                <h3>WhatsApp delivery log</h3>
                 <ul className="ad-log">
                   {c.notifications.map((n, i) => (
                     <li key={i} className={n.ok ? "ok" : n.pending ? "wait" : "bad"}>
@@ -135,13 +253,31 @@ function Detail({ id, token, onClose, onChanged, flash }) {
                     </li>
                   ))}
                 </ul>
-              )}
-            </section>
+              </section>
+            )}
           </div>
         )}
       </aside>
     </div>
   );
+}
+
+/* ---------- alerts on this device ---------- */
+function AlertsButton({ token, flash }) {
+  const [on, setOn] = useState(() => typeof Notification !== "undefined" && Notification.permission === "granted" && (() => { try { return localStorage.getItem("tvk38.adminAlerts") === "1"; } catch { return false; } })());
+  if (!pushSupported()) return null;
+  const enable = async () => {
+    try {
+      const { key } = await api.pushKey();
+      if (!key) return flash("Push is not configured on the server yet");
+      const sub = await subscribePush(key);
+      if (!sub) return flash("Notifications were blocked in this browser");
+      await admin.savePush(token, sub);
+      try { localStorage.setItem("tvk38.adminAlerts", "1"); } catch { /* ignore */ }
+      setOn(true); flash("New complaint alerts are on for this device");
+    } catch { flash("Could not turn on alerts"); }
+  };
+  return <button className={"ad-icon" + (on ? " on" : "")} onClick={enable} aria-label="Alerts for new complaints" title="Alerts for new complaints"><Ico d={I.bell} /></button>;
 }
 
 /* ---------- main ---------- */
@@ -183,6 +319,7 @@ function Panel({ token, onLogout }) {
       <header className="ad-top">
         <div className="ad-brand"><img src="/flag.jpg" alt="" /><div><b>Complaints admin</b><small>Ward 38 · Kattur</small></div></div>
         <div className="ad-top-r">
+          <AlertsButton token={token} flash={flash} />
           <button className="ad-icon" onClick={() => { setLoading(true); load(false); }} aria-label="Refresh" title="Refresh"><Ico d={I.re} /></button>
           <a className="ad-icon" href={admin.csvUrl(token)} aria-label="Export CSV" title="Export CSV"><Ico d={I.dl} /></a>
           <button className="ad-icon" onClick={onLogout} aria-label="Sign out" title="Sign out"><Ico d={I.out} /></button>

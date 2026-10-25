@@ -3,6 +3,7 @@ import { CFG, CATS } from "./config.js";
 import { T } from "./i18n.js";
 import { TVK_SITE } from "./i18n-tvk.js";
 import { api } from "./api.js";
+import { subscribePush, pushSupported } from "./push.js";
 import Admin from "./Admin.jsx";
 
 const wa = text => `https://wa.me/${CFG.phone}${text ? "?text=" + encodeURIComponent(text) : ""}`;
@@ -131,6 +132,7 @@ function Portal() {
         <Join t={t} />
         <Track t={t} lang={lang} />
         <How t={t} />
+        <WorkDone t={t} lang={lang} />
         <Updates t={t} />
         <Faq t={t} />
         <Contact t={t} />
@@ -362,7 +364,11 @@ function Complaint({ t, lang, say, onDone, micReq }) {
   const [street, setStreet] = useState("");
   const [coords, setCoords] = useState(null);
   const [gpsMsg, setGpsMsg] = useState("");
-  const [photo, setPhoto] = useState("");
+  const [photos, setPhotos] = useState([]);
+  const [consent, setConsent] = useState(false);
+  const [notify, setNotify] = useState(true);
+  const [pushKey, setPushKey] = useState(null);
+  useEffect(() => { if (pushSupported()) api.pushKey().then(r => setPushKey(r.key)).catch(() => {}); }, []);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [err, setErr] = useState("");
@@ -401,16 +407,25 @@ function Complaint({ t, lang, say, onDone, micReq }) {
     }, () => setGpsMsg(t.gpsFail), { enableHighAccuracy: true, timeout: 10000 });
   };
 
-  const onPhoto = e => {
-    const f = e.target.files[0]; if (!f) return;
-    const img = new Image(), url = URL.createObjectURL(f);
+  // Each photo is shrunk in the browser (max 900px wide, JPEG) so five of them still upload fast on mobile data.
+  const shrink = file => new Promise(resolve => {
+    const img = new Image(), url = URL.createObjectURL(file);
     img.onload = () => {
-      const s = Math.min(1, 640 / img.width), c = document.createElement("canvas");
-      c.width = img.width * s; c.height = img.height * s;
+      const s = Math.min(1, 900 / img.width), c = document.createElement("canvas");
+      c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
       c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
-      setPhoto(c.toDataURL("image/jpeg", 0.6)); URL.revokeObjectURL(url);
+      let q = 0.7, out = c.toDataURL("image/jpeg", q);
+      while (out.length > 380000 && q > 0.35) { q -= 0.1; out = c.toDataURL("image/jpeg", q); }
+      URL.revokeObjectURL(url); resolve(out);
     };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(null); };
     img.src = url;
+  });
+  const onPhotos = async e => {
+    const files = [...e.target.files].slice(0, 4 - photos.length);
+    e.target.value = "";
+    const added = (await Promise.all(files.map(shrink))).filter(Boolean);
+    if (added.length) setPhotos(p => [...p, ...added].slice(0, 4));
   };
 
   const check = s => {
@@ -433,16 +448,18 @@ function Complaint({ t, lang, say, onDone, micReq }) {
     if (c.coords) s += `${tt.waMap}: https://maps.google.com/?q=${c.coords.lat},${c.coords.lng}\n`;
     return s + `${tt.waName}: ${c.name}\n${tt.waPhone}: ${c.phone}`;
   };
-  const reset = () => { setStep(0); setCat(null); setDesc(""); setStreet(""); setCoords(null); setGpsMsg(""); setPhoto(""); setName(""); setPhone(""); setErr(""); };
+  const reset = () => { setStep(0); setCat(null); setDesc(""); setStreet(""); setCoords(null); setGpsMsg(""); setPhotos([]); setConsent(false); setName(""); setPhone(""); setErr(""); };
 
   const submit = async () => {
     const m = check(3); if (m) { setErr(m); say(m); return; }
     if (busy) return;
     setBusy(true); setDown(null);
-    const body = { cat, desc: desc.trim(), street: street.trim(), coords, photo, name: name.trim(), phone, lang };
+    // ask for notification permission first, while the tap is still fresh
+    const push = notify && pushKey ? await subscribePush(pushKey) : null;
+    const body = { cat, desc: desc.trim(), street: street.trim(), coords, photos, consent, push, name: name.trim(), phone, lang };
     try {
       const r = await api.create(body);
-      onDone({ id: r.id, link: wa(waText({ id: r.id, ...body })) }); reset();
+      onDone({ id: r.id, pushSaved: r.pushSaved, link: wa(waText({ id: r.id, ...body })) }); reset();
     } catch (e) {
       if (e.status === 429) { setErr(t.eLimit); say(t.eLimit); }
       else if (e.status && e.status < 500) { setErr(t.eServer); }
@@ -496,11 +513,23 @@ function Complaint({ t, lang, say, onDone, micReq }) {
             </button>
             <div className="cx-or"><span>{t.orType}</span></div>
             <textarea rows={4} maxLength={600} value={desc} placeholder={t.fDescPh} onChange={e => setDesc(e.target.value)} />
-            <label className={"cx-opt" + (photo ? " ok" : "")}>
-              {photo ? <img src={photo} alt="" /> : <span className="cx-ico"><Icon d={P.cam} size={22} /></span>}
-              <span><b>{t.fPhoto}</b><small>{t.photoHelp}</small></span>
-              <input type="file" accept="image/*" capture="environment" hidden onChange={onPhoto} />
-            </label>
+            <div className="cx-photos">
+              {photos.map((p, k) => (
+                <div className="cx-thumb" key={k}>
+                  <img src={p} alt="" />
+                  <button type="button" onClick={() => setPhotos(list => list.filter((_, n) => n !== k))} aria-label={t.remove}><Icon d="M6 6l12 12M18 6 6 18" size={14} /></button>
+                </div>
+              ))}
+              {photos.length < 4 && (
+                <label className="cx-add">
+                  <Icon d={P.cam} size={24} />
+                  <b>{photos.length ? t.addMore : t.fPhoto}</b>
+                  <small>{photos.length}/4</small>
+                  <input type="file" accept="image/*" multiple hidden onChange={onPhotos} />
+                </label>
+              )}
+            </div>
+            <p className="hint">{t.photoHelp2}</p>
           </>)}
 
           {step === 2 && (<>
@@ -517,11 +546,13 @@ function Complaint({ t, lang, say, onDone, micReq }) {
             <h3>{t.fWho}</h3>
             <input type="text" value={name} placeholder={t.fNamePh} onChange={e => setName(e.target.value)} autoComplete="name" />
             <input type="tel" inputMode="numeric" maxLength={10} value={phone} placeholder={t.fPhonePh} onChange={e => setPhone(e.target.value.replace(/\D/g, ""))} autoComplete="tel-national" />
+            {pushKey && <label className="cx-check"><input type="checkbox" checked={notify} onChange={e => setNotify(e.target.checked)} /><span><b>{t.notifyMe}</b><small>{t.notifyHelp}</small></span></label>}
+            {photos.length > 0 && <label className="cx-check"><input type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)} /><span><b>{t.consent}</b><small>{t.consentHelp}</small></span></label>}
             <dl className="cx-sum">
               <div><dt>{T[lang].waCat}</dt><dd>{catLabel || "-"}</dd></div>
               <div><dt>{T[lang].waDesc}</dt><dd>{desc || "-"}</dd></div>
               {(street || coords) && <div><dt>{T[lang].waPlace}</dt><dd>{street || `${coords.lat}, ${coords.lng}`}</dd></div>}
-              {photo && <div><dt>{t.fPhoto}</dt><dd>✓</dd></div>}
+              {photos.length > 0 && <div><dt>{t.fPhoto}</dt><dd>{photos.length}</dd></div>}
             </dl>
           </>)}
           {err && <p className="err" role="alert">{err}</p>}
@@ -568,6 +599,7 @@ function Track({ t, lang }) {
             <p><strong>{CATS.find(x => x.id === c.cat)?.[lang]}</strong> · {c.snippet}</p>
             <small>{new Date(c.createdAt).toLocaleDateString(lang === "ta" ? "ta-IN" : "en-IN", { day: "numeric", month: "short", year: "numeric" })}</small>
             <div className="progress">{[0, 1, 2].map(i => <i key={i} className={i <= c.status ? "f" : ""} />)}</div>
+            {c.result && <a className="t-result" href={c.result} target="_blank" rel="noopener"><img src={c.result} alt={t.beforeAfter} loading="lazy" /><span>{t.beforeAfter}</span></a>}
           </article>
         ))}
       </div>
@@ -644,6 +676,25 @@ function Updates({ t }) {
   );
 }
 
+function WorkDone({ t, lang }) {
+  const [items, setItems] = useState([]);
+  useEffect(() => { api.work().then(r => setItems(r.items || [])).catch(() => {}); }, []);
+  if (!items.length) return null;
+  return (
+    <section className="sec workdone" id="work"><div className="wrap">
+      <Head eyebrow={t.wEyebrow} title={t.wTitle} sub={t.wSub} />
+      <div className="work-grid">
+        {items.map((w, i) => (
+          <a key={i} className="work-card rv" href={w.image} target="_blank" rel="noopener">
+            <img src={w.image} alt={t.beforeAfter} loading="lazy" />
+            <span>{CATS.find(x => x.id === w.cat)?.[lang]} · {new Date(w.at).toLocaleDateString(lang === "ta" ? "ta-IN" : "en-IN", { day: "numeric", month: "short" })}</span>
+          </a>
+        ))}
+      </div>
+    </div></section>
+  );
+}
+
 function Faq({ t }) {
   const [open, setOpen] = useState(0);
   return (
@@ -696,7 +747,7 @@ function Sheet({ t, c, onClose }) {
           <b>{c.id}</b>
           <button type="button" className={"copy" + (copied ? " ok" : "")} onClick={copy} aria-label={t.copy}><Icon d={copied ? P.tick : P.copy} size={20} /><span>{copied ? t.copied : t.copy}</span></button>
         </div>
-        <p>{t.okText}</p>
+        <p>{c.pushSaved ? t.okPush : t.okText}</p>
         <a className="btn wa wide" href={c.link} target="_blank" rel="noopener"><Icon d={P.chat} size={18} />{t.okWa}</a>
         <button type="button" className="btn ghost-d wide" onClick={onClose}>{t.okClose}</button>
       </div>

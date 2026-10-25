@@ -106,3 +106,10 @@ body:has(.ad),body:has(.ad-login){padding-bottom:0;background:#f6f2e8}
 .ad *,.ad-login *{font-family:"Manrope","Noto Sans Tamil",system-ui,sans-serif}
 
 .ad-log li.wait{border-left-color:#e0a400}
+
+.ad-icon.on{background:var(--g);color:var(--mdd)}
+.ad-photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+.ad-photos img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;display:block}
+.ad-after{display:flex;flex-direction:column;gap:8px;margin:12px 0;padding:12px;border-radius:14px;background:#fff;border:1.5px dashed var(--ln)}
+.ad-file{cursor:pointer;align-self:flex-start}
+.ad-preview{width:100%;border-radius:14px;display:block;border:2px solid var(--g)}
