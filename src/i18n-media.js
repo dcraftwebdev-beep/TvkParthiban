@@ -54,3 +54,6 @@ Object.assign(T.en, {
   viewAll: "View all", all: "All", loadMore: "Show more", download: "Download",
   wpEmpty: "No resolved complaints in this category yet."
 });
+
+Object.assign(T.ta, { heroTag: "தமிழக வெற்றிக் கழகம் · எல்லோருக்கும் எல்லாம்" });
+Object.assign(T.en, { heroTag: "Tamilaga Vettri Kazhagam · Everyone deserves everything" });

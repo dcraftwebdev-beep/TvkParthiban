@@ -251,7 +251,7 @@ function Hero({ t }) {
           <a className="btn primary" href="#complaint">{t.ctaRaise}</a>
           <a className="btn ghost" href="#track">{t.ctaTrack}</a>
         </div>
-        <p className="rep"><span>{t.repLabel}</span><b>{CFG.leaderName[t === T.ta ? "ta" : "en"]}</b></p>
+        <p className="rep"><span>{t.heroTag}</span></p>
       </div>
     </section>
   );

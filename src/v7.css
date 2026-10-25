@@ -134,7 +134,6 @@
 }
 
 @media (max-width:360px){
-  .brand-text small{display:none}
   .quick-in{gap:6px;padding:0 12px}
   .goals{grid-template-columns:1fr}
   .hero-cta{grid-template-columns:1fr}
