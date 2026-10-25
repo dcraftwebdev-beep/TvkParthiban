@@ -182,12 +182,18 @@ function Detail({ id, token, onClose, onChanged, flash }) {
     setBusy(true);
     try {
       const data = await Promise.all(files.map(f => fileToJpeg(f, 900)));
-      setAfters(data);
-      const beforeUrls = Array.from({ length: Math.min(c.photoCount || 0, 3) }, (_, k) => admin.photoUrl(token, c.id, k));
-      setComposed(await composeBeforeAfter({ beforeUrls, afterData: data, id: c.id, raisedAt: c.createdAt, doneAt: Date.now() }));
+      const all = [...afters, ...data].slice(0, 3);
+      await rebuild(all); setStatus(2);
     } catch { flash("Could not read those photos"); }
     finally { setBusy(false); }
   };
+  const rebuild = async list => {
+    setAfters(list);
+    if (!list.length) { setComposed(""); return; }
+    const beforeUrls = Array.from({ length: Math.min(c.photoCount || 0, 3) }, (_, k) => admin.photoUrl(token, c.id, k));
+    setComposed(await composeBeforeAfter({ beforeUrls, afterData: list, id: c.id, raisedAt: c.createdAt, doneAt: Date.now() }));
+  };
+  const dropAfter = async k => { setBusy(true); try { await rebuild(afters.filter((_, n) => n !== k)); } finally { setBusy(false); } };
 
   const save = async () => {
     if (status === 2 && !c.hasResult && !afters.length && c.status !== 2) { /* resolving without an after photo is allowed */ }
@@ -259,13 +265,34 @@ function Detail({ id, token, onClose, onChanged, flash }) {
               </div>
             </section>
 
-            {c.photoCount > 0 && (
-              <section className="ad-strip">
-                {Array.from({ length: c.photoCount }, (_, i) => (
-                  <a key={i} href={admin.photoUrl(token, c.id, i)} target="_blank" rel="noopener"><img src={admin.photoUrl(token, c.id, i)} alt={`Photo ${i + 1}`} loading="lazy" /></a>
-                ))}
-              </section>
-            )}
+            <section className="ad-compare">
+              <div className="ad-col">
+                <h4>Before <small>citizen</small></h4>
+                {c.photoCount > 0 ? (
+                  <div className="ad-thumbs">
+                    {Array.from({ length: c.photoCount }, (_, i) => (
+                      <a key={i} href={admin.photoUrl(token, c.id, i)} target="_blank" rel="noopener"><img src={admin.photoUrl(token, c.id, i)} alt={`Photo ${i + 1}`} loading="lazy" /></a>
+                    ))}
+                  </div>
+                ) : <p className="ad-none">No photos added</p>}
+              </div>
+              <div className="ad-col after">
+                <h4>After <small>you</small></h4>
+                <div className="ad-thumbs">
+                  {afters.map((p, k) => (
+                    <div className="ad-thumb" key={k}><img src={p} alt={`After ${k + 1}`} /><button type="button" onClick={() => dropAfter(k)} aria-label="Remove"><Ico d={I.x} s={12} /></button></div>
+                  ))}
+                  {afters.length < 3 && (
+                    <label className="ad-addtile">
+                      <Ico d={I.cam} s={22} />
+                      <span>{afters.length || c.hasResult ? "Add more" : "Add photos"}</span>
+                      <input type="file" accept="image/*" multiple hidden onChange={pickAfter} />
+                    </label>
+                  )}
+                </div>
+                {c.hasResult && !afters.length && <p className="ad-none">After photos saved. Add new ones to replace.</p>}
+              </div>
+            </section>
 
             <section className="ad-panel">
               <div className="ad-seg">
@@ -273,13 +300,6 @@ function Detail({ id, token, onClose, onChanged, flash }) {
               </div>
               <input className="ad-line" type="text" maxLength={300} value={note} onChange={e => setNote(e.target.value)} placeholder="Note for the citizen (optional)" />
 
-              {status === 2 && (
-                <label className="ad-addafter">
-                  <Ico d={I.cam} />
-                  <span>{afters.length ? `${afters.length} after photo${afters.length > 1 ? "s" : ""} added` : c.hasResult ? "Change the after photos" : "Add the after photos"}</span>
-                  <input type="file" accept="image/*" multiple hidden onChange={pickAfter} />
-                </label>
-              )}
               {composed && <img className="ad-preview" src={composed} alt="Before and after preview" />}
 
               <button className="ad-btn primary ad-save" disabled={busy} onClick={save}>{busy ? "Working…" : "Save"}</button>

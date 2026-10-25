@@ -6,7 +6,13 @@ import { makeHandler } from "../api/_lib/app.js";
 import { memDb } from "./memdb.js";
 
 const db = memDb();
-const env = { ADMIN_PASSWORD: "secret-pass", PUBLIC_URL: "https://example.test" };
+const env = { ADMIN_PASSWORD: "secret-pass", PUBLIC_URL: "https://example.test", TELEGRAM_BOT_TOKEN: "tok123", TELEGRAM_CHAT_ID: "111,222" };
+
+// capture the Telegram calls instead of sending them
+const realFetch = globalThis.fetch, telegram = [];
+globalThis.fetch = (u, o) => String(u).startsWith("https://api.telegram.org/")
+  ? (telegram.push({ url: String(u), body: o?.body }), Promise.resolve(new Response('{"ok":true}', { status: 200 })))
+  : realFetch(u, o);
 const server = http.createServer(makeHandler(() => db, env));
 await new Promise(r => server.listen(0, r));
 const base = `http://localhost:${server.address().port}`;
@@ -44,6 +50,13 @@ await t("photos beyond 4 and non-JPEG files are dropped", async () => {
   assert.equal(r.data.photos, 4); assert.equal(r.data.pushSaved, false);
 });
 await t("WhatsApp queue is off by default", async () => assert.equal(db.outbox.length, 0));
+await t("Telegram alert goes to every chat, first one with the photo and the admin link", async () => {
+  assert.equal(telegram.length, 4);   // 2 chats x 2 complaints so far
+  assert.ok(telegram[0].url.endsWith("/bottok123/sendPhoto")); assert.ok(telegram[0].body instanceof FormData);
+  assert.equal(telegram[0].body.get("chat_id"), "111"); assert.ok(telegram[0].body.get("caption").includes(id));
+  assert.ok(telegram[0].body.get("reply_markup").includes("https://example.test/#/admin"));
+  assert.equal(telegram[1].body.get("chat_id"), "222");
+});
 await t("public stats", async () => assert.deepEqual((await call("/api/stats")).data, { total: 2, open: 2, done: 0 }));
 await t("track by id and by phone, no private data", async () => {
   const a = (await call(`/api/track?q=${id}`)).data.items[0], b = (await call("/api/track?q=9123456780")).data.items;

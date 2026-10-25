@@ -149,3 +149,18 @@ body:has(.ad),body:has(.ad-login){padding-bottom:0;background:#f6f2e8}
 .ad-more .ad-log{padding-bottom:12px}
 .ad-chips{display:flex;gap:8px;flex-wrap:wrap;padding-bottom:14px}
 .ad-chips a{padding:9px 14px;border-radius:99px;background:#1faa59;color:#fff;font-weight:700;font-size:13px;text-decoration:none}
+
+/* before (left) and after (right) */
+.ad-compare{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ad-col{background:#fff;border-radius:16px;padding:10px;min-width:0}
+.ad-col.after{background:#f0f8f2}
+.ad-col h4{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--m);margin-bottom:8px}
+.ad-col.after h4{color:#14803f}
+.ad-col h4 small{font-weight:600;letter-spacing:0;text-transform:none;color:var(--mute);margin-left:4px}
+.ad-thumbs{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.ad-thumbs img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;display:block}
+.ad-thumb{position:relative}
+.ad-thumb button{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;border:0;background:#000000b3;color:#fff;display:grid;place-items:center;cursor:pointer}
+.ad-addtile{aspect-ratio:1;border:1.5px dashed #14803f;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#14803f;font-size:12px;font-weight:700;text-align:center;cursor:pointer}
+.ad-none{font-size:12.5px;color:var(--mute);line-height:1.4;margin-top:6px}
+.ad-col .ad-none:only-child{margin:0}

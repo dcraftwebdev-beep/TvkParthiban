@@ -1,6 +1,7 @@
 import { createHmac, randomInt, timingSafeEqual } from "node:crypto";
 import { newComplaintMessages, statusMessage, toIntl } from "./messages.js";
 import { sendPush, citizenPush, adminPush, pushEnabled } from "./push.js";
+import { telegramNewComplaint, telegramEnabled } from "./telegram.js";
 
 const CATS = ["road", "water", "drain", "light", "trash", "power", "other"];
 const DEFAULT_URL = "https://tvkparthibankattur.vercel.app";
@@ -109,7 +110,7 @@ export function makeHandler(getDb, env = process.env) {
 
       if (path === "/health" && method === "GET") {
         const configured = !!(env.SUPABASE_URL && (env.SUPABASE_SERVICE_KEY || env.SUPABASE_SERVICE_ROLE_KEY));
-        return send(res, 200, { ok: true, storage: "supabase", configured, admin: !!env.ADMIN_PASSWORD, push: pushEnabled(env) });
+        return send(res, 200, { ok: true, storage: "supabase", configured, admin: !!env.ADMIN_PASSWORD, push: pushEnabled(env), telegram: telegramEnabled(env) });
       }
       let db;
       try { db = getDb(); } catch (e) { console.error(e.message); return send(res, 503, { error: "not_configured" }); }
@@ -171,7 +172,10 @@ export function makeHandler(getDb, env = process.env) {
           try { await db.addOutbox(newComplaintMessages(row, { publicUrl, adminPhones }).map(r => ({ ...r, complaint_id: id }))); }
           catch (e) { console.error("outbox insert failed", e); }
         }
-        try { await pushAllAdmins(db, adminPush(row, `${publicUrl}/#/admin`)); } catch (e) { console.error("admin push failed", e); }
+        await Promise.allSettled([
+          pushAllAdmins(db, adminPush(row, `${publicUrl}/#/admin`)),
+          telegramNewComplaint(env, row, photos[0] || null, `${publicUrl}/#/admin`)
+        ]);
         return send(res, 201, { id, status: 0, createdAt: now, pushSaved: !!row.push_sub, photos: photos.length });
       }
 
@@ -236,7 +240,7 @@ h1{font-size:22px;margin:18px 0 6px}p{color:#ffffffbf;margin:0 0 18px}a{display:
             week: rows.filter(r => r.created_at > Date.now() - 7 * 86400e3).length,
             byCat: Object.entries(catCount).map(([cat, n]) => ({ cat, n })).sort((a, b) => b.n - a.n),
             pending: queueWhatsApp ? await db.pendingCount() : 0,
-            push: pushEnabled(env),
+            push: pushEnabled(env), telegram: telegramEnabled(env),
             notify: { provider: "outbox" }
           });
         }
