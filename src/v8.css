@@ -1,0 +1,17 @@
+/* v8: fixes found in the phone audit */
+.cx-cat{min-width:0}
+.cx-cat b{min-width:0;line-height:1.25;overflow-wrap:anywhere;font-weight:700}
+@media (max-width:859px){
+  .cx-cat{padding:10px;gap:9px;font-size:13.5px}
+  .cx-ico{width:36px;height:36px;border-radius:10px}
+  .cx-ico svg{width:20px;height:20px}
+}
+@media (max-width:859px){
+  .goals{grid-template-columns:1fr;gap:8px}
+  .goal{display:grid;grid-template-columns:44px 1fr;column-gap:14px;align-items:start;padding:14px}
+  .goal .ic{grid-row:span 2;width:44px;height:44px;padding:10px;border-radius:12px;background:#ffffff14;margin:0}
+  .goal h3{font-size:16px;margin-bottom:2px}
+  .goal p{font-size:13px}
+  .goal .num{display:none}
+}
+.copy{flex:none}.idbox{flex-wrap:nowrap}.copy span{white-space:nowrap}

@@ -1,0 +1,141 @@
+/* v7: mobile-first polish (phones). Desktop rules live in the earlier files. */
+@media (max-width:859px){
+  html{scroll-padding-top:64px}
+  body{font-size:15.5px}
+  .wrap{padding:0 16px}
+
+  /* header */
+  .top{padding:calc(6px + env(safe-area-inset-top)) 0 6px}
+  .top-in{gap:10px}
+  .brand{gap:9px}
+  .brand-flag{width:48px;height:32px;border-width:1.5px}
+  .brand-text b{font-size:14px}
+  .brand-text small{font-size:10.5px}
+  .lang button{padding:5px 11px;font-size:11.5px}
+
+  /* hero: video block on top, copy below, never overlapping */
+  .hero{display:flex;flex-direction:column;justify-content:flex-end;height:auto;min-height:100svh;max-height:none}
+  .hero-main{position:relative;inset:auto;width:100%;height:auto;aspect-ratio:1280/542;margin-top:calc(60px + env(safe-area-inset-top));flex:none;z-index:0}
+  .hero-shade{background:linear-gradient(180deg,#3d060c99 0%,#3d060c00 14%,#3d060c00 34%,#3d060cf0 62%,#3d060c 100%)}
+  .hero-copy{padding-top:28px;padding-bottom:36px;margin-top:auto}
+  .hero h1{font-size:clamp(30px,9vw,44px);line-height:1.18;margin-bottom:12px}
+  .lead{font-size:14.5px;line-height:1.55;margin-bottom:20px}
+  .hero-cta{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .hero-cta .btn{padding:0 12px;min-height:50px;font-size:14.5px}
+  .rep{margin-top:20px;font-size:12.5px}
+
+  /* quick actions as a clean 4-up row */
+  .quick{padding:14px 0}
+  .quick-in{gap:8px;padding:0 16px}
+  .tile{padding:12px 2px 10px;gap:6px}
+  .tile b{font-size:12px}
+
+  /* stats */
+  .stats-in{padding-top:12px;padding-bottom:12px}
+  .stat b{font-size:30px}
+
+  /* sections */
+  .sec{padding:44px 0}
+  .sec-head{margin-bottom:22px}
+  .sec-head h2,.up-head h2,.cx-side h2{font-size:clamp(24px,7vw,30px)}
+  .sec-head .sub,.up-head .sub{font-size:14.5px}
+
+  /* leader */
+  .leader-in{gap:30px}
+  .portrait{max-width:330px}
+  .portrait::before{inset:14px -8px -10px 14px}
+  .leader-copy h2{font-size:clamp(30px,9vw,38px)}
+  .leader-copy .body{font-size:14.5px}
+  .roles .role{font-size:12.5px}
+  .leader-copy .btn{width:100%}
+
+  /* complaint: lead with the form, keep the side panel short */
+  .cx{gap:14px}
+  .cx-side{padding:20px 18px;border-radius:20px}
+  .cx-side .eyebrow{margin-bottom:6px}
+  .cx-side h2{margin-bottom:4px}
+  .cx-side .sub{margin-bottom:0;font-size:14px}
+  .cx-points{display:none}
+  .cx-pane{min-height:0;padding:10px 16px 4px}
+  .cx-meta{padding:14px 16px 4px}
+  .cx-actions{padding:12px 16px 18px}
+  .cx-cats{gap:8px}
+  .cx-cat{padding:11px;gap:10px;font-size:14px;min-height:64px}
+  .cx-ico{width:40px;height:40px}
+  .mic-big{padding:14px;gap:14px}
+  .mic-orb{width:56px;height:56px}
+  .mic-txt b{font-size:16px}
+  .mic-txt small{font-size:12px}
+
+  /* kural */
+  .kural{padding:46px 0}
+  .kural .q{font-size:70px;margin-bottom:12px}
+
+  /* tvk: compact, scannable */
+  .tvk-top{gap:18px;margin-bottom:22px}
+  .flag-card{padding:12px;gap:10px}
+  .flag-card h3{font-size:15px}
+  .flag-card p{font-size:13px}
+  .goals{grid-template-columns:1fr 1fr;gap:10px}
+  .goal{padding:16px 14px}
+  .goal .ic{width:24px;height:24px;margin-bottom:8px}
+  .goal h3{font-size:15.5px}
+  .goal p{font-size:12.5px;line-height:1.5}
+  .goal .num{font-size:22px;right:12px;top:10px}
+  .icons{margin-top:26px;padding-top:18px}
+  .icons ul.leaders{margin:0 -16px;padding:0 16px 6px;scroll-snap-type:x proximity}
+  .leaders li{flex:0 0 88px;scroll-snap-align:start}
+  .leaders img{width:76px;height:76px}
+
+  /* track */
+  .track-form{flex-direction:column}
+  .track-form .btn{min-height:50px;width:100%}
+  .t-card{padding:15px}
+
+  /* how */
+  .steps li{padding:16px 0;gap:14px}
+  .steps b{font-size:26px;min-width:44px}
+  .steps h3{font-size:16.5px}
+
+  /* schemes */
+  .up-head{margin-bottom:20px;text-align:left}
+  .up-head .eyebrow{justify-content:flex-start}
+  .wa-channel{border-radius:18px;margin:0 -4px}
+  .wa-head b{font-size:15px}
+  .wa-av{width:38px;height:38px}
+  .wa-join span{display:none}
+  .wa-join{padding:0;width:40px;justify-content:center}
+  .wa-tabs{padding:10px 10px 0;gap:5px}
+  .wa-tabs button{padding:0 6px;font-size:12.5px}
+  .wa-feed{padding:10px}
+  .wa-card h3{font-size:16px}
+  .wa-card p{font-size:13.5px}
+  .wa-row a{font-size:12.5px}
+
+  /* faq */
+  .acc-i>button{font-size:15.5px;padding:17px 2px}
+
+  /* contact + footer */
+  .c-card{padding:18px}
+  .c-card b{font-size:21px}
+  .foot{padding:22px 0 26px}
+  .foot-in{align-items:flex-start}
+
+  /* bottom bar + toast */
+  .tabbar{height:calc(62px + env(safe-area-inset-bottom))}
+  .tabbar a{font-size:10px}
+  .tabbar a.fab .ic{width:46px;height:46px;padding:12px;margin-top:-24px}
+  body{padding-bottom:calc(62px + env(safe-area-inset-bottom))}
+  .toast{bottom:calc(74px + env(safe-area-inset-bottom))}
+
+  /* dialog */
+  .sheet{padding:16px}
+  .sheet-card{padding:28px 18px 18px}
+}
+
+@media (max-width:360px){
+  .brand-text small{display:none}
+  .quick-in{gap:6px;padding:0 12px}
+  .goals{grid-template-columns:1fr}
+  .hero-cta{grid-template-columns:1fr}
+}

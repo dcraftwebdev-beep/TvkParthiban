@@ -1,0 +1,1 @@
+﻿{"version":"0.0.1","configurations":[{"name":"tvk","runtimeExecutable":"npx","runtimeArgs":["--yes","serve","-l","5188","."],"port":5188}]}

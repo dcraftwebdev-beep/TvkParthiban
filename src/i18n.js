@@ -1,0 +1,167 @@
+export const T = {
+  ta: {
+    brand: "மக்கள் குறைகள் மையம்", brandSub: "வார்டு 38 · காட்டூர் · பார்த்திபன்",
+    ticker: "திருச்சிராப்பள்ளி மாநகராட்சி · வார்டு 38 சிறப்பு மக்கள் குறைதீர் மையம்",
+    navHome: "முகப்பு", navLeader: "பிரதிநிதி", navTvk: "TVK", navComplaint: "புகார்", navTrack: "நிலை", navHow: "செயல்முறை", navContact: "தொடர்பு",
+    heroEyebrow: "வார்டு 38 · காட்டூர்",
+    heroTitle: ["உங்கள் குறை,", "எங்கள் பொறுப்பு."],
+    heroLead: "சாலை, குடிநீர், கழிவுநீர், தெருவிளக்கு என எந்த பிரச்சனையாக இருந்தாலும் பேசியோ, எழுதியோ பதிவு செய்யுங்கள். ஒவ்வொரு புகாருக்கும் ஒரு எண். தீரும் வரை பின்தொடர்தல்.",
+    ctaRaise: "புகார் பதிவு செய்", ctaTrack: "நிலை அறிய", repLabel: "TVK வார்டு 38 · காட்டூர்",
+    qComplaint: "புகார்", qComplaintSub: "பதிவு செய்", qVoice: "குரல் புகார்", qVoiceSub: "பேசி பதிவு",
+    qWaSub: "நேரடி உரையாடல்", qCall: "அழை", qCallSub: "கைபேசி",
+    sTotal: "பதிவான புகார்கள்", sOpen: "நடவடிக்கையில்", sDone: "தீர்க்கப்பட்டவை", sWard: "வார்டு",
+    lEyebrow: "உங்கள் பிரதிநிதி", lRole: "TVK வார்டு 38 · காட்டூர் பகுதி", lRole2: "மாவட்ட துணைச் செயலாளர்", lOrg: "தமிழக வெற்றிக் கழகம்",
+    lText: "வார்டு 38 மக்களின் அன்றாடப் பிரச்சனைகளைக் கேட்டு, சம்பந்தப்பட்ட துறைகளுடன் இணைந்து தீர்வு காண்பதே இந்த மையத்தின் நோக்கம். எந்த நேரத்திலும் உங்கள் புகாரைப் பதிவு செய்யலாம்.",
+    lP1: "ஒவ்வொரு புகாருக்கும் தனி எண்", lP2: "குரல் மற்றும் புகைப்படத்துடன் பதிவு", lP3: "தீரும் வரை பின்தொடர்தல்",
+    lCta: "நேரடியாகப் பேச",
+    kuralTag: "திருக்குறள் · 972", kuralEn: "",
+    tvkEyebrow: "தமிழக வெற்றிக் கழகம்", tvkTitle: "நாங்கள் நம்பும் கொள்கை",
+    tvkLead: "தமிழக வெற்றிக் கழகம் 2024 பிப்ரவரி 2 அன்று தொடங்கப்பட்டது. தலைவர் திரு. C. ஜோசப் விஜய். சமத்துவம், சமூகநீதி, மதச்சார்பின்மை ஆகியவை கட்சியின் அடிப்படைக் கொள்கைகள்.",
+    g1t: "சமத்துவம்", g1p: "பிறப்பால் அனைவரும் சமம். சாதி, மதம், பாலினம் கடந்து ஒவ்வொருவருக்கும் சம வாய்ப்பு.",
+    g2t: "சமூகநீதி", g2p: "கல்வி, வேலை, அரசு சேவைகளில் நியாயமான பங்கு அனைவருக்கும் கிடைக்க வேண்டும்.",
+    g3t: "மதச்சார்பின்மை", g3p: "அனைத்து மதத்தினரும் நல்லிணக்கத்துடன் வாழும் தமிழகம்.",
+    g4t: "மக்களுக்கான சேவை", g4p: "வார்டு அளவில் வெளிப்படையான, பதிலளிக்கும் பொது சேவை. உங்கள் குறை கேட்கப்படும்.",
+    iconsTitle: "வழிகாட்டும் தலைவர்கள்",
+    ic: ["பெரியார்", "அம்பேத்கர்", "காமராஜர்", "வேலு நாச்சியார்", "அஞ்சலை அம்மாள்"],
+    flagTitle: "கழகக் கொடி", flagText: "மெரூன் - மஞ்சள் - மெரூன் வண்ணம். நடுவில் வாகை மலரும், இருபுறமும் போர் யானைகளும். வாகை என்றால் வெற்றி.",
+    cEyebrow: "புகார் பதிவு", cTitle: "என்ன பிரச்சனை?", cSub: "நான்கு எளிய படிகள். ஒரு நிமிடம் போதும்.",
+    stepLabels: ["வகை", "விவரம்", "இடம்", "உறுதி"],
+    fCat: "வகையைத் தேர்ந்தெடுக்கவும்", fDesc: "பிரச்சனையைக் கூறுங்கள்",
+    fDescPh: "இங்கே எழுதுங்கள் அல்லது மைக்கை அழுத்தி பேசுங்கள்",
+    micHint: "மைக்கை அழுத்தி தமிழில் அல்லது ஆங்கிலத்தில் பேசலாம்.",
+    micListen: "கேட்கிறேன்... பேசுங்கள்", micNo: "இந்த உலாவியில் குரல் வசதி இல்லை. Chrome பயன்படுத்தவும்.", micDeny: "மைக் அனுமதி தேவை.",
+    fPlace: "இடம் மற்றும் படம்", fStreetPh: "தெரு / பகுதி பெயர்", fGps: "என் இருப்பிடம்", fPhoto: "புகைப்படம் சேர்",
+    gpsWait: "இருப்பிடம் பெறுகிறது...", gpsOk: "இருப்பிடம் சேர்க்கப்பட்டது", gpsFail: "இருப்பிடம் கிடைக்கவில்லை",
+    fWho: "உங்கள் விவரம்", fNamePh: "பெயர்", fPhonePh: "கைபேசி எண்",
+    review: "சரிபார்க்கவும்", next: "அடுத்து", back: "பின்", fSubmit: "புகாரைச் சமர்ப்பி", fSubmitWa: "WhatsApp மூலம் அனுப்பு",
+    eCat: "வகையைத் தேர்ந்தெடுக்கவும்.", eDesc: "பிரச்சனையை விவரிக்கவும்.", eName: "பெயரை உள்ளிடவும்.", ePhone: "சரியான 10 இலக்க கைபேசி எண்ணை உள்ளிடவும்.",
+    tEyebrow: "புகார் நிலை", tTitle: "உங்கள் புகார் எங்கே?", tPh: "புகார் எண் அல்லது கைபேசி எண்", tBtn: "தேடு",
+    tNone: "எந்த புகாரும் கிடைக்கவில்லை. எண்ணைச் சரிபார்க்கவும்.", tHint: "இந்த சாதனத்தில் பதிவு செய்த புகார்கள் இங்கே தெரியும்.",
+    st: ["பெறப்பட்டது", "நடவடிக்கையில்", "தீர்க்கப்பட்டது"],
+    hEyebrow: "எப்படி செயல்படுகிறது", hTitle: "புகாரிலிருந்து தீர்வு வரை",
+    h: [["பதிவு", "குரல், எழுத்து அல்லது புகைப்படத்துடன் புகாரைப் பதிவு செய்யுங்கள்."], ["புகார் எண்", "உடனே தனி புகார் எண் கிடைக்கும்."], ["நடவடிக்கை", "அலுவலகக் குழு சம்பந்தப்பட்ட துறைக்கு அனுப்பி பின்தொடரும்."], ["தீர்வு", "தீர்வு கிடைத்ததும் உங்களுக்குத் தெரிவிக்கப்படும்."]],
+    gEyebrow: "நிகழ்வு", gTitle: "மக்களோடு, கழகத்தோடு",
+    faqEyebrow: "கேள்விகள்", faqTitle: "அடிக்கடி கேட்கப்படுபவை",
+    faq: [
+      ["யார் புகார் அளிக்கலாம்?", "வார்டு 38 இல் வசிக்கும் எவரும் புகார் அளிக்கலாம்."],
+      ["குரல் மூலம் எப்படி பதிவு செய்வது?", "புகார் படிவத்தில் மைக் பொத்தானை அழுத்தி தமிழில் அல்லது ஆங்கிலத்தில் பேசுங்கள். பேசியது எழுத்தாக மாறும். Chrome உலாவி சிறந்தது."],
+      ["புகார் எண் எதற்கு?", "புகாரின் நிலையை அறிய இந்த எண் உதவும். WhatsApp இல் தெரிவிக்கும்போதும் இதைக் குறிப்பிடுங்கள்."],
+      ["அவசரப் பிரச்சனைக்கு?", "நேரடியாக அழைக்கவும் அல்லது WhatsApp இல் தகவல் அனுப்பவும்."]
+    ],
+    kEyebrow: "தொடர்பு", kTitle: "நேரடியாகத் தொடர்பு கொள்ளுங்கள்",
+    kWa: "WhatsApp வாயிலாகப் புகார்", kCall: "கைபேசி வாயிலாகப் புகார்",
+    kNote: "வார்டு 38 · காட்டூர் · திருச்சிராப்பள்ளி மாநகராட்சி",
+    footer: "தமிழக வெற்றிக் கழகம் · வார்டு 38 மக்கள் குறைகள் மையம்",
+    okTitle: "புகார் பதிவானது", okText: "இந்த எண்ணைக் குறித்து வைத்துக் கொள்ளுங்கள். நிலை அறிய இதைப் பயன்படுத்தலாம்.",
+    okWa: "WhatsApp இல் உறுதிப்படுத்து", okClose: "மூடு",
+    waHead: "புகார்", waCat: "வகை", waDesc: "விவரம்", waPlace: "இடம்", waName: "பெயர்", waPhone: "கைபேசி", waMap: "வரைபடம்"
+  },
+  en: {
+    brand: "People's Grievance Centre", brandSub: "Ward 38 · Kattur · Parthiban",
+    ticker: "Tiruchirappalli Corporation · Ward 38 Special Public Grievance Redressal Centre",
+    navHome: "Home", navLeader: "Representative", navTvk: "TVK", navComplaint: "Complaint", navTrack: "Track", navHow: "How it works", navContact: "Contact",
+    heroEyebrow: "Ward 38 · Kattur",
+    heroTitle: ["Your problem,", "our responsibility."],
+    heroLead: "Roads, water, drainage, streetlights, whatever it is, report it by voice or text. Every complaint gets an ID and is followed up until it is fixed.",
+    ctaRaise: "Raise a complaint", ctaTrack: "Track status", repLabel: "TVK Ward 38 · Kattur",
+    qComplaint: "Complaint", qComplaintSub: "Register", qVoice: "Voice", qVoiceSub: "Speak it",
+    qWaSub: "Direct chat", qCall: "Call", qCallSub: "Mobile",
+    sTotal: "Complaints logged", sOpen: "In progress", sDone: "Resolved", sWard: "Ward",
+    lEyebrow: "Your representative", lRole: "TVK Ward 38 · Kattur area", lRole2: "District Joint Secretary", lOrg: "Tamilaga Vettri Kazhagam",
+    lText: "This centre exists to hear the everyday problems of Ward 38 and to work with the departments concerned until they are solved. You can register a complaint at any time.",
+    lP1: "A unique ID for every complaint", lP2: "Voice and photo supported", lP3: "Followed up until resolved",
+    lCta: "Talk directly",
+    kuralTag: "Thirukkural · 972", kuralEn: "",
+    tvkEyebrow: "Tamilaga Vettri Kazhagam", tvkTitle: "The ideals we stand for",
+    tvkLead: "Tamilaga Vettri Kazhagam was founded on 2 February 2024 and is led by C. Joseph Vijay. Equality, social justice and secularism are the party's core principles.",
+    g1t: "Equality", g1p: "All are equal by birth. Equal opportunity for everyone beyond caste, religion and gender.",
+    g2t: "Social justice", g2p: "A fair share in education, jobs and public services for every community.",
+    g3t: "Secularism", g3p: "A Tamil Nadu where people of all faiths live together in harmony.",
+    g4t: "Service to people", g4p: "Transparent, responsive public service at ward level. Your complaint will be heard.",
+    iconsTitle: "Icons who guide us",
+    ic: ["Periyar", "Ambedkar", "Kamarajar", "Velu Nachiyar", "Anjalai Ammal"],
+    flagTitle: "The party flag", flagText: "Maroon, yellow and maroon bands. The vaagai flower sits in the centre between two fighting elephants. Vaagai means victory.",
+    cEyebrow: "Register complaint", cTitle: "What is the problem?", cSub: "Four quick steps. It takes about a minute.",
+    stepLabels: ["Type", "Details", "Place", "Confirm"],
+    fCat: "Choose a category", fDesc: "Describe the problem",
+    fDescPh: "Type here or tap the mic and speak",
+    micHint: "Tap the mic and speak in Tamil or English.",
+    micListen: "Listening... speak now", micNo: "Voice input is not supported here. Try Chrome.", micDeny: "Microphone permission needed.",
+    fPlace: "Location and photo", fStreetPh: "Street / area name", fGps: "My location", fPhoto: "Add photo",
+    gpsWait: "Getting location...", gpsOk: "Location added", gpsFail: "Could not get location",
+    fWho: "Your details", fNamePh: "Name", fPhonePh: "Mobile number",
+    review: "Review", next: "Next", back: "Back", fSubmit: "Submit complaint", fSubmitWa: "Send via WhatsApp",
+    eCat: "Please choose a category.", eDesc: "Please describe the problem.", eName: "Please enter your name.", ePhone: "Enter a valid 10 digit mobile number.",
+    tEyebrow: "Complaint status", tTitle: "Where is my complaint?", tPh: "Complaint ID or mobile number", tBtn: "Search",
+    tNone: "No complaint found. Check the number.", tHint: "Complaints filed on this device show up here.",
+    st: ["Received", "In progress", "Resolved"],
+    hEyebrow: "How it works", hTitle: "From complaint to resolution",
+    h: [["Register", "File your complaint with voice, text or a photo."], ["Get an ID", "You instantly receive a unique complaint number."], ["Action", "The ward office forwards it to the right department and follows up."], ["Resolved", "You are informed as soon as it is fixed."]],
+    gEyebrow: "Moments", gTitle: "With the people, with the party",
+    faqEyebrow: "Questions", faqTitle: "Frequently asked",
+    faq: [
+      ["Who can file a complaint?", "Anyone living in Ward 38."],
+      ["How do I use voice?", "Tap the mic button in the complaint form and speak in Tamil or English. Your speech turns into text. Chrome works best."],
+      ["What is the complaint ID for?", "It lets you check the status later. Quote it when you message us on WhatsApp too."],
+      ["What about emergencies?", "Call us directly or send a WhatsApp message."]
+    ],
+    kEyebrow: "Contact", kTitle: "Reach us directly",
+    kWa: "Complaint via WhatsApp", kCall: "Complaint via phone",
+    kNote: "Ward 38 · Kattur · Tiruchirappalli Corporation",
+    footer: "Tamilaga Vettri Kazhagam · Ward 38 Grievance Centre",
+    okTitle: "Complaint registered", okText: "Keep this number safe. Use it to check the status later.",
+    okWa: "Confirm on WhatsApp", okClose: "Close",
+    waHead: "Complaint", waCat: "Category", waDesc: "Details", waPlace: "Location", waName: "Name", waPhone: "Mobile", waMap: "Map"
+  }
+};
+
+const SRC = {
+  ring: "https://www.theweek.in/news/india/2026/09/28/tamil-nadu-gold-ring-scheme-newborns.html",
+  ringNews: "https://www.deccanchronicle.com/amp/southern-states/tamil-nadu/cm-vijay-to-launch-one-gram-gold-ring-scheme-for-newborns-1990943",
+  women: "https://www.dailypioneer.com/news/vijay-tvk-manifesto-promises-8-gram-gold-cash-aid-jobs-as-party-nears-majority-tamil-nadu-",
+  bus: "https://newsable.asianetnews.com/india/tn-polls-vijays-tvk-announces-free-bus-travel-safety-force-for-women-articleshow-hmgsv49",
+  gold: "https://keralakaumudi.com/en/news/news.php?id=1732116"
+};
+
+Object.assign(T.ta, {
+  cSub: "வகையைத் தேர்ந்தெடுங்கள், பேசுங்கள், அனுப்புங்கள். அவ்வளவுதான்.",
+  cB1: "பேசியே பதிவு செய்யலாம்", cB2: "உடனே தனி புகார் எண்", cB3: "நிலையை எப்போதும் அறியலாம்", cOr: "அல்லது நேரடியாக:",
+  speak: "பேசி பதிவு செய்", speaking: "கேட்கிறேன்... நிறுத்த தொடவும்", orType: "அல்லது எழுதுங்கள்",
+  photoHelp: "படம் இருந்தால் தீர்வு விரைவாகும்", gpsHelp: "துல்லியமான இடத்தை அனுப்ப உதவும்",
+  uEyebrow: "சமீபத்திய திட்டங்கள்", uTitle: "மக்களுக்கான திட்டங்கள்",
+  uSub: "தமிழக வெற்றிக் கழகம் அறிவித்த முக்கிய திட்டங்கள். WhatsApp இல் நண்பர்களுக்குப் பகிருங்கள்.",
+  uJoin: "WhatsApp இல் தொடர்பு கொள்", uNote: "செய்தி அறிக்கைகளின் அடிப்படையிலான சுருக்கம். அமலாக்க நிலை மாறக்கூடும்.",
+  uChannel: "TVK திட்டங்கள்", uChannelSub: "வார்டு 38 · காட்டூர்", uPhotoCap: "கழக நிகழ்வு", uTag: "நிகழ்வு",
+  uShare: "பகிர்", uSrc: "மூலம்"
+});
+
+Object.assign(T.en, {
+  cSub: "Pick a category, speak, send. That is all.",
+  cB1: "Report by speaking", cB2: "Instant complaint ID", cB3: "Check status anytime", cOr: "Or reach us directly:",
+  speak: "Tap to speak", speaking: "Listening... tap to stop", orType: "or type it",
+  photoHelp: "A photo helps us fix it faster", gpsHelp: "Sends the exact spot",
+  uEyebrow: "Recent schemes", uTitle: "Schemes for the people",
+  uSub: "Key schemes announced by Tamilaga Vettri Kazhagam. Share them with friends on WhatsApp.",
+  uJoin: "Message us on WhatsApp", uNote: "Summaries based on news reports. Rollout status may change.",
+  uChannel: "TVK Schemes", uChannelSub: "Ward 38 · Kattur", uPhotoCap: "Party event", uTag: "Event",
+  uShare: "Share", uSrc: "Source"
+});
+
+Object.assign(T.ta, {
+  copy: "நகலெடு", copied: "நகலானது", sending: "அனுப்புகிறது...",
+  okText: "உங்கள் கைபேசிக்கு WhatsApp இல் உறுதிப்படுத்தல் அனுப்பப்படும். இந்த எண்ணைக் குறித்து வைத்துக் கொள்ளுங்கள்.",
+  eServer: "விவரங்களைச் சரிபார்த்து மீண்டும் முயலவும்.", eLimit: "நிறைய முயற்சிகள். சிறிது நேரம் கழித்து முயலவும்.",
+  serverDown: "சேவையகத்தை அடைய முடியவில்லை. WhatsApp மூலம் நேரடியாக அனுப்பலாம்.",
+  tFail: "இணைப்பு இல்லை. மீண்டும் முயலவும்.", tPh: "புகார் எண் அல்லது கைபேசி எண்",
+  uAll: "அனைத்தும்", uLaunched: "தொடங்கப்பட்டது", uAnnounced: "அறிவிப்பு", uJoinShort: "தொடர்பு"
+});
+Object.assign(T.en, {
+  copy: "Copy", copied: "Copied", sending: "Sending...",
+  okText: "A confirmation will be sent to your mobile on WhatsApp. Keep this number safe.",
+  eServer: "Please check your details and try again.", eLimit: "Too many attempts. Please try again later.",
+  serverDown: "Could not reach the server. You can send it directly on WhatsApp.",
+  tFail: "No connection. Please try again.", tPh: "Complaint ID or mobile number",
+  uAll: "All", uLaunched: "Launched", uAnnounced: "Announced", uJoinShort: "Contact"
+});
+Object.assign(T.ta, { tHint: "புகார் எண் அல்லது கைபேசி எண்ணை உள்ளிட்டுத் தேடுங்கள்." });
+Object.assign(T.en, { tHint: "Search with your complaint ID or mobile number." });

@@ -1,0 +1,51 @@
+/* v12: two-line hero title, quick-action cards visible on the first screen */
+.hero h1{white-space:nowrap;max-width:none}
+
+/* phones */
+@media (max-width:859px){
+  .hero{min-height:calc(100svh - 62px - env(safe-area-inset-bottom) - 124px)}
+  .hero h1{font-size:clamp(26px,11vw,50px);line-height:1.2}
+  html[lang="en"] .hero h1{font-size:clamp(40px,12.2vw,60px);line-height:1}
+  .hero-copy{padding-bottom:22px;padding-top:20px}
+  .lead{margin-bottom:16px}
+  .rep{margin-top:16px}
+  .quick{padding:12px 0;background:var(--maroon-d)}
+  .tile{background:var(--maroon)}
+}
+/* short phones: drop the paragraph so the cards stay on the first screen */
+@media (max-width:859px) and (max-height:700px){
+  .lead{display:none}
+  .hero-copy{padding-bottom:16px}
+}
+
+/* desktop: cards sit directly under the banner, inside the first screen */
+@media (min-width:860px){
+  .hero{height:calc(100vh - 156px);min-height:540px;max-height:none}
+  .hero-copy{padding-bottom:16px;padding-top:50px}
+  .hero h1{font-size:clamp(40px,5.2vw,80px);max-width:none}
+  html[lang="en"] .hero h1{font-size:clamp(64px,8vw,124px)}
+  .quick{margin-top:0;padding:16px 0;background:var(--maroon-d)}
+  .quick-in{padding:0 20px}
+  .tile{padding:18px 22px;border-bottom:4px solid var(--gold)}
+  .stats{margin-top:0;padding-top:0}
+  .stats-in{padding-top:30px;padding-bottom:26px}
+}
+@media (min-width:860px) and (max-height:700px){
+  .lead{display:none}
+}
+
+@media (max-width:859px){
+  html[lang="en"] .hero h1{font-size:clamp(38px,11.4vw,56px)}
+  html[lang] .hero .lead{font-size:13.5px;line-height:1.5;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .hero h1{margin-bottom:8px}
+  .hero-copy{padding-top:14px;padding-bottom:16px}
+  .hero-cta .btn{min-height:46px}
+  .rep{margin-top:12px}
+  .quick{padding:10px 0}
+  .hero-main{margin-top:calc(54px + env(safe-area-inset-top))}
+}
+
+@media (max-width:859px) and (max-height:780px){
+  html[lang] .hero .lead{display:none}
+  .hero-copy{padding-bottom:14px}
+}

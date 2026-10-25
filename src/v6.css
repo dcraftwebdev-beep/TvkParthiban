@@ -1,0 +1,49 @@
+/* v6: centered success dialog, schemes layout, mobile polish */
+
+/* ---------- success dialog (centered) ---------- */
+.sheet{align-items:center;padding:20px;background:#2a0508b8;backdrop-filter:blur(3px)}
+.sheet-card{position:relative;max-width:400px;border-radius:26px;padding:30px 22px 22px;animation:pop .28s cubic-bezier(.2,.9,.3,1.2);border-top:6px solid var(--gold);gap:14px}
+@keyframes pop{from{opacity:0;transform:scale(.9) translateY(10px)}}
+.sheet-x{position:absolute;right:12px;top:12px;width:36px;height:36px;border-radius:50%;border:0;background:var(--paper2);color:var(--maroon-d);display:grid;place-items:center}
+.sheet-card .tick{width:64px;height:64px;margin-bottom:0}
+.sheet-card h3{font-size:22px;margin-top:-2px}
+.idbox{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#fff;border:1.5px dashed #c9b88c;border-radius:16px;padding:8px 8px 8px 16px}
+.idbox b{font-size:clamp(19px,6vw,24px);font-weight:800;color:var(--maroon);letter-spacing:.04em;white-space:nowrap}
+.copy{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px;border-radius:12px;border:0;background:var(--maroon);color:#fff;font-weight:800;font-size:13.5px;transition:background .2s}
+.copy.ok{background:#1faa59}
+.sheet-card>p{font-size:13.5px;line-height:1.5}
+
+/* ---------- complaint extras ---------- */
+.cx-actions .btn:disabled{opacity:.6}
+.cx-down{display:flex;flex-direction:column;gap:10px;background:#fff6e0;border:1px solid #ecd270;border-radius:14px;padding:12px}
+.cx-down p{font-size:13.5px;color:#6b5200;font-weight:600}
+
+/* ---------- schemes (WhatsApp channel) ---------- */
+.wa-head{padding:12px 14px}
+.wa-join{padding:8px 14px;min-height:40px}
+.wa-tabs{display:flex;gap:6px;padding:10px 12px 0}
+.wa-tabs button{flex:1;min-height:40px;border:0;border-radius:99px;background:#ffffffb3;color:#4a4a4d;font-weight:700;font-size:13.5px;white-space:nowrap;padding:0 12px;transition:all .15s}
+.wa-tabs button.on{background:#075e54;color:#fff}
+.wa-feed{display:flex;flex-direction:column;gap:10px;overflow:visible;padding:12px 12px 14px;scroll-snap-type:none}
+.wa-card{flex:none;width:100%;padding:14px 14px 12px;scroll-snap-align:none}
+.wa-card.live{border:2px solid #25d366}
+.wa-card.live::after{content:none}
+.wa-photo{min-height:0;aspect-ratio:16/11;padding:0}
+.wa-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.wa-top .wa-tag{margin:0}
+.wa-status{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:800;padding:4px 11px;border-radius:99px}
+.wa-status::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.wa-status.live{background:#25d366;color:#04361c}
+.wa-status.ann{background:#fff0c2;color:#7a5600}
+.wa-card h3{font-size:16.5px}
+.wa-card p{font-size:14px;line-height:1.5}
+.wa-row{margin-top:12px}
+.wa-row .wa-share{min-height:36px}
+
+@media (min-width:860px){
+  .wa-head{padding:18px 26px}
+  .wa-tabs{padding:14px 26px 0}
+  .wa-tabs button{flex:none;padding:0 20px}
+  .wa-feed{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:20px 26px 28px}
+  .wa-photo{grid-row:span 2;aspect-ratio:auto;min-height:420px}
+}

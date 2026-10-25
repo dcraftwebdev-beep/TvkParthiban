@@ -1,0 +1,20 @@
+/* v11: announcements without the journey timeline, schemes show-more, hero bottom no longer hidden */
+.wa-more{display:flex;align-items:center;justify-content:center;margin:16px auto 0;min-height:46px;padding:0 26px;border-radius:99px;border:1.5px solid var(--maroon);background:transparent;color:var(--maroon);font-weight:700;font-size:14.5px}
+.wa-more:hover{background:var(--maroon);color:#fff}
+
+
+.journey .hq{max-width:680px;margin:0 auto}
+.journey .hq-list{gap:12px}
+
+@media (min-width:860px){
+  /* the quick-action row overlaps the hero by 52px, so keep the leader line clear of it */
+  .hero{min-height:760px}
+  .hero-copy{padding-bottom:120px}
+  .quick{margin-top:-64px}
+  .stats{margin-top:-64px;padding-top:64px}
+  .journey .hq{max-width:760px}
+}
+@media (max-width:859px){
+  .journey{padding:40px 0}
+  .wa-photo{aspect-ratio:16/10}
+}

@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="ta">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0b0c">
+<title>மக்கள் குறைகள் மையம் | Ward 36 Thiruverumbur</title>
+<meta name="description" content="TVK Ward 36 public grievance centre, Tiruchirappalli Corporation. Raise a complaint by voice, text, photo or WhatsApp.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="top" id="top">
+  <a class="brand" href="#home" aria-label="Home">
+    <span class="flag" aria-hidden="true"><i></i><i></i><i></i></span>
+    <span class="brand-text">
+      <b data-t="brand">மக்கள் குறைகள் மையம்</b>
+      <small data-t="brandSub">வார்டு 36 · திருவெறும்பூர்</small>
+    </span>
+  </a>
+  <nav class="desk-nav" aria-label="Primary">
+    <a href="#home" data-t="navHome">முகப்பு</a>
+    <a href="#complaint" data-t="navComplaint">புகார்</a>
+    <a href="#track" data-t="navTrack">நிலை அறிய</a>
+    <a href="#how" data-t="navHow">செயல்முறை</a>
+    <a href="#contact" data-t="navContact">தொடர்பு</a>
+  </nav>
+  <div class="lang" role="group" aria-label="Language">
+    <button type="button" data-lang="ta" class="on">த</button>
+    <button type="button" data-lang="en">EN</button>
+  </div>
+</header>
+
+<main>
+  <!-- HERO -->
+  <section class="hero" id="home">
+    <video class="hero-video hero-bg" autoplay muted loop playsinline preload="auto" aria-hidden="true">
+      <source src="assets/hero.mp4" type="video/mp4">
+    </video>
+    <video class="hero-video hero-main" autoplay muted loop playsinline preload="auto">
+      <source src="assets/hero.mp4" type="video/mp4">
+    </video>
+    <div class="hero-shade"></div>
+    <div class="hero-copy">
+      <p class="eyebrow" data-t="heroEyebrow">திருச்சிராப்பள்ளி மாநகராட்சி · வார்டு 36</p>
+      <h1 data-t="heroTitle">உங்கள் குறை,<br>எங்கள் பொறுப்பு.</h1>
+      <p class="lead" data-t="heroLead">சாலை, குடிநீர், கழிவுநீர், தெருவிளக்கு என எந்த பிரச்சனையாக இருந்தாலும் பேசியோ, எழுதியோ பதிவு செய்யுங்கள்.</p>
+      <div class="hero-cta">
+        <a class="btn primary" href="#complaint" data-t="ctaRaise">புகார் பதிவு செய்</a>
+        <a class="btn ghost" href="#track" data-t="ctaTrack">நிலை அறிய</a>
+      </div>
+      <p class="rep"><span data-t="repLabel">வார்டு பிரதிநிதி</span> <b>நவல்பட்டு S. விஜி</b></p>
+    </div>
+    <a class="scroll-hint" href="#quick" aria-label="Scroll"><i></i></a>
+  </section>
+
+  <!-- QUICK ACTIONS -->
+  <section class="quick" id="quick">
+    <a class="tile" href="#complaint">
+      <svg viewBox="0 0 24 24"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14"/></svg>
+      <b data-t="qRaise">புகார்</b><small data-t="qRaiseSub">பதிவு செய்</small>
+    </a>
+    <a class="tile" id="qVoice" href="#complaint">
+      <svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+      <b data-t="qVoice">குரல்</b><small data-t="qVoiceSub">பேசி பதிவு</small>
+    </a>
+    <a class="tile" id="qWa" href="#" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24"><path d="M4 20l1.4-4.2A8 8 0 1 1 8.3 18.7L4 20z"/></svg>
+      <b>WhatsApp</b><small data-t="qWaSub">நேரடியாக</small>
+    </a>
+    <a class="tile" id="qCall" href="#">
+      <svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>
+      <b data-t="qCall">அழை</b><small data-t="qCallSub">கைபேசி</small>
+    </a>
+  </section>
+
+  <!-- STATS -->
+  <section class="stats" aria-label="Statistics">
+    <div><b id="sTotal">0</b><span data-t="sTotal">பதிவான புகார்கள்</span></div>
+    <div><b id="sOpen">0</b><span data-t="sOpen">நடவடிக்கையில்</span></div>
+    <div><b id="sDone">0</b><span data-t="sDone">தீர்க்கப்பட்டவை</span></div>
+  </section>
+
+  <!-- COMPLAINT -->
+  <section class="sec" id="complaint">
+    <div class="sec-head">
+      <p class="eyebrow" data-t="cEyebrow">புகார் பதிவு</p>
+      <h2 data-t="cTitle">என்ன பிரச்சனை?</h2>
+    </div>
+
+    <form id="form" class="form" novalidate>
+      <fieldset class="step">
+        <legend><span>1</span> <em data-t="fCat">வகையைத் தேர்ந்தெடுக்கவும்</em></legend>
+        <div class="chips" id="chips"></div>
+      </fieldset>
+
+      <fieldset class="step">
+        <legend><span>2</span> <em data-t="fDesc">பிரச்சனையைக் கூறுங்கள்</em></legend>
+        <div class="voice-box">
+          <textarea id="desc" rows="4" maxlength="600" data-ph="fDescPh" placeholder="இங்கே எழுதுங்கள் அல்லது மைக்கை அழுத்தி பேசுங்கள்"></textarea>
+          <button type="button" id="mic" class="mic" aria-label="Voice input">
+            <svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+            <i class="ring"></i>
+          </button>
+        </div>
+        <p class="hint" id="micHint" data-t="micHint">மைக்கை அழுத்தி தமிழில் அல்லது ஆங்கிலத்தில் பேசலாம்.</p>
+      </fieldset>
+
+      <fieldset class="step">
+        <legend><span>3</span> <em data-t="fPlace">இடம் மற்றும் படம்</em></legend>
+        <input id="street" type="text" data-ph="fStreetPh" placeholder="தெரு / பகுதி பெயர்" autocomplete="street-address">
+        <div class="row2">
+          <button type="button" id="gps" class="soft">
+            <svg viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11a7 7 0 0 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+            <span data-t="fGps">என் இருப்பிடம்</span>
+          </button>
+          <label class="soft file">
+            <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><circle cx="12" cy="12" r="3.2"/></svg>
+            <span id="photoLbl" data-t="fPhoto">புகைப்படம்</span>
+            <input id="photo" type="file" accept="image/*" capture="environment" hidden>
+          </label>
+        </div>
+        <img id="preview" class="preview" alt="" hidden>
+        <p class="hint" id="gpsOut"></p>
+      </fieldset>
+
+      <fieldset class="step">
+        <legend><span>4</span> <em data-t="fWho">உங்கள் விவரம்</em></legend>
+        <div class="row2">
+          <input id="name" type="text" data-ph="fNamePh" placeholder="பெயர்" autocomplete="name" required>
+          <input id="phone" type="tel" inputmode="numeric" maxlength="10" data-ph="fPhonePh" placeholder="கைபேசி எண்" autocomplete="tel-national" required>
+        </div>
+        <p class="err" id="err" role="alert"></p>
+      </fieldset>
+
+      <div class="actions">
+        <button type="submit" class="btn primary wide" data-t="fSubmit">புகாரைச் சமர்ப்பி</button>
+        <button type="button" id="sendWa" class="btn wa wide" data-t="fSubmitWa">WhatsApp மூலம் அனுப்பு</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- TRACK -->
+  <section class="sec dark" id="track">
+    <div class="sec-head">
+      <p class="eyebrow" data-t="tEyebrow">புகார் நிலை</p>
+      <h2 data-t="tTitle">உங்கள் புகார் எங்கே?</h2>
+    </div>
+    <form id="trackForm" class="track-form">
+      <input id="trackInput" type="text" data-ph="tPh" placeholder="புகார் எண் அல்லது கைபேசி எண்">
+      <button class="btn primary" type="submit" data-t="tBtn">தேடு</button>
+    </form>
+    <div id="trackOut" class="track-out"></div>
+  </section>
+
+  <!-- HOW -->
+  <section class="sec" id="how">
+    <div class="sec-head">
+      <p class="eyebrow" data-t="hEyebrow">எப்படி செயல்படுகிறது</p>
+      <h2 data-t="hTitle">நான்கு எளிய படிகள்</h2>
+    </div>
+    <ol class="steps">
+      <li><b>01</b><div><h3 data-t="h1t">பதிவு</h3><p data-t="h1p">குரல், எழுத்து அல்லது புகைப்படத்துடன் புகாரைப் பதிவு செய்யுங்கள்.</p></div></li>
+      <li><b>02</b><div><h3 data-t="h2t">புகார் எண்</h3><p data-t="h2p">உடனே தனி புகார் எண் கிடைக்கும்.</p></div></li>
+      <li><b>03</b><div><h3 data-t="h3t">நடவடிக்கை</h3><p data-t="h3p">அலுவலகக் குழு சம்பந்தப்பட்ட துறைக்கு அனுப்பி பின்தொடரும்.</p></div></li>
+      <li><b>04</b><div><h3 data-t="h4t">தீர்வு</h3><p data-t="h4p">தீர்வு கிடைத்ததும் உங்களுக்குத் தெரிவிக்கப்படும்.</p></div></li>
+    </ol>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="sec contact" id="contact">
+    <div class="sec-head">
+      <p class="eyebrow" data-t="kEyebrow">தொடர்பு</p>
+      <h2 data-t="kTitle">நேரடியாகத் தொடர்பு கொள்ளுங்கள்</h2>
+    </div>
+    <div class="contact-grid">
+      <a class="c-card" id="cWa" href="#" target="_blank" rel="noopener">
+        <span data-t="kWa">WhatsApp வாயிலாகப் புகார்</span><b>+91 79020 30402</b>
+      </a>
+      <a class="c-card" id="cCall" href="#">
+        <span data-t="kCall">கைபேசி வாயிலாகப் புகார்</span><b>+91 79020 30402</b>
+      </a>
+    </div>
+    <p class="note" data-t="kNote">வார்டு 36 · திருச்சிராப்பள்ளி மாநகராட்சி · திருவெறும்பூர் சட்டமன்றத் தொகுதி</p>
+  </section>
+</main>
+
+<footer class="foot">
+  <span class="flag" aria-hidden="true"><i></i><i></i><i></i></span>
+  <p>© <span id="yr"></span> <span data-t="footer">தமிழக வெற்றிக் கழகம் · வார்டு 36 மக்கள் குறைகள் மையம்</span></p>
+</footer>
+
+<!-- Mobile app tab bar -->
+<nav class="tabbar" aria-label="App navigation">
+  <a href="#home" data-tab="home"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z"/></svg><span data-t="navHome">முகப்பு</span></a>
+  <a href="#complaint" data-tab="complaint"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span data-t="navComplaint">புகார்</span></a>
+  <a href="#track" data-tab="track"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.2-4.2"/></svg><span data-t="navTrack">நிலை</span></a>
+  <a href="#contact" data-tab="contact"><svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg><span data-t="navContact">தொடர்பு</span></a>
+</nav>
+
+<div class="toast" id="toast" role="status"></div>
+
+<!-- Success sheet -->
+<div class="sheet" id="sheet" hidden>
+  <div class="sheet-card">
+    <div class="tick"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+    <h3 data-t="okTitle">புகார் பதிவானது</h3>
+    <p class="id" id="okId"></p>
+    <p data-t="okText">இந்த எண்ணைக் குறித்து வைத்துக் கொள்ளுங்கள். நிலை அறிய இதைப் பயன்படுத்தலாம்.</p>
+    <button class="btn wa wide" id="okWa" type="button" data-t="okWa">WhatsApp இல் உறுதிப்படுத்து</button>
+    <button class="btn ghost-d wide" id="okClose" type="button" data-t="okClose">மூடு</button>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

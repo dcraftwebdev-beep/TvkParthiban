@@ -1,0 +1,60 @@
+/* v10: the exact typefaces used on tvkvijay.com
+   Tamil:   headings (h1, h2)  -> TAU Neythal (Tamil Virtual Academy)
+            body, h3-h5, nav   -> Tamil010
+   English: headings (h1, h2)  -> Teko
+            body, h3-h5, nav   -> Instrument Sans   (Teko and Instrument Sans are loaded from Google Fonts in index.html)
+*/
+@font-face{font-family:"tamil010";src:url(/fonts/Tamil010.ttf) format("truetype");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"neythal";src:url(/fonts/TAU_Neythal.ttf) format("truetype");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"neythal";src:url(/fonts/TAU_Neythal-Bold.ttf) format("truetype");font-weight:700;font-style:normal;font-display:swap}
+
+:root{
+  --f-ta-body:"tamil010","Noto Sans Tamil",sans-serif;
+  --f-ta-head:"neythal","tamil010","Noto Sans Tamil",sans-serif;
+  --f-en-body:"Instrument Sans","Manrope",system-ui,sans-serif;
+  --f-en-head:"Teko","Instrument Sans",system-ui,sans-serif;
+}
+html[lang="ta"]{--f-body:var(--f-ta-body);--f-head:var(--f-ta-head);--f-strong:var(--f-ta-head)}
+html[lang="en"]{--f-body:var(--f-en-body);--f-head:var(--f-en-head);--f-strong:var(--f-en-body)}
+
+body,button,input,textarea,select{font-family:var(--f-body)}
+html[lang="ta"] body{font-synthesis:none}
+
+/* display type */
+h1,h2,
+.brand-text b,.stat b,.kural blockquote p,.motto p,.timeline b,.steps b,.idbox b,.sheet .id,.c-card b,.t-top b,.year{font-family:var(--f-head)}
+h3,h4,h5,p,nav a,.desk-nav a{font-family:var(--f-body)}
+
+/* emphasis and UI labels */
+b,strong,label,dt,
+.btn,.eyebrow,.chip,.badge,.role,.wa-status,.wa-tag,.cx-pill,.ideo li,.icons li,.tabbar a,.top-cta,.toast,
+.lang button,.cx-cat b,.mic-txt b,.tile b,.hq-tabs button,.wa-tabs button,.copy,.wa-row a,.rep b,.portrait-tag,.hq-list time,.hq-more{font-family:var(--f-strong)}
+
+/* Tamil: TAU Neythal ships regular and bold only */
+html[lang="ta"] h1,html[lang="ta"] h2{font-weight:700;letter-spacing:0}
+html[lang="ta"] h3{font-weight:400}
+html[lang="ta"] .btn,html[lang="ta"] .eyebrow{letter-spacing:.01em}
+
+/* Tamil010 and Neythal draw smaller than Latin type, so lift the sizes a little */
+html[lang="ta"] body{font-size:17px}
+html[lang="ta"] .lead,html[lang="ta"] .sub,html[lang="ta"] p{font-size:1.04em}
+html[lang="ta"] .tile b,html[lang="ta"] .tabbar a,html[lang="ta"] .brand-text small,html[lang="ta"] .stat span,html[lang="ta"] .chip,html[lang="ta"] .hint{font-size:1.06em}
+
+/* English: Teko is tall and narrow, so display sizes go up and get the same 2% tracking the site uses */
+html[lang="en"] h1,html[lang="en"] h2{font-weight:600;letter-spacing:.02em;line-height:1.02}
+html[lang="en"] h1{font-weight:700}
+html[lang="en"] h3{font-weight:500}
+html[lang="en"] .hero h1{font-size:clamp(50px,15vw,66px)}
+html[lang="en"] .sec-head h2,html[lang="en"] .up-head h2,html[lang="en"] .cx-side h2,html[lang="en"] .hq h2,html[lang="en"] .join-copy h2{font-size:clamp(36px,10.5vw,46px)}
+html[lang="en"] .leader-copy h2{font-size:clamp(42px,12vw,56px)}
+html[lang="en"] .kural blockquote p{font-size:clamp(22px,6.4vw,40px);white-space:normal}
+html[lang="en"] .motto p{font-size:clamp(34px,10vw,56px);font-weight:600}
+html[lang="en"] .brand-text b{font-size:18px;font-weight:600;letter-spacing:.03em}
+html[lang="en"] .stat b{font-weight:600}
+html[lang="en"] .eyebrow{letter-spacing:.14em}
+@media (min-width:860px){
+  html[lang="en"] .hero h1{font-size:clamp(76px,8vw,128px)}
+  html[lang="en"] .sec-head h2,html[lang="en"] .up-head h2,html[lang="en"] .cx-side h2,html[lang="en"] .hq h2,html[lang="en"] .join-copy h2{font-size:clamp(50px,5.4vw,76px)}
+  html[lang="en"] .leader-copy h2{font-size:clamp(60px,6vw,88px)}
+  html[lang="en"] .kural blockquote p{font-size:clamp(34px,3.6vw,56px)}
+}
