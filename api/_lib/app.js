@@ -71,10 +71,14 @@ export function makeHandler(getDb, env = process.env) {
       const method = req.method;
       const ip = String(req.headers["x-forwarded-for"] || req.socket?.remoteAddress || "").split(",")[0].trim();
       const bearer = (req.headers.authorization || "").replace(/^Bearer /, "") || url.searchParams.get("t");
-      const db = getDb();
+      if (path === "/health" && method === "GET") {
+        const configured = !!(env.SUPABASE_URL && (env.SUPABASE_SERVICE_KEY || env.SUPABASE_SERVICE_ROLE_KEY));
+        return send(res, 200, { ok: true, storage: "supabase", configured, admin: !!env.ADMIN_PASSWORD });
+      }
+      let db;
+      try { db = getDb(); } catch (e) { console.error(e.message); return send(res, 503, { error: "not_configured" }); }
 
       /* ----- public ----- */
-      if (path === "/health" && method === "GET") return send(res, 200, { ok: true, storage: "supabase" });
 
       if (path === "/stats" && method === "GET") {
         const rows = await db.summary();
