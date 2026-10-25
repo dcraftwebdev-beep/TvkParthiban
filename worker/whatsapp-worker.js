@@ -37,8 +37,21 @@ async function sendOne(to, message) {
   if (!out.startsWith("✅")) throw new Error(out || "send failed");
 }
 
+let waitingNoted = false;
+async function linked() {
+  if (DRY_RUN) return true;
+  const client = await getClient();
+  const out = ((await client.callTool({ name: "wa_status", arguments: {} }))?.content || []).map(c => c.text || "").join("\n");
+  const ok = out.startsWith("✅");
+  if (!ok && !waitingNoted) { console.log("Waiting for WhatsApp to be linked. Scan the QR code shown above (WhatsApp > Linked devices > Link a device)."); waitingNoted = true; }
+  if (ok && waitingNoted) { console.log("WhatsApp is linked."); waitingNoted = false; }
+  return ok;
+}
+
 async function tick() {
   const batch = await db.pendingBatch(10);
+  if (!batch.length) return;
+  if (!(await linked())) return;           // messages stay pending, no attempts are used up
   for (const m of batch) {
     try {
       await sendOne(m.to_phone, m.message);
@@ -48,7 +61,6 @@ async function tick() {
       const attempts = m.attempts + 1, error = String(e.message || e).slice(0, 300);
       await db.markOutbox(m.n, { status: attempts >= MAX_ATTEMPTS ? "failed" : "pending", attempts, error });
       console.error(`#${m.n} to ${m.to_phone} failed (${attempts}/${MAX_ATTEMPTS}): ${error}`);
-      if (/not connected/i.test(error)) break;      // the phone is not linked yet, retry on the next poll
     }
     await sleep(GAP_MS);
   }
