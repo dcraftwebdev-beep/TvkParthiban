@@ -4,6 +4,7 @@ import { T } from "./i18n.js";
 import { TVK_SITE } from "./i18n-tvk.js";
 import { api } from "./api.js";
 import { subscribePush, pushSupported } from "./push.js";
+import { canRecord, startRecording, blobToBase64, clock, MAX_SECS } from "./recorder.js";
 import Admin from "./Admin.jsx";
 
 const wa = text => `https://wa.me/${CFG.phone}${text ? "?text=" + encodeURIComponent(text) : ""}`;
@@ -383,27 +384,32 @@ function Complaint({ t, lang, say, onDone, micReq }) {
   const [live, setLive] = useState(false);
   const [busy, setBusy] = useState(false);
   const [down, setDown] = useState(null);
+  const [voice, setVoice] = useState(null);   // { url, blob, secs, type }: the recorded voice message
+  const [secs, setSecs] = useState(0);
   const recRef = useRef(null);
-  const baseRef = useRef("");
-  const SR = typeof window !== "undefined" && (window.SpeechRecognition || window.webkitSpeechRecognition);
+  const canRec = canRecord();
 
-  const stopMic = () => { try { recRef.current?.stop(); } catch { /* ignore */ } setLive(false); };
-  const toggleMic = useCallback(() => {
-    if (!SR) return say(t.micNo);
-    if (live) return stopMic();
-    const r = new SR(); recRef.current = r;
-    r.continuous = true; r.interimResults = true; r.lang = lang === "ta" ? "ta-IN" : "en-IN";
-    baseRef.current = desc;
-    r.onresult = e => { let s = ""; for (let i = 0; i < e.results.length; i++) s += e.results[i][0].transcript; setDesc((baseRef.current + " " + s).trim()); };
-    r.onerror = e => { if (e.error === "not-allowed") say(t.micDeny); setLive(false); };
-    r.onend = () => setLive(false);
-    try { r.start(); setLive(true); } catch { setLive(false); }
-  }, [SR, live, desc, lang, t, say]);
+  const stopRec = () => recRef.current?.stop();
+  const clearVoice = () => setVoice(old => { if (old) URL.revokeObjectURL(old.url); return null; });
+  const toggleRecord = useCallback(async () => {
+    if (live) return stopRec();
+    if (!canRec) return say(t.recNo);
+    try {
+      setSecs(0);
+      const r = await startRecording(setSecs);
+      recRef.current = r; setLive(true);
+      r.done.then(({ blob, secs: s, type }) => {
+        setLive(false); recRef.current = null;
+        if (blob.size < 800) return say(t.recShort);
+        setVoice(old => { if (old) URL.revokeObjectURL(old.url); return { url: URL.createObjectURL(blob), blob, secs: s, type }; });
+      });
+    } catch { say(t.micDeny); setLive(false); }
+  }, [live, canRec, t, say]);
 
-  // "Voice" tile elsewhere: jump to the details step and start the mic
+  // "Voice complaint" tile elsewhere: jump to the details step and start recording
   const lastReq = useRef(0);
   useEffect(() => {
-    if (micReq && micReq !== lastReq.current) { lastReq.current = micReq; setStep(1); setTimeout(toggleMic, 700); }
+    if (micReq && micReq !== lastReq.current) { lastReq.current = micReq; setStep(1); setTimeout(toggleRecord, 700); }
   }, [micReq]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const gps = () => {
@@ -438,14 +444,14 @@ function Complaint({ t, lang, say, onDone, micReq }) {
 
   const check = s => {
     if (s >= 0 && !cat) return t.eCat;
-    if (s >= 1 && !desc.trim()) return t.eDesc;
+    if (s >= 1 && !desc.trim() && !voice) return t.eDesc;
     if (s >= 3 && !name.trim()) return t.eName;
     if (s >= 3 && !/^[6-9]\d{9}$/.test(phone)) return t.ePhone;
     return "";
   };
   const go = n => {
     if (n > step) { const m = check(step); if (m) { setErr(m); say(m); return; } }
-    setErr(""); if (live) stopMic(); setStep(n);
+    setErr(""); if (live) stopRec(); setStep(n);
   };
   const pick = id => { setCat(id); setErr(""); setTimeout(() => setStep(1), 220); };
 
@@ -456,7 +462,7 @@ function Complaint({ t, lang, say, onDone, micReq }) {
     if (c.coords) s += `${tt.waMap}: https://maps.google.com/?q=${c.coords.lat},${c.coords.lng}\n`;
     return s + `${tt.waName}: ${c.name}\n${tt.waPhone}: ${c.phone}`;
   };
-  const reset = () => { setStep(0); setCat(null); setDesc(""); setStreet(""); setCoords(null); setGpsMsg(""); setPhotos([]); setConsent(true); setName(""); setPhone(""); setErr(""); };
+  const reset = () => { setStep(0); setCat(null); setDesc(""); setStreet(""); setCoords(null); setGpsMsg(""); setPhotos([]); clearVoice(); setConsent(true); setName(""); setPhone(""); setErr(""); };
 
   const submit = async () => {
     const m = check(3); if (m) { setErr(m); say(m); return; }
@@ -466,10 +472,12 @@ function Complaint({ t, lang, say, onDone, micReq }) {
     const push = notify && pushKey ? await subscribePush(pushKey) : null;
     const body = { cat, desc: desc.trim(), street: street.trim(), coords, photos, consent, push, name: name.trim(), phone, lang };
     try {
+      if (voice) body.voice = { data: await blobToBase64(voice.blob), type: voice.type, secs: voice.secs };
       const r = await api.create(body);
       onDone({ id: r.id, pushSaved: r.pushSaved, link: wa(waText({ id: r.id, ...body })) }); reset();
     } catch (e) {
       if (e.status === 429) { setErr(t.eLimit); say(t.eLimit); }
+      else if (e.message === "voice") { setErr(t.recBig); }
       else if (e.status && e.status < 500) { setErr(t.eServer); }
       else setDown(wa(waText({ id: "-", ...body })));
     } finally { setBusy(false); }
@@ -515,10 +523,21 @@ function Complaint({ t, lang, say, onDone, micReq }) {
 
           {step === 1 && (<>
             <h3>{t.fDesc}</h3>
-            <button type="button" className={"mic-big" + (live ? " live" : "")} onClick={toggleMic}>
-              <span className="mic-orb"><Icon d={P.mic} size={28} /><i className="ring" /><i className="ring r2" /></span>
-              <span className="mic-txt"><b>{live ? t.speaking : t.speak}</b><small>{t.micHint}</small></span>
-            </button>
+            {!voice ? (
+              <button type="button" className={"mic-big" + (live ? " live" : "")} onClick={toggleRecord}>
+                <span className="mic-orb"><Icon d={P.mic} size={28} /><i className="ring" /><i className="ring r2" /></span>
+                <span className="mic-txt">
+                  <b>{live ? `${t.recording} ${clock(secs)}` : t.recVoice}</b>
+                  <small>{live ? `${t.recStop} (${MAX_SECS}s)` : t.recHint}</small>
+                </span>
+              </button>
+            ) : (
+              <div className="voice-done">
+                <span className="vd-ico"><Icon d={P.mic} size={18} /></span>
+                <audio controls src={voice.url} preload="metadata" />
+                <button type="button" onClick={clearVoice} aria-label={t.remove}><Icon d="M6 6l12 12M18 6 6 18" size={16} /></button>
+              </div>
+            )}
             <div className="cx-or"><span>{t.orType}</span></div>
             <textarea rows={4} maxLength={600} value={desc} placeholder={t.fDescPh} onChange={e => setDesc(e.target.value)} />
             <div className="cx-photos">
@@ -561,6 +580,7 @@ function Complaint({ t, lang, say, onDone, micReq }) {
               <div><dt>{T[lang].waDesc}</dt><dd>{desc || "-"}</dd></div>
               {(street || coords) && <div><dt>{T[lang].waPlace}</dt><dd>{street || `${coords.lat}, ${coords.lng}`}</dd></div>}
               {photos.length > 0 && <div><dt>{t.fPhoto}</dt><dd>{photos.length}</dd></div>}
+              {voice && <div><dt>{t.voiceLabel}</dt><dd>{clock(voice.secs)}</dd></div>}
             </dl>
           </>)}
           {err && <p className="err" role="alert">{err}</p>}

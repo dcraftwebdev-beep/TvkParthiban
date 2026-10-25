@@ -17,7 +17,8 @@ export async function telegramNewComplaint(env, c, photo, adminUrl) {
   const map = c.lat != null ? `\n📍 <a href="https://maps.google.com/?q=${c.lat},${c.lng}">Map</a>` : "";
   const text = `🆕 <b>புதிய புகார் ${esc(c.id)}</b>\n${esc(CAT[c.cat] || c.cat)}\n\n${esc(c.descr)}\n\n` +
     `📌 ${esc(c.street || "-")}${map}\n👤 ${esc(c.name)}\n📞 ${esc(c.phone)}  ·  <a href="https://wa.me/91${esc(c.phone)}">WhatsApp</a>` +
-    (c.photo_count ? `\n🖼 ${c.photo_count} photo${c.photo_count > 1 ? "s" : ""}` : "");
+    (c.photo_count ? `\n🖼 ${c.photo_count} photo${c.photo_count > 1 ? "s" : ""}` : "") +
+    (c.has_voice ? `\n🎤 Voice message (${c.voice_secs}s). Play it in the admin panel.` : "");
   const keyboard = JSON.stringify({ inline_keyboard: [[{ text: "Open admin panel", url: adminUrl }]] });
   const call = m => `https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/${m}`;
   let ok = true, error = "";

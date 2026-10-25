@@ -36,7 +36,7 @@ const I = {
   phone: "M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z",
   chat: "M4 20l1.4-4.2A8 8 0 1 1 8.3 18.7L4 20z",
   pin: "M12 21s7-6.2 7-11a7 7 0 0 0-14 0c0 4.8 7 11 7 11zM12 7.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z",
-  x: "M6 6l12 12M18 6 6 18", out: "M10 5H5v14h5M14 8l4 4-4 4M18 12H9", dl: "M12 4v11m0 0-4-4m4 4 4-4M5 20h14", re: "M20 11a8 8 0 1 0-2.3 5.700M20 5v6h-6", cam: "M3 7h4l2-2h6l2 2h4v12H3zM12 9a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z", bell: "M6 17V11a6 6 0 0 1 12 0v6l2 2H4zM10 21a2 2 0 0 0 4 0", share: "M12 4v11M8 8l4-4 4 4M5 14v6h14v-6", link: "M10 14a4 4 0 0 0 5.700 0l3-3a4 4 0 0 0-5.700-5.700l-1 1M14 10a4 4 0 0 0-5.700 0l-3 3a4 4 0 0 0 5.700 5.700l1-1"
+  x: "M6 6l12 12M18 6 6 18", out: "M10 5H5v14h5M14 8l4 4-4 4M18 12H9", dl: "M12 4v11m0 0-4-4m4 4 4-4M5 20h14", re: "M20 11a8 8 0 1 0-2.3 5.700M20 5v6h-6", cam: "M3 7h4l2-2h6l2 2h4v12H3zM12 9a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z", bell: "M6 17V11a6 6 0 0 1 12 0v6l2 2H4zM10 21a2 2 0 0 0 4 0", mic: "M9 3h6v12H9zM5 11a7 7 0 0 0 14 0M12 18v3", share: "M12 4v11M8 8l4-4 4 4M5 14v6h14v-6", link: "M10 14a4 4 0 0 0 5.700 0l3-3a4 4 0 0 0-5.700-5.700l-1 1M14 10a4 4 0 0 0-5.700 0l-3 3a4 4 0 0 0 5.700 5.700l1-1"
 };
 
 /* ---------- login ---------- */
@@ -265,6 +265,16 @@ function Detail({ id, token, onClose, onChanged, flash }) {
               </div>
             </section>
 
+            {c.hasVoice && (
+              <section className="ad-voice">
+                <span className="ad-vico"><Ico d={I.mic} /></span>
+                <div>
+                  <b>Voice message <small>{c.voiceSecs}s</small></b>
+                  <audio controls preload="none" src={admin.voiceUrl(token, c.id)} />
+                </div>
+              </section>
+            )}
+
             <section className="ad-compare">
               <div className="ad-col">
                 <h4>Before <small>citizen</small></h4>
@@ -452,7 +462,7 @@ function Panel({ token, onLogout }) {
               <div className="ad-cbody">
                 <div className="ad-ctop"><b>{c.id}</b><span className={"ad-pill s" + c.status}>{ST_EN[c.status]}</span></div>
                 <p className="ad-clamp">{c.desc}</p>
-                <div className="ad-cmeta"><span>{catName(c.cat)}</span><span>{c.name} · {c.phone}</span><span>{ago(c.createdAt)}</span></div>
+                <div className="ad-cmeta">{c.hasVoice && <span className="ad-vtag"><Ico d={I.mic} s={13} />{c.voiceSecs}s</span>}<span>{catName(c.cat)}</span><span>{c.name} · {c.phone}</span><span>{ago(c.createdAt)}</span></div>
               </div>
             </button>
           ))}

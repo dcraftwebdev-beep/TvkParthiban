@@ -1,11 +1,12 @@
 import { createHmac, randomInt, timingSafeEqual } from "node:crypto";
 import { newComplaintMessages, statusMessage, toIntl } from "./messages.js";
-import { sendPush, citizenPush, adminPush, pushEnabled } from "./push.js";
+import { sendPush, citizenPush, createdPush, adminPush, pushEnabled } from "./push.js";
 import { telegramNewComplaint, telegramEnabled } from "./telegram.js";
 
 const CATS = ["road", "water", "drain", "light", "trash", "power", "other"];
 const DEFAULT_URL = "https://tvkparthibankattur.vercel.app";
 const MAX_PHOTOS = 4;
+const VOICE_TYPES = ["audio/webm", "audio/ogg", "audio/mp4", "audio/mpeg", "audio/aac", "audio/x-m4a"];
 
 /* ---------- small helpers ---------- */
 const clean = (s, n) => String(s ?? "").replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "").trim().slice(0, n);
@@ -24,6 +25,22 @@ function jpegB64(s, maxBytes) {
   if (!m) return null;
   const buf = Buffer.from(m[1], "base64");
   return buf.length <= maxBytes && buf[0] === 0xff && buf[1] === 0xd8 ? m[1] : null;
+}
+/** Serves a buffer, honouring Range requests (Safari will not play audio without them). */
+function sendBuffer(req, res, buf, type) {
+  const m = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || "");
+  res.setHeader("Accept-Ranges", "bytes");
+  if (m && (m[1] || m[2])) {
+    const start = m[1] === "" ? Math.max(buf.length - +m[2], 0) : +m[1];
+    const end = m[1] === "" || m[2] === "" ? buf.length - 1 : Math.min(+m[2], buf.length - 1);
+    if (start > end || start >= buf.length) { res.statusCode = 416; res.setHeader("Content-Range", `bytes */${buf.length}`); return res.end(); }
+    res.statusCode = 206;
+    res.setHeader("Content-Range", `bytes ${start}-${end}/${buf.length}`);
+    res.setHeader("Content-Length", end - start + 1);
+    res.setHeader("Content-Type", type); res.setHeader("Cache-Control", "no-store");
+    return res.end(buf.subarray(start, end + 1));
+  }
+  return send(res, 200, buf, type);
 }
 const validSub = s => s && typeof s.endpoint === "string" && /^https:\/\//.test(s.endpoint) && s.keys && s.keys.p256dh && s.keys.auth;
 
@@ -79,7 +96,7 @@ export function makeHandler(getDb, env = process.env) {
 
   const adminView = c => ({
     id: c.id, cat: c.cat, desc: c.descr, street: c.street, lat: c.lat, lng: c.lng,
-    hasPhoto: !!c.has_photo, photoCount: c.photo_count || 0, hasResult: !!c.has_result,
+    hasPhoto: !!c.has_photo, photoCount: c.photo_count || 0, hasVoice: !!c.has_voice, voiceSecs: c.voice_secs || 0, hasResult: !!c.has_result,
     name: c.name, phone: c.phone, lang: c.lang, status: c.status, note: c.note, consent: !!c.consent_public,
     createdAt: c.created_at, updatedAt: c.updated_at, progressAt: c.progress_at || null, resolvedAt: c.resolved_at,
     resultUrl: c.has_result ? resultPath(c.id) : null, resultPage: c.has_result ? resultPage(c.id) : null
@@ -140,9 +157,20 @@ export function makeHandler(getDb, env = process.env) {
         if (limited("create", ip, 8, 3600e3)) return send(res, 429, { error: "too_many_requests" });
         const b = await readBody(req);
         const cat = CATS.includes(b.cat) ? b.cat : null;
-        const descr = clean(b.desc, 600), name = clean(b.name, 60), street = clean(b.street, 120);
+        let descr = clean(b.desc, 600);
+        const name = clean(b.name, 60), street = clean(b.street, 120);
         const phone = String(b.phone || "").replace(/\D/g, "").slice(-10);
         const lang = b.lang === "en" ? "en" : "ta";
+
+        // voice message: the audio file itself, no speech to text
+        let voice = null, voiceType = null, voiceSecs = 0;
+        const v = b.voice;
+        if (v && typeof v.data === "string") {
+          const type = String(v.type || "").split(";")[0].toLowerCase();
+          if (!VOICE_TYPES.includes(type) || !/^[A-Za-z0-9+/=]+$/.test(v.data) || v.data.length > 1000000) return send(res, 400, { error: "voice" });
+          voice = v.data; voiceType = type; voiceSecs = Math.min(Math.max(Math.round(+v.secs || 0), 1), 90);
+          if (descr.length < 3) descr = lang === "en" ? "(Voice message)" : "(குரல் செய்தி)";
+        }
         if (!cat) return send(res, 400, { error: "category" });
         if (descr.length < 3) return send(res, 400, { error: "desc" });
         if (!name) return send(res, 400, { error: "name" });
@@ -164,6 +192,7 @@ export function makeHandler(getDb, env = process.env) {
         const id = `${prefix}-${randomInt(100000, 1000000)}`, now = Date.now();
         const row = {
           id, cat, descr, street, lat, lng, has_photo: photos.length > 0, photo_count: photos.length, photos,
+          has_voice: !!voice, voice, voice_type: voiceType, voice_secs: voice ? voiceSecs : null,
           has_result: false, name, phone, lang, status: 0, note: null, consent_public: b.consent === true,
           push_sub: validSub(b.push) ? b.push : null, created_at: now, updated_at: now
         };
@@ -173,6 +202,7 @@ export function makeHandler(getDb, env = process.env) {
           catch (e) { console.error("outbox insert failed", e); }
         }
         await Promise.allSettled([
+          row.push_sub ? sendPush(env, row.push_sub, createdPush(row, `${publicUrl}/#track`)) : null,
           pushAllAdmins(db, adminPush(row, `${publicUrl}/#/admin`)),
           telegramNewComplaint(env, row, photos[0] || null, `${publicUrl}/#/admin`)
         ]);
@@ -265,6 +295,13 @@ h1{font-size:22px;margin:18px 0 6px}p{color:#ffffffbf;margin:0 0 18px}a{display:
           const rows = (await db.list({ limit: 1000 })).map(c => [c.id, c.cat, st[c.status], c.descr, c.street, c.lat, c.lng, c.name, c.phone, c.photo_count || 0, new Date(c.created_at).toISOString(), new Date(c.updated_at).toISOString(), c.note].map(q).join(","));
           res.setHeader("Content-Disposition", 'attachment; filename="complaints.csv"');
           return send(res, 200, "﻿" + [head.join(","), ...rows].join("\n"), "text/csv; charset=utf-8");
+        }
+
+        m = path.match(/^\/admin\/voice\/([A-Za-z0-9-]+)$/);
+        if (m && method === "GET") {
+          const r = await db.getVoice(m[1]);
+          if (!r || !r.voice) return send(res, 404, { error: "not_found" });
+          return sendBuffer(req, res, Buffer.from(r.voice, "base64"), r.voice_type || "audio/webm");
         }
 
         m = path.match(/^\/admin\/photo\/([A-Za-z0-9-]+)(?:\/(\d))?$/);

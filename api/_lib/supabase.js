@@ -1,5 +1,5 @@
 // Minimal Supabase (PostgREST) data layer over fetch. No SDK needed.
-const COLS = "id,cat,descr,street,lat,lng,has_photo,photo_count,has_result,name,phone,lang,status,note,consent_public,created_at,updated_at,progress_at,resolved_at";
+const COLS = "id,cat,descr,street,lat,lng,has_photo,photo_count,has_voice,voice_secs,has_result,name,phone,lang,status,note,consent_public,created_at,updated_at,progress_at,resolved_at";
 
 export function supabaseDb(env = process.env) {
   const url = (env.SUPABASE_URL || "").replace(/\/$/, "");
@@ -23,6 +23,7 @@ export function supabaseDb(env = process.env) {
     async insertComplaint(row) { await rest("/complaints", { method: "POST", body: row, prefer: "return=minimal" }); },
     getComplaint: id => one(`/complaints?id=${eq(id)}&select=${COLS}`),
     async getPhoto(id, i) { const r = await one(`/complaints?id=${eq(id)}&select=photos`); return r?.photos?.[i] || null; },
+    async getVoice(id) { return one(`/complaints?id=${eq(id)}&select=voice,voice_type`); },
     async getResult(id) { return (await one(`/complaints?id=${eq(id)}&select=result_image`))?.result_image || null; },
     async getPush(id) { return (await one(`/complaints?id=${eq(id)}&select=push_sub`))?.push_sub || null; },
     byPhone: (phone, limit = 20) => rest(`/complaints?phone=${eq(phone)}&select=${COLS}&order=created_at.desc&limit=${limit}`),

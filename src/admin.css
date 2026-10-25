@@ -164,3 +164,12 @@ body:has(.ad),body:has(.ad-login){padding-bottom:0;background:#f6f2e8}
 .ad-addtile{aspect-ratio:1;border:1.5px dashed #14803f;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#14803f;font-size:12px;font-weight:700;text-align:center;cursor:pointer}
 .ad-none{font-size:12.5px;color:var(--mute);line-height:1.4;margin-top:6px}
 .ad-col .ad-none:only-child{margin:0}
+
+/* voice message */
+.ad-voice{display:flex;gap:12px;align-items:center;background:#fff;border-radius:16px;padding:12px;border-left:5px solid var(--m)}
+.ad-voice>div{flex:1;min-width:0}
+.ad-voice b{display:block;font-size:14px;margin-bottom:6px}
+.ad-voice b small{font-weight:600;color:var(--mute);margin-left:6px}
+.ad-voice audio{width:100%;height:40px}
+.ad-vico{display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:var(--m);color:#fff;flex:none}
+.ad-vtag{display:inline-flex;align-items:center;gap:3px;color:var(--m);font-weight:800}

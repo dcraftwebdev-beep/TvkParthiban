@@ -40,6 +40,10 @@ export function citizenPush(c, url) {
     : { title: "புகார் புதுப்பிப்பு", body: `${c.id} நடவடிக்கையில் உள்ளது.${c.note ? " " + c.note : ""}`, url };
 }
 
+export const createdPush = (c, url) => (c.lang === "en"
+  ? { title: "Complaint registered", body: `${c.id} is registered. Tap to track it.`, url }
+  : { title: "புகார் பதிவானது", body: `${c.id} பதிவு செய்யப்பட்டது. நிலை அறிய தொடவும்.`, url });
+
 export const adminPush = (c, url) => ({
   title: `புதிய புகார் · ${CAT.ta[c.cat] || c.cat}`,
   body: `${c.descr.slice(0, 90)} (${c.name}, ${c.phone})`,

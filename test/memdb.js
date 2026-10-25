@@ -1,12 +1,13 @@
 // In-memory stand-in for api/_lib/supabase.js (same interface). Used by the tests and the local dev server.
 export function memDb() {
   const rows = [], outbox = [], admins = [];
-  const light = ({ photos, photo, result_image, after_photo, push_sub, ...r }) => ({ ...r });
+  const light = ({ photos, photo, voice, result_image, after_photo, push_sub, ...r }) => ({ ...r });
   return {
     rows, outbox, admins,
     async insertComplaint(r) { rows.push({ ...r }); },
     async getComplaint(id) { const r = rows.find(x => x.id === id); return r ? light(r) : null; },
     async getPhoto(id, i) { return rows.find(x => x.id === id)?.photos?.[i] || null; },
+    async getVoice(id) { const r = rows.find(x => x.id === id); return r && r.voice ? { voice: r.voice, voice_type: r.voice_type } : null; },
     async getResult(id) { return rows.find(x => x.id === id)?.result_image || null; },
     async getPush(id) { return rows.find(x => x.id === id)?.push_sub || null; },
     async byPhone(p) { return rows.filter(r => r.phone === p).sort((a, b) => b.created_at - a.created_at).map(light); },

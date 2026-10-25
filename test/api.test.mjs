@@ -126,6 +126,24 @@ await t("per-phone limit (5 an hour)", async () => {
   for (let i = 0; i < 5; i++) assert.equal((await call("/api/complaints", { method: "POST", ip: "9.9.9.9", body: { ...good, phone: "9555555555", push: undefined, photos: [] } })).status, 201);
   assert.equal((await call("/api/complaints", { method: "POST", ip: "9.9.9.9", body: { ...good, phone: "9555555555", push: undefined, photos: [] } })).status, 429);
 });
+await t("voice message is stored as audio, playable by the admin with Range support, voice-only complaints allowed", async () => {
+  const audio = Buffer.from(Array.from({ length: 1000 }, (_, i) => i % 251));
+  const r = await call("/api/complaints", { method: "POST", ip: "7.7.7.7", body: { cat: "water", desc: "", name: "Voice User", phone: "9444444444", lang: "ta", voice: { data: audio.toString("base64"), type: "audio/webm;codecs=opus", secs: 12 } } });
+  assert.equal(r.status, 201);
+  assert.equal(db.rows.at(-1).descr, "(குரல் செய்தி)"); assert.equal(db.rows.at(-1).has_voice, true); assert.equal(db.rows.at(-1).voice_type, "audio/webm");
+  const vid = r.data.id;
+  assert.equal((await call("/api/complaints", { method: "POST", ip: "7.7.7.7", body: { cat: "water", name: "X", phone: "9444444445", voice: { data: "AAAA", type: "text/html", secs: 5 } } })).data.error, "voice");
+  assert.equal((await call("/api/complaints", { method: "POST", ip: "7.7.7.7", body: { cat: "water", desc: "", name: "X", phone: "9444444446" } })).data.error, "desc");
+  assert.equal((await fetch(`${base}/api/admin/voice/${vid}`)).status, 401);
+  const tk = (await call("/api/admin/login", { method: "POST", body: { password: "secret-pass" } })).data.token;
+  const url = process.env.VIA_REWRITE ? viaRewrite(`/api/admin/voice/${vid}?t=${encodeURIComponent(tk)}`) : `/api/admin/voice/${vid}?t=${encodeURIComponent(tk)}`;
+  const full = await fetch(base + url); assert.equal(full.status, 200); assert.equal(full.headers.get("content-type"), "audio/webm"); assert.equal(full.headers.get("accept-ranges"), "bytes");
+  assert.equal(Buffer.from(await full.arrayBuffer()).length, 1000);
+  const part = await fetch(base + url, { headers: { Range: "bytes=100-199" } });
+  assert.equal(part.status, 206); assert.equal(part.headers.get("content-range"), "bytes 100-199/1000"); assert.equal(Buffer.from(await part.arrayBuffer())[0], 100);
+  assert.equal((await fetch(base + url, { headers: { Range: "bytes=5000-" } })).status, 416);
+  const d = (await call(`/api/admin/complaints/${vid}`, { token: tk })).data; assert.equal(d.hasVoice, true); assert.equal(d.voiceSecs, 12);
+});
 await t("unknown route is 404", async () => assert.equal((await call("/api/nothing")).status, 404));
 
 server.close();

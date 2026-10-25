@@ -31,6 +31,7 @@ export const admin = {
   patch: (t, id, body) => req(`/api/admin/complaints/${id}`, { method: "PATCH", body, token: t }),
   message: (t, id, message) => req(`/api/admin/complaints/${id}/message`, { method: "POST", body: { message }, token: t }),
   savePush: (t, sub) => req("/api/admin/push", { method: "POST", body: { sub }, token: t }),
+  voiceUrl: (t, id) => `/api/admin/voice/${id}?t=${encodeURIComponent(t)}`,
   photoUrl: (t, id, i = 0) => `/api/admin/photo/${id}/${i}?t=${encodeURIComponent(t)}`,
   csvUrl: t => `/api/admin/export.csv?t=${encodeURIComponent(t)}`
 };

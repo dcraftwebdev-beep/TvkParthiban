@@ -5,7 +5,7 @@ Everything runs on Vercel and Supabase. Nothing has to run on a laptop.
 
 ## What it does
 
-- Citizens file a complaint with up to 4 photos. They can tick "notify this phone" and "you may show my photo".
+- Citizens file a complaint with up to 4 photos and/or a recorded voice message (up to 60 seconds). The audio file itself is sent, with no speech to text, and the admin presses play. They can tick "notify this phone" and "you may show my photo".
 - Admins sign in at `/#/admin`, change the status, and when a complaint is resolved add an **after photo**.
   The admin panel joins the citizen's first photo and the after photo into one branded **before/after** picture.
 - The citizen is told in three free ways, no WhatsApp business account needed:
@@ -22,6 +22,7 @@ Everything runs on Vercel and Supabase. Nothing has to run on a laptop.
 SQL Editor, New query, paste and Run, in this order:
 1. `supabase/schema.sql` (only if you have not run it yet)
 2. `supabase/migration-002.sql` (photos, before/after, push)
+3. `supabase/migration-003.sql` (voice messages)
 
 ### 2. Vercel environment variables
 Project, Settings, Environment Variables (Production), then redeploy.
@@ -35,6 +36,7 @@ Project, Settings, Environment Variables (Production), then redeploy.
 | `VAPID_PUBLIC_KEY` | generate once: `npx web-push generate-vapid-keys` |
 | `VAPID_PRIVATE_KEY` | from the same command. Secret. |
 | `VAPID_SUBJECT` | `mailto:you@example.com` |
+| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | optional free alert with a link: create a bot with @BotFather, message it once, then read the chat id from `https://api.telegram.org/bot<TOKEN>/getUpdates` |
 
 Check `https://tvkparthibankattur.vercel.app/api/health`. You want `configured`, `admin` and `push` all true.
 

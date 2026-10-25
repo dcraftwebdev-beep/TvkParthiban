@@ -57,3 +57,20 @@ Object.assign(T.en, {
 
 Object.assign(T.ta, { heroTag: "தமிழக வெற்றிக் கழகம் · எல்லோருக்கும் எல்லாம்" });
 Object.assign(T.en, { heroTag: "Tamilaga Vettri Kazhagam · Everyone deserves everything" });
+
+Object.assign(T.ta, {
+  cTitle: "புகாரைப் பதிவு செய்யுங்கள்",
+  recVoice: "குரல் செய்தியைப் பதிவு செய்", recHint: "அதிகபட்சம் 60 வினாடி. நிர்வாகி நேரடியாகக் கேட்பார்.",
+  recording: "பதிவாகிறது", recStop: "நிறுத்த தொடவும்",
+  recNo: "இந்த உலாவியில் குரல் பதிவு இல்லை. Chrome பயன்படுத்தவும்.", recShort: "பதிவு மிகக் குறைவு. மீண்டும் முயலவும்.",
+  recBig: "குரல் பதிவு மிகப் பெரியது. சிறியதாகப் பதிவு செய்யவும்.", voiceLabel: "குரல் செய்தி",
+  orType: "அல்லது எழுதுங்கள்", cB1: "குரலில் சொன்னாலே போதும்"
+});
+Object.assign(T.en, {
+  cTitle: "Register your complaint",
+  recVoice: "Record a voice message", recHint: "Up to 60 seconds. The ward office listens to it directly.",
+  recording: "Recording", recStop: "Tap to stop",
+  recNo: "Voice recording is not supported here. Try Chrome.", recShort: "That was too short. Please try again.",
+  recBig: "The voice message is too large. Please record a shorter one.", voiceLabel: "Voice message",
+  orType: "or type it", cB1: "Just say it in your own voice"
+});
