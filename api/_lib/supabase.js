@@ -9,7 +9,7 @@ export function supabaseDb(env = process.env) {
   async function rest(path, { method = "GET", body, prefer } = {}) {
     const res = await fetch(`${url}/rest/v1${path}`, {
       method,
-      headers: { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json", ...(prefer ? { Prefer: prefer } : {}) },
+      headers: { apikey: key, ...(key.startsWith("eyJ") ? { Authorization: `Bearer ${key}` } : {}), "Content-Type": "application/json", ...(prefer ? { Prefer: prefer } : {}) },
       body: body === undefined ? undefined : JSON.stringify(body)
     });
     const text = await res.text();
