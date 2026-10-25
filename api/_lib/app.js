@@ -67,7 +67,8 @@ export function makeHandler(getDb, env = process.env) {
   return async function handler(req, res) {
     try {
       const url = new URL(req.url, "http://x");
-      const path = url.pathname.replace(/^\/api/, "").replace(/\/+$/, "") || "/";
+      const routed = url.searchParams.get("__p");   // set by the rewrite in vercel.json
+      const path = (routed !== null ? "/" + routed : url.pathname.replace(/^\/api/, "")).replace(/\/+$/, "") || "/";
       const method = req.method;
       const ip = String(req.headers["x-forwarded-for"] || req.socket?.remoteAddress || "").split(",")[0].trim();
       const bearer = (req.headers.authorization || "").replace(/^Bearer /, "") || url.searchParams.get("t");

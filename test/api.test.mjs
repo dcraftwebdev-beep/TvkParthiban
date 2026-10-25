@@ -31,7 +31,9 @@ const env = { ADMIN_PASSWORD: "secret-pass", ADMIN_WHATSAPP: "7603959394", PUBLI
 const server = http.createServer(makeHandler(() => db, env));
 await new Promise(r => server.listen(0, r));
 const base = `http://localhost:${server.address().port}`;
-const call = async (path, { method = "GET", body, token, ip } = {}) => {
+const viaRewrite = p => { const u = new URL(p, "http://x"); u.searchParams.set("__p", u.pathname.replace(/^\/api\/?/, "")); return "/api/index" + u.search; };
+const call = async (path0, { method = "GET", body, token, ip } = {}) => {
+  const path = process.env.VIA_REWRITE ? viaRewrite(path0) : path0;
   const r = await fetch(base + path, { method, headers: { ...(ip ? { "x-forwarded-for": ip } : {}), ...(body ? { "Content-Type": "application/json" } : {}), ...(token ? { Authorization: `Bearer ${token}` } : {}) }, body: body ? JSON.stringify(body) : undefined });
   const ct = r.headers.get("content-type") || "";
   return { status: r.status, data: ct.includes("json") ? await r.json() : await r.text(), ct };
