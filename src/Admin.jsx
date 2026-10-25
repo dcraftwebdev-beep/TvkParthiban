@@ -79,32 +79,66 @@ function chip(ctx, text, x, y) {
   ctx.fillStyle = "#3d060c"; ctx.textBaseline = "middle"; ctx.fillText(text, x + 18, y + 24);
 }
 
-/** Joins the citizen's first photo (before) and the admin's photo (after) into one 1200x760 picture. */
-async function composeBeforeAfter({ beforeUrl, afterData, id, at }) {
-  try { await Promise.all([document.fonts.load('700 26px neythal'), document.fonts.load('400 24px tamil010')]); } catch { /* fall back to system fonts */ }
-  const [after, before, flag] = await Promise.all([loadImg(afterData), beforeUrl ? loadImg(beforeUrl).catch(() => null) : null, loadImg("/flag.jpg").catch(() => null)]);
-  const c = document.createElement("canvas"); c.width = 1200; c.height = 760;
-  const ctx = c.getContext("2d");
-  ctx.fillStyle = "#5c0a12"; ctx.fillRect(0, 0, 1200, 760);
-  ctx.fillStyle = "#8a0f1b"; ctx.fillRect(0, 0, 1200, 92);
-  ctx.fillStyle = "#f5c400"; ctx.fillRect(0, 92, 1200, 6);
-  if (flag) cover(ctx, flag, 22, 18, 96, 56, 8);
-  ctx.textBaseline = "middle";
-  ctx.fillStyle = "#f5c400"; ctx.font = '700 34px "neythal","Noto Sans Tamil",Arial,sans-serif'; ctx.fillText("தமிழக வெற்றிக் கழகம்", 134, 34);
-  ctx.fillStyle = "#ffffffd9"; ctx.font = '400 24px "tamil010","Noto Sans Tamil",Arial,sans-serif'; ctx.fillText("வார்டு 38 · காட்டூர் · பார்த்திபன்", 134, 68);
-  ctx.textAlign = "right"; ctx.fillStyle = "#fff"; ctx.font = '700 28px Arial,sans-serif'; ctx.fillText(id, 1178, 46); ctx.textAlign = "left";
+const dateText = ms => new Date(ms).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 
-  const y = 122, h = 560;
-  if (before) {
-    cover(ctx, before, 22, y, 568, h); cover(ctx, after, 610, y, 568, h);
-    chip(ctx, "முன் · BEFORE", 40, y + h - 66); chip(ctx, "பின் · AFTER", 628, y + h - 66);
-  } else {
-    cover(ctx, after, 22, y, 1156, h); chip(ctx, "பின் · AFTER", 40, y + h - 66);
-  }
-  ctx.fillStyle = "#ffffffcc"; ctx.font = '400 24px "tamil010","Noto Sans Tamil",Arial,sans-serif';
-  ctx.fillText("புகார் தீர்க்கப்பட்டது · " + new Date(at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }), 24, 724);
-  ctx.textAlign = "right"; ctx.fillText("tvkparthibankattur.vercel.app", 1178, 724);
-  return c.toDataURL("image/jpeg", 0.84);
+/**
+ * Joins the citizen's photos (BEFORE, red band) and the admin's photos (AFTER, green band) into one tall picture,
+ * with the ward branding and the raised / completed dates. Up to 3 photos in each row.
+ */
+async function composeBeforeAfter({ beforeUrls, afterData, id, raisedAt, doneAt }) {
+  try { await Promise.all([document.fonts.load('700 26px neythal'), document.fonts.load('400 24px tamil010')]); } catch { /* fall back to system fonts */ }
+  const afters = await Promise.all(afterData.slice(0, 3).map(loadImg));
+  const befores = (await Promise.all(beforeUrls.slice(0, 3).map(u => loadImg(u).catch(() => null)))).filter(Boolean);
+  const flag = await loadImg("/flag.jpg").catch(() => null);
+
+  const W = 1200, HEAD = 96, BAND = 62, FOOT = 112, GAP = 6;
+  const rowH = n => (n <= 1 ? 620 : 600);
+  const hB = befores.length ? BAND + rowH(befores.length) : 0, hA = BAND + rowH(afters.length);
+  const H = HEAD + hB + hA + FOOT;
+
+  const c = document.createElement("canvas"); c.width = W; c.height = H;
+  const ctx = c.getContext("2d");
+  ctx.textBaseline = "middle";
+  const head = '"neythal","Noto Sans Tamil",Arial,sans-serif', body = '"tamil010","Noto Sans Tamil",Arial,sans-serif';
+
+  // header
+  ctx.fillStyle = "#8a0f1b"; ctx.fillRect(0, 0, W, HEAD);
+  ctx.fillStyle = "#f5c400"; ctx.fillRect(0, HEAD - 6, W, 6);
+  if (flag) { ctx.save(); ctx.beginPath(); ctx.roundRect(24, 16, 102, 60, 8); ctx.clip(); ctx.drawImage(flag, 24, 16, 102, 60); ctx.restore(); }
+  ctx.fillStyle = "#f5c400"; ctx.font = `700 34px ${head}`; ctx.fillText("தமிழக வெற்றிக் கழகம்", 142, 32);
+  ctx.fillStyle = "#ffffffe6"; ctx.font = `400 24px ${body}`; ctx.fillText("வார்டு 38 · காட்டூர் · பார்த்திபன்", 142, 64);
+  ctx.textAlign = "right"; ctx.fillStyle = "#fff"; ctx.font = "700 28px Arial,sans-serif"; ctx.fillText(id, W - 24, 40); ctx.textAlign = "left";
+
+  const band = (y, color, text) => {
+    ctx.fillStyle = color; ctx.fillRect(0, y, W, BAND);
+    ctx.fillStyle = "#fff"; ctx.textAlign = "center"; ctx.font = `700 34px ${head}`; ctx.fillText(text, W / 2, y + BAND / 2 + 1); ctx.textAlign = "left";
+  };
+  const row = (y, imgs) => {
+    const h = rowH(imgs.length), w = (W - GAP * (imgs.length - 1)) / imgs.length;
+    imgs.forEach((img, k) => {
+      const x = k * (w + GAP);
+      ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
+      const s = Math.max(w / img.width, h / img.height), dw = img.width * s, dh = img.height * s;
+      ctx.drawImage(img, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
+      ctx.restore();
+    });
+  };
+
+  let y = HEAD;
+  if (befores.length) { band(y, "#b3201f", "முன் · BEFORE"); row(y + BAND, befores); y += hB; }
+  band(y, "#1f7a3a", "பின் · AFTER"); row(y + BAND, afters); y += hA;
+
+  // footer with the dates
+  ctx.fillStyle = "#5c0a12"; ctx.fillRect(0, y, W, FOOT);
+  const days = Math.max(0, Math.round((doneAt - raisedAt) / 86400000));
+  ctx.fillStyle = "#f5c400"; ctx.font = `700 28px ${head}`;
+  ctx.fillText(`புகார் பதிவு: ${dateText(raisedAt)}`, 24, y + 36);
+  ctx.fillStyle = "#fff"; ctx.fillText(`தீர்வு: ${dateText(doneAt)}${days === 0 ? " · அதே நாளில்" : ` · ${days} நாட்களில்`}`, 24, y + 76);
+  ctx.textAlign = "right"; ctx.fillStyle = "#ffffffb3"; ctx.font = `400 22px ${body}`; ctx.fillText("tvkparthibankattur.vercel.app", W - 24, y + 76); ctx.textAlign = "left";
+
+  let q = 0.84, out = c.toDataURL("image/jpeg", q);
+  while (out.length > 1000000 && q > 0.45) { q -= 0.08; out = c.toDataURL("image/jpeg", q); }
+  return out;
 }
 
 /* ---------- detail drawer ---------- */
@@ -112,7 +146,7 @@ function Detail({ id, token, onClose, onChanged, flash }) {
   const [c, setC] = useState(null);
   const [status, setStatus] = useState(0);
   const [note, setNote] = useState("");
-  const [afterData, setAfterData] = useState("");
+  const [afters, setAfters] = useState([]);
   const [composed, setComposed] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -129,13 +163,14 @@ function Detail({ id, token, onClose, onChanged, flash }) {
   }, [onClose]);
 
   const pickAfter = async e => {
-    const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+    const files = [...e.target.files].slice(0, 3); e.target.value = ""; if (!files.length) return;
     setBusy(true);
     try {
-      const data = await fileToJpeg(f);
-      setAfterData(data);
-      setComposed(await composeBeforeAfter({ beforeUrl: c.photoCount ? admin.photoUrl(token, c.id, 0) : null, afterData: data, id: c.id, at: Date.now() }));
-    } catch { flash("Could not read that photo"); }
+      const data = await Promise.all(files.map(f => fileToJpeg(f, 900)));
+      setAfters(data);
+      const beforeUrls = Array.from({ length: Math.min(c.photoCount || 0, 3) }, (_, k) => admin.photoUrl(token, c.id, k));
+      setComposed(await composeBeforeAfter({ beforeUrls, afterData: data, id: c.id, raisedAt: c.createdAt, doneAt: Date.now() }));
+    } catch { flash("Could not read those photos"); }
     finally { setBusy(false); }
   };
 
@@ -143,15 +178,32 @@ function Detail({ id, token, onClose, onChanged, flash }) {
     setBusy(true);
     try {
       const body = { status, note, notify };
-      if (status === 2 && afterData && composed) { body.after = afterData; body.result = composed; }
+      if (status === 2 && afters.length && composed) { body.after = afters[0]; body.result = composed; }
       const r = await admin.patch(token, id, body);
-      setC(p => ({ ...p, ...r })); setAfterData(""); setComposed(""); onChanged();
+      setC(p => ({ ...p, ...r })); setAfters([]); setComposed(""); onChanged();
       flash(r.pushed ? "Saved. The citizen's phone was notified" : notify ? "Saved. Send the result from your WhatsApp below" : "Saved");
     } catch (e) { flash(e.status === 400 ? "Photo was rejected, try a smaller one" : "Save failed"); }
     finally { setBusy(false); }
   };
 
   const link = c?.resultPage;
+  const waLink = kind => {
+    if (!c) return "#";
+    const ta = c.lang !== "en", cat = (CATS.find(x => x.id === c.cat) || {})[ta ? "ta" : "en"] || c.cat, who = CFG.leaderName[ta ? "ta" : "en"];
+    const line = "━━━━━━━━━━";
+    const text = {
+      received: ta
+        ? `✅ புகார் பதிவாகிவிட்டது!\n${line}\n🪪 புகார் எண்: ${c.id}\n📋 வகை: ${cat}\n📝 தலைப்பு: ${c.desc}\n${line}\n🏛 தமிழக வெற்றிக் கழகம்\nவார்டு 38 · காட்டூர் பகுதி\n👤 ${who}\n📞 ${CFG.phoneShow}\n🕐 24X7 எப்போதும்\n${line}\n24 மணி நேரத்தில் தொடர்பு கொள்வோம்.`
+        : `✅ Your complaint is registered!\n${line}\n🪪 ID: ${c.id}\n📋 Category: ${cat}\n📝 Details: ${c.desc}\n${line}\n🏛 Tamilaga Vettri Kazhagam\nWard 38 · Kattur\n👤 ${who}\n📞 ${CFG.phoneShow}\n🕐 24X7\n${line}\nWe will contact you within 24 hours.`,
+      progress: ta
+        ? `🛠 உங்கள் புகார் ${c.id} மீது நடவடிக்கை எடுக்கப்பட்டு வருகிறது.${c.note ? "\n" + c.note : ""}`
+        : `🛠 Work has started on your complaint ${c.id}.${c.note ? "\n" + c.note : ""}`,
+      resolved: c.hasResult && link
+        ? (ta ? `✅ உங்கள் புகார் ${c.id} தீர்க்கப்பட்டது.\nமுன் / பின் படங்கள்: ${link}` : `✅ Your complaint ${c.id} is resolved.\nBefore and after photos: ${link}`)
+        : (ta ? `✅ உங்கள் புகார் ${c.id} தீர்க்கப்பட்டது. நன்றி.` : `✅ Your complaint ${c.id} is resolved. Thank you.`)
+    }[kind];
+    return `https://wa.me/${intl(c.phone)}?text=${encodeURIComponent(text)}`;
+  };
   const waText = c && (c.lang === "en"
     ? `✅ Your complaint ${c.id} is resolved.\nBefore and after photos: ${link}`
     : `✅ உங்கள் புகார் ${c.id} தீர்க்கப்பட்டது.\nமுன் / பின் படங்கள்: ${link}`);
@@ -204,6 +256,16 @@ function Detail({ id, token, onClose, onChanged, flash }) {
             </div>
 
             <section>
+              <h3>WhatsApp messages (from your own number)</h3>
+              <div className="ad-actions">
+                <a className="ad-btn wa" href={waLink("received")} target="_blank" rel="noopener">Received</a>
+                <a className="ad-btn wa" href={waLink("progress")} target="_blank" rel="noopener">In progress</a>
+                <a className="ad-btn wa" href={waLink("resolved")} target="_blank" rel="noopener">Resolved</a>
+              </div>
+              <p className="ad-meta">Opens this citizen's chat with the message written. Check it, then tap Send.</p>
+            </section>
+
+            <section>
               <h3>Status</h3>
               <div className="ad-seg">
                 {ST_EN.map((l, i) => <button key={l} className={status === i ? "on s" + i : ""} onClick={() => setStatus(i)}>{l}</button>)}
@@ -213,10 +275,10 @@ function Detail({ id, token, onClose, onChanged, flash }) {
               {status === 2 && (
                 <div className="ad-after">
                   <label className="ad-btn ad-file">
-                    <Ico d={I.cam} />{c.hasResult || afterData ? "Change the after photo" : "Add the after photo"}
-                    <input type="file" accept="image/*" capture="environment" hidden onChange={pickAfter} />
+                    <Ico d={I.cam} />{c.hasResult || afters.length ? "Change the after photos" : "Add the after photos (up to 3)"}
+                    <input type="file" accept="image/*" multiple hidden onChange={pickAfter} />
                   </label>
-                  <p className="ad-meta">The after photo is joined with the citizen's first photo into one before/after picture.</p>
+                  <p className="ad-meta">Your photos are joined with the citizen's photos (red BEFORE, green AFTER) with both dates, into one picture.</p>
                   {composed && <img className="ad-preview" src={composed} alt="Before and after preview" />}
                 </div>
               )}

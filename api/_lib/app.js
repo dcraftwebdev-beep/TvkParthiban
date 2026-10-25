@@ -80,11 +80,12 @@ export function makeHandler(getDb, env = process.env) {
     id: c.id, cat: c.cat, desc: c.descr, street: c.street, lat: c.lat, lng: c.lng,
     hasPhoto: !!c.has_photo, photoCount: c.photo_count || 0, hasResult: !!c.has_result,
     name: c.name, phone: c.phone, lang: c.lang, status: c.status, note: c.note, consent: !!c.consent_public,
-    createdAt: c.created_at, updatedAt: c.updated_at, resolvedAt: c.resolved_at,
+    createdAt: c.created_at, updatedAt: c.updated_at, progressAt: c.progress_at || null, resolvedAt: c.resolved_at,
     resultUrl: c.has_result ? resultPath(c.id) : null, resultPage: c.has_result ? resultPage(c.id) : null
   });
   const publicView = c => ({
     id: c.id, cat: c.cat, status: c.status, createdAt: c.created_at, updatedAt: c.updated_at,
+    progressAt: c.progress_at || null, resolvedAt: c.resolved_at || null, street: c.street || "", note: c.note || "",
     snippet: c.descr.slice(0, 80), result: c.has_result ? resultPath(c.id) : null
   });
 
@@ -197,7 +198,7 @@ export function makeHandler(getDb, env = process.env) {
         const html = `<!doctype html><html lang="${ta ? "ta" : "en"}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(title)}</title>
 <meta property="og:type" content="article"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}">
-<meta property="og:image" content="${esc(img)}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="760">
+<meta property="og:image" content="${esc(img)}">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="${esc(img)}">
 <style>body{margin:0;background:#3d060c;color:#fff;font-family:system-ui,sans-serif;display:grid;place-items:center;min-height:100vh;padding:16px;box-sizing:border-box}
 main{max-width:640px;width:100%;text-align:center}img{width:100%;border-radius:16px;border:3px solid #f5c400;display:block}
@@ -278,12 +279,14 @@ h1{font-size:22px;margin:18px 0 6px}p{color:#ffffffbf;margin:0 0 18px}a{display:
             if (![0, 1, 2].includes(status)) return send(res, 400, { error: "status" });
             const note = b.note === undefined ? c.note : clean(b.note, 300);
             const patch = { status, note, updated_at: Date.now() };
+            if (status === 1 && !c.progress_at) patch.progress_at = Date.now();
             if (status === 2 && c.status !== 2) patch.resolved_at = Date.now();
             if (status !== 2 && c.resolved_at) patch.resolved_at = null;
             if (b.after !== undefined) {
-              const after = jpegB64(b.after, 500 * 1024), result = jpegB64(b.result, 900 * 1024);
+              const after = jpegB64(b.after, 500 * 1024), result = jpegB64(b.result, 1300 * 1024);
               if (!after || !result) return send(res, 400, { error: "image" });
               patch.after_photo = after; patch.result_image = result; patch.has_result = true;
+              if (status !== 2) return send(res, 400, { error: "result_needs_resolved" });
             }
             await db.update(c.id, patch);
             const next = { ...c, ...patch };

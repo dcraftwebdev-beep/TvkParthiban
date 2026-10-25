@@ -1,5 +1,5 @@
 // Minimal Supabase (PostgREST) data layer over fetch. No SDK needed.
-const COLS = "id,cat,descr,street,lat,lng,has_photo,photo_count,has_result,name,phone,lang,status,note,consent_public,created_at,updated_at,resolved_at";
+const COLS = "id,cat,descr,street,lat,lng,has_photo,photo_count,has_result,name,phone,lang,status,note,consent_public,created_at,updated_at,progress_at,resolved_at";
 
 export function supabaseDb(env = process.env) {
   const url = (env.SUPABASE_URL || "").replace(/\/$/, "");

@@ -571,6 +571,56 @@ function Complaint({ t, lang, say, onDone, micReq }) {
   );
 }
 
+/* ---------- one complaint in the tracker ---------- */
+const dayMs = 86400000;
+function TrackCard({ c, t, lang }) {
+  const loc = lang === "ta" ? "ta-IN" : "en-IN";
+  const date = ms => ms ? new Date(ms).toLocaleDateString(loc, { day: "numeric", month: "short", year: "numeric" }) : "";
+  const time = ms => ms ? new Date(ms).toLocaleTimeString(loc, { hour: "numeric", minute: "2-digit" }) : "";
+  const stepAt = [c.createdAt, c.progressAt || (c.status >= 1 ? c.updatedAt : null), c.resolvedAt || (c.status === 2 ? c.updatedAt : null)];
+  const done = c.status === 2;
+  const days = Math.max(0, Math.round(((done ? stepAt[2] : Date.now()) - c.createdAt) / dayMs));
+  const took = done ? (days === 0 ? t.tSameDay : `${days} ${t.tDays}`) : `${days} ${t.tDays}`;
+  const [copied, setCopied] = useState(false);
+  const copy = async () => { try { await navigator.clipboard.writeText(c.id); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch { /* ignore */ } };
+  return (
+    <article className={"t-card" + (done ? " is-done" : "")}>
+      <div className="t-top">
+        <button type="button" className="t-id" onClick={copy} title={t.copy}>{c.id}<Icon d={copied ? P.tick : P.copy} size={14} /></button>
+        <span className={"badge s" + c.status}>{t.st[c.status]}</span>
+      </div>
+      <p className="t-desc"><strong>{CATS.find(x => x.id === c.cat)?.[lang]}</strong> · {c.snippet}</p>
+      {c.street && <p className="t-loc"><Icon d={P.pin} size={14} />{c.street}</p>}
+
+      <ol className="t-steps">
+        {[0, 1, 2].map(i => (
+          <li key={i} className={(i <= c.status ? "on" : "") + (i === c.status ? " now" : "")}>
+            <span className="t-dot">{i <= c.status ? <Icon d={P.tick} size={13} /> : i + 1}</span>
+            <div><b>{t.st[i]}</b><small>{stepAt[i] && i <= c.status ? `${date(stepAt[i])}, ${time(stepAt[i])}` : t.tWaiting}</small></div>
+          </li>
+        ))}
+      </ol>
+
+      <dl className="t-facts">
+        <div><dt>{t.tRaised}</dt><dd>{date(c.createdAt)}</dd></div>
+        <div><dt>{t.tDone}</dt><dd>{done ? date(stepAt[2]) : t.tPending}</dd></div>
+        <div><dt>{done ? t.tTaken : t.tOpenFor}</dt><dd>{took}</dd></div>
+      </dl>
+
+      {c.note && <p className="t-note"><b>{t.tNote}</b>{c.note}</p>}
+      {c.result && (
+        <a className="t-result" href={c.result} target="_blank" rel="noopener">
+          <img src={c.result} alt={t.beforeAfter} loading="lazy" /><span>{t.beforeAfter}</span>
+        </a>
+      )}
+      <div className="t-contact">
+        <a href={`tel:+${CFG.phone}`}><Icon d={P.phone} size={16} />{t.qCall}</a>
+        <a href={wa(`${c.id}`)} target="_blank" rel="noopener"><Icon d={P.chat} size={16} />WhatsApp</a>
+      </div>
+    </article>
+  );
+}
+
 /* ---------- track ---------- */
 function Track({ t, lang }) {
   const [q, setQ] = useState("");
@@ -594,13 +644,7 @@ function Track({ t, lang }) {
         {!fail && res === null && <p className="empty">{t.tHint}</p>}
         {res && !res.length && <p className="empty">{t.tNone}</p>}
         {res && res.map(c => (
-          <article className="t-card" key={c.id}>
-            <div className="t-top"><b>{c.id}</b><span className={"badge s" + c.status}>{t.st[c.status]}</span></div>
-            <p><strong>{CATS.find(x => x.id === c.cat)?.[lang]}</strong> · {c.snippet}</p>
-            <small>{new Date(c.createdAt).toLocaleDateString(lang === "ta" ? "ta-IN" : "en-IN", { day: "numeric", month: "short", year: "numeric" })}</small>
-            <div className="progress">{[0, 1, 2].map(i => <i key={i} className={i <= c.status ? "f" : ""} />)}</div>
-            {c.result && <a className="t-result" href={c.result} target="_blank" rel="noopener"><img src={c.result} alt={t.beforeAfter} loading="lazy" /><span>{t.beforeAfter}</span></a>}
-          </article>
+          <TrackCard key={c.id} c={c} t={t} lang={lang} />
         ))}
       </div>
     </div></section>

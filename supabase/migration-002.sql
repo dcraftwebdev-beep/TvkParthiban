@@ -10,6 +10,7 @@ alter table public.complaints add column if not exists has_result     boolean no
 alter table public.complaints add column if not exists resolved_at    bigint;
 alter table public.complaints add column if not exists consent_public boolean not null default false;
 alter table public.complaints add column if not exists push_sub       jsonb;
+alter table public.complaints add column if not exists progress_at    bigint;
 
 -- photos that were saved with the first version
 update public.complaints

@@ -28,3 +28,12 @@ Object.assign(T.en, {
   okText: "Keep this number safe. You can check the status anytime in the Track section with this number or your mobile number.",
   okWa: "Message the ward office on WhatsApp"
 });
+
+Object.assign(T.ta, {
+  tRaised: "புகார் பதிவு நாள்", tDone: "தீர்வு நாள்", tPending: "நிலுவையில்", tTaken: "தீர்வுக்கு ஆனது", tOpenFor: "திறந்திருக்கும் நாட்கள்",
+  tDays: "நாட்கள்", tSameDay: "அதே நாளில்", tWaiting: "காத்திருக்கிறது", tNote: "வார்டு அலுவலகத் தகவல்: "
+});
+Object.assign(T.en, {
+  tRaised: "Complaint raised", tDone: "Completed on", tPending: "Pending", tTaken: "Time taken", tOpenFor: "Open for",
+  tDays: "days", tSameDay: "Same day", tWaiting: "Waiting", tNote: "From the ward office: "
+});

@@ -87,8 +87,10 @@ await t("result image and page need the right key", async () => {
   const page = await call(`/api/r/${id}?k=${resultUrl.split("k=")[1]}`);
   assert.equal(page.status, 200); assert.ok(page.data.includes('property="og:image"')); assert.ok(page.data.includes(`https://example.test/api/r/${id}/image`));
 });
-await t("citizen sees the result in tracking", async () => {
+await t("citizen sees the result and the dates in tracking", async () => {
   const a = (await call(`/api/track?q=${id}`)).data.items[0]; assert.equal(a.status, 2); assert.equal(a.result, resultUrl);
+  assert.ok(a.progressAt && a.resolvedAt && a.createdAt <= a.progressAt && a.progressAt <= a.resolvedAt);
+  assert.equal(a.street, "Main St"); assert.equal(a.note, "Work on Monday"); assert.equal(a.name, undefined);
 });
 await t("public work gallery only shows consented, finished work", async () => {
   const w = (await call("/api/work")).data.items; assert.equal(w.length, 1); assert.equal(w[0].image, resultUrl); assert.equal(w[0].id, undefined);
