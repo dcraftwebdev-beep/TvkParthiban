@@ -601,7 +601,7 @@ function Complaint({ t, lang, say, onDone, micReq }) {
 
 /* ---------- one complaint in the tracker ---------- */
 const dayMs = 86400000;
-function TrackCard({ c, t, lang }) {
+function TrackCard({ c, t, lang, n, open, onToggle }) {
   const loc = lang === "ta" ? "ta-IN" : "en-IN";
   const date = ms => ms ? new Date(ms).toLocaleDateString(loc, { day: "numeric", month: "short", year: "numeric" }) : "";
   const time = ms => ms ? new Date(ms).toLocaleTimeString(loc, { hour: "numeric", minute: "2-digit" }) : "";
@@ -611,40 +611,53 @@ function TrackCard({ c, t, lang }) {
   const took = done ? (days === 0 ? t.tSameDay : `${days} ${t.tDays}`) : `${days} ${t.tDays}`;
   const [copied, setCopied] = useState(false);
   const copy = async () => { try { await navigator.clipboard.writeText(c.id); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch { /* ignore */ } };
+  const cat = CATS.find(x => x.id === c.cat)?.[lang];
   return (
-    <article className={"t-card" + (done ? " is-done" : "")}>
-      <div className="t-top">
-        <button type="button" className="t-id" onClick={copy} title={t.copy}>{c.id}<Icon d={copied ? P.tick : P.copy} size={14} /></button>
-        <span className={"badge s" + c.status}>{t.st[c.status]}</span>
-      </div>
-      <p className="t-desc"><strong>{CATS.find(x => x.id === c.cat)?.[lang]}</strong> · {c.snippet}</p>
-      {c.street && <p className="t-loc"><Icon d={P.pin} size={14} />{c.street}</p>}
+    <article className={"t-card" + (done ? " is-done" : "") + (open ? " open" : "")}>
+      <button type="button" className="t-head" onClick={onToggle} aria-expanded={open}>
+        <span className="t-num">{n}</span>
+        <span className="t-main">
+          <span className="t-line1"><b>{c.id}</b><span className={"badge s" + c.status}>{t.st[c.status]}</span></span>
+          <span className="t-line2"><strong>{cat}</strong> · {c.snippet}</span>
+          <span className="t-mini" aria-hidden="true">{[0, 1, 2].map(k => <i key={k} className={k <= c.status ? "f" : ""} />)}</span>
+        </span>
+        <span className="t-chev"><Icon d="M6 9l6 6 6-6" size={18} /></span>
+      </button>
 
-      <ol className="t-steps">
-        {[0, 1, 2].map(i => (
-          <li key={i} className={(i <= c.status ? "on" : "") + (i === c.status ? " now" : "")}>
-            <span className="t-dot">{i <= c.status ? <Icon d={P.tick} size={13} /> : i + 1}</span>
-            <div><b>{t.st[i]}</b><small>{stepAt[i] && i <= c.status ? `${date(stepAt[i])}, ${time(stepAt[i])}` : t.tWaiting}</small></div>
-          </li>
-        ))}
-      </ol>
+      {open && (
+        <div className="t-body">
+          <ol className="t-steps">
+            {[0, 1, 2].map(k => (
+              <li key={k} className={(k <= c.status ? "on" : "") + (k === c.status ? " now" : "")}>
+                <span className="t-dot">{k <= c.status ? <Icon d={P.tick} size={13} /> : k + 1}</span>
+                <div>
+                  <b>{t.st[k]}</b>
+                  <small>{stepAt[k] && k <= c.status ? <>{date(stepAt[k])}<br />{time(stepAt[k])}</> : t.tWaiting}</small>
+                </div>
+              </li>
+            ))}
+          </ol>
 
-      <dl className="t-facts">
-        <div><dt>{t.tRaised}</dt><dd>{date(c.createdAt)}</dd></div>
-        <div><dt>{t.tDone}</dt><dd>{done ? date(stepAt[2]) : t.tPending}</dd></div>
-        <div><dt>{done ? t.tTaken : t.tOpenFor}</dt><dd>{took}</dd></div>
-      </dl>
+          <dl className="t-facts">
+            <div><dt>{t.tRaised}</dt><dd>{date(c.createdAt)}</dd></div>
+            <div><dt>{t.tDone}</dt><dd>{done ? date(stepAt[2]) : t.tPending}</dd></div>
+            <div><dt>{done ? t.tTaken : t.tOpenFor}</dt><dd>{took}</dd></div>
+          </dl>
 
-      {c.note && <p className="t-note"><b>{t.tNote}</b>{c.note}</p>}
-      {c.result && (
-        <a className="t-result" href={c.result} target="_blank" rel="noopener">
-          <img src={c.result} alt={t.beforeAfter} loading="lazy" /><span>{t.beforeAfter}</span>
-        </a>
+          {c.street && <p className="t-loc"><Icon d={P.pin} size={14} />{c.street}</p>}
+          {c.note && <p className="t-note"><b>{t.tNote}</b>{c.note}</p>}
+          {c.result && (
+            <a className="t-result" href={c.result} target="_blank" rel="noopener">
+              <img src={c.result} alt={t.beforeAfter} loading="lazy" /><span>{t.beforeAfter}</span>
+            </a>
+          )}
+          <div className="t-contact">
+            <button type="button" onClick={copy}><Icon d={copied ? P.tick : P.copy} size={16} />{copied ? t.copied : t.copy}</button>
+            <a href={`tel:+${CFG.phone}`}><Icon d={P.phone} size={16} />{t.qCall}</a>
+            <a href={wa(`${c.id}`)} target="_blank" rel="noopener"><Icon d={P.chat} size={16} />WhatsApp</a>
+          </div>
+        </div>
       )}
-      <div className="t-contact">
-        <a href={`tel:+${CFG.phone}`}><Icon d={P.phone} size={16} />{t.qCall}</a>
-        <a href={wa(`${c.id}`)} target="_blank" rel="noopener"><Icon d={P.chat} size={16} />WhatsApp</a>
-      </div>
     </article>
   );
 }
@@ -652,28 +665,42 @@ function TrackCard({ c, t, lang }) {
 /* ---------- track ---------- */
 function Track({ t, lang }) {
   const [q, setQ] = useState("");
+  const [asked, setAsked] = useState("");
   const [res, setRes] = useState(null);
+  const [openId, setOpenId] = useState(null);
   const [busy, setBusy] = useState(false);
   const [fail, setFail] = useState(false);
   const search = async e => {
     e.preventDefault(); const s = q.trim(); if (!s || busy) return;
     setBusy(true); setFail(false);
-    try { setRes((await api.track(s)).items); } catch { setFail(true); setRes(null); } finally { setBusy(false); }
+    try {
+      const items = (await api.track(s)).items;
+      setRes(items); setAsked(s);
+      setOpenId(items.length === 1 ? items[0].id : null);   // a single complaint opens by itself, a list stays compact
+    } catch { setFail(true); setRes(null); } finally { setBusy(false); }
   };
+  const many = !!res && res.length > 1;
   return (
-    <section className="sec dark" id="track"><div className="wrap narrow">
-      <Head eyebrow={t.tEyebrow} title={t.tTitle} dark />
-      <form className="track-form rv" onSubmit={search}>
-        <input type="text" value={q} onChange={e => setQ(e.target.value)} placeholder={t.tPh} enterKeyHint="search" />
-        <button className="btn primary" type="submit" disabled={busy}>{busy ? "…" : t.tBtn}</button>
-      </form>
+    <section className="sec dark" id="track"><div className="wrap">
+      <div className="t-intro">
+        <Head eyebrow={t.tEyebrow} title={t.tTitle} dark />
+        <form className="track-form rv" onSubmit={search}>
+          <input type="text" value={q} onChange={e => setQ(e.target.value)} placeholder={t.tPh} enterKeyHint="search" />
+          <button className="btn primary" type="submit" disabled={busy}>{busy ? "…" : t.tBtn}</button>
+        </form>
+      </div>
       <div className="track-out">
         {fail && <p className="empty">{t.tFail}</p>}
         {!fail && res === null && <p className="empty">{t.tHint}</p>}
         {res && !res.length && <p className="empty">{t.tNone}</p>}
-        {res && res.map(c => (
-          <TrackCard key={c.id} c={c} t={t} lang={lang} />
-        ))}
+        {many && <p className="t-count"><b>{asked}</b> · {res.length} {t.tCount}</p>}
+        {res && res.length > 0 && (
+          <div className={"t-list" + (many ? " multi" : "")}>
+            {res.map((c, k) => (
+              <TrackCard key={c.id} c={c} t={t} lang={lang} n={k + 1} open={openId === c.id} onToggle={() => setOpenId(openId === c.id ? null : c.id)} />
+            ))}
+          </div>
+        )}
       </div>
     </div></section>
   );

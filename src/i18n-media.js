@@ -74,3 +74,6 @@ Object.assign(T.en, {
   recBig: "The voice message is too large. Please record a shorter one.", voiceLabel: "Voice message",
   orType: "or type it", cB1: "Just say it in your own voice"
 });
+
+Object.assign(T.ta, { tCount: "புகார்கள்" });
+Object.assign(T.en, { tCount: "complaints" });
