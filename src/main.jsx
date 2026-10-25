@@ -21,5 +21,6 @@ import "./v17.css";
 import "./v18.css";
 import "./v19.css";
 import "./v20.css";
+import "./v21.css";
 
 createRoot(document.getElementById("root")).render(<App />);

@@ -1,0 +1,20 @@
+/* v21: the "எல்லோருக்கும் எல்லாம்" section gets a full-width background photo (Parthiban's portrait) */
+.join{position:relative;overflow:hidden;isolation:isolate;background:var(--maroon)}
+.join::before{
+  content:"";position:absolute;inset:0;z-index:-2;
+  background:url(/portrait.jpg) no-repeat;background-size:cover;background-position:center 18%;
+  mix-blend-mode:multiply;           /* the white backdrop of the photo melts into the maroon */
+  filter:contrast(1.3) saturate(1.1) brightness(1.18);
+}
+.join::after{
+  content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:
+    linear-gradient(180deg,#3d060c4d 0%,#3d060c80 55%,#3d060cb3 100%),
+    radial-gradient(900px 500px at 85% 0,#f5c40022,transparent 70%);
+}
+.join .wrap{position:relative;z-index:1}
+
+@media (min-width:860px){
+  .join::before{background-position:right 12% center;background-size:cover}
+  .join::after{background:linear-gradient(90deg,#3d060cf0 0%,#3d060cc0 36%,#3d060c55 68%,#3d060c20 100%),linear-gradient(180deg,#3d060c30,#3d060c70)}
+}
