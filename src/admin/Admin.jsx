@@ -63,7 +63,7 @@ function Login({ onOk }) {
           <p>{t("Listen to every complaint. Follow it up until it is solved.")}</p>
         </div>
       </aside>
-      <main className="ad-login-side">
+      <div className="ad-login-side">
         <LangSwitch className="ad-lang-float" />
         <form className={"ad-login-card" + (shake ? " shake" : "")} key={shake} onSubmit={go}>
           <img src="/flag.jpg" alt="" className="ad-flag" />
@@ -87,7 +87,7 @@ function Login({ onOk }) {
           <a href="#home" className="ad-link">{t("← Back to website")}</a>
           <small className="ad-foot"><SiteIcon n="lock" size={13} /> {t("Ward office staff only")}</small>
         </form>
-      </main>
+      </div>
     </div>
   );
 }

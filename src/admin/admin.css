@@ -406,3 +406,7 @@ body:has(.ad)::before,body:has(.ad-login)::before{display:none}
 .ad-group:first-child{margin-top:0}
 .ad-group i{font-style:normal;font-size:11px;padding:1px 8px;border-radius:99px;background:#fff;border:1px solid var(--ln);color:var(--mute)}
 .ad-ctime.late{color:#B91C1C;font-weight:800}
+/* the site's page theme sets white text on <main>; the login must never inherit it */
+.ad-login{color:#0F172A}
+.ad-login-card{color:#0F172A;--ink:#0F172A;--mute:#64748B}
+.ad-login .ad-pw input{padding:13px 46px 13px 44px}
