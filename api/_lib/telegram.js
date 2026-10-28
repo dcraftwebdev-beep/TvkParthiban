@@ -1,12 +1,10 @@
+import { CATS } from "../../shared/cats.js";
 // Free, automatic admin alert with a link: a Telegram bot messages the ward office when a complaint arrives.
 // Setup: talk to @BotFather on Telegram, create a bot, copy its token. Message the bot once, then open
 // https://api.telegram.org/bot<TOKEN>/getUpdates and copy the "chat":{"id": ...} number.
 const esc = s => String(s ?? "").replace(/[&<>]/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[m]));
 
-const CAT = {
-  road: "சாலை / Road", water: "குடிநீர் / Drinking water", drain: "கழிவுநீர் / Drainage", light: "தெருவிளக்கு / Streetlight",
-  trash: "குப்பை / Garbage", power: "மின்சாரம் / Electricity", other: "பிற / Other"
-};
+const CAT = Object.fromEntries(CATS.map(c => [c.id, `${c.ta} / ${c.en}`]));
 
 export const telegramEnabled = env => !!(env.TELEGRAM_BOT_TOKEN && env.TELEGRAM_CHAT_ID);
 

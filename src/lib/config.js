@@ -12,12 +12,4 @@ export const CFG = {
   }
 };
 
-export const CATS = [
-  { id: "road", ta: "சாலை", en: "Road", icon: "road" },
-  { id: "water", ta: "குடிநீர்", en: "Drinking water", icon: "water" },
-  { id: "drain", ta: "கழிவுநீர்", en: "Drainage", icon: "drain" },
-  { id: "light", ta: "தெருவிளக்கு", en: "Streetlight", icon: "light" },
-  { id: "trash", ta: "குப்பை", en: "Garbage", icon: "trash" },
-  { id: "power", ta: "மின்சாரம்", en: "Electricity", icon: "power" },
-  { id: "other", ta: "பிற", en: "Other", icon: "other" }
-];
+export { CATS } from "../../shared/cats.js";

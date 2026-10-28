@@ -1,9 +1,10 @@
 import { createHmac, randomInt, timingSafeEqual } from "node:crypto";
 import { newComplaintMessages, statusMessage, toIntl } from "./messages.js";
 import { sendPush, citizenPush, createdPush, adminPush, pushEnabled } from "./push.js";
+import { CAT_IDS } from "../../shared/cats.js";
 import { telegramNewComplaint, telegramEnabled } from "./telegram.js";
 
-const CATS = ["road", "water", "drain", "light", "trash", "power", "other"];
+const CATS = CAT_IDS;
 const DEFAULT_URL = "https://tvkparthibankattur.vercel.app";
 const MAX_PHOTOS = 4;
 const VOICE_TYPES = ["audio/webm", "audio/ogg", "audio/mp4", "audio/mpeg", "audio/aac", "audio/x-m4a"];

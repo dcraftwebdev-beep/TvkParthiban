@@ -1,8 +1,6 @@
+import { catLabels } from "../../shared/cats.js";
 // WhatsApp message templates. Returns rows for the outbox table; the worker sends them.
-const CAT = {
-  ta: { road: "சாலை", water: "குடிநீர்", drain: "கழிவுநீர்", light: "தெருவிளக்கு", trash: "குப்பை", power: "மின்சாரம்", other: "பிற" },
-  en: { road: "Road", water: "Drinking water", drain: "Drainage", light: "Streetlight", trash: "Garbage", power: "Electricity", other: "Other" }
-};
+const CAT = { ta: catLabels("ta"), en: catLabels("en") };
 const STATUS = { ta: ["பெறப்பட்டது", "நடவடிக்கையில்", "தீர்க்கப்பட்டது"], en: ["Received", "In progress", "Resolved"] };
 
 export const toIntl = p => { const d = String(p).replace(/\D/g, ""); return d.length === 10 ? "91" + d : d; };

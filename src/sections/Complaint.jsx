@@ -158,10 +158,13 @@ export function Complaint({ t, lang, say, onDone, micReq }) {
         <div className="cx-pane" key={step}>
           {step === 0 && (<>
             <h3>{t.fCat}</h3>
+            <p className="cx-pickhint"><Icon n="tap" size={18} />{t.fCatHint}</p>
             <div className="cx-cats">
               {CATS.map(c => (
                 <button key={c.id} type="button" className={"cx-cat" + (cat === c.id ? " on" : "")} onClick={() => pick(c.id)}>
-                  <span className="cx-ico"><Icon n={c.icon} size={24} /></span><b>{c[lang]}</b>
+                  <span className="cx-ico"><Icon n={c.icon} size={22} /></span>
+                  <span className="cx-cat-txt"><b>{c[lang]}</b><small>{c.ex[lang]}</small></span>
+                  <span className="cx-go" aria-hidden="true"><Icon n="right" size={16} /></span>
                 </button>
               ))}
             </div>

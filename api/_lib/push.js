@@ -1,3 +1,4 @@
+import { catLabels } from "../../shared/cats.js";
 // Web push (free, automatic): notifies a citizen's phone or an admin device without WhatsApp.
 import webpush from "web-push";
 
@@ -23,10 +24,7 @@ export async function sendPush(env, sub, payload) {
   }
 }
 
-const CAT = {
-  ta: { road: "சாலை", water: "குடிநீர்", drain: "கழிவுநீர்", light: "தெருவிளக்கு", trash: "குப்பை", power: "மின்சாரம்", other: "பிற" },
-  en: { road: "Road", water: "Drinking water", drain: "Drainage", light: "Streetlight", trash: "Garbage", power: "Electricity", other: "Other" }
-};
+const CAT = { ta: catLabels("ta"), en: catLabels("en") };
 
 export function citizenPush(c, url) {
   const L = c.lang === "en" ? "en" : "ta";

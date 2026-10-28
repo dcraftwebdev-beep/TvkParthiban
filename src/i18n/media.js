@@ -2,6 +2,7 @@
 import { T } from "./index.js";
 
 Object.assign(T.ta, {
+  fCatHint: "உங்கள் பிரச்சனைக்குப் பொருந்துவதைத் தொடவும்",
   teamEyebrow: "தமிழக வெற்றிக் கழகம்", teamTitle: "மக்களுக்காக... மக்களுடன்...", teamName: "நவல்பட்டு S. விஜி",
   teamRoles: ["திருவெறும்பூர் சட்டமன்ற உறுப்பினர்", "மாவட்டச் செயலாளர், திருச்சி புறநகர் தெற்கு மாவட்டம்"],
   teamNote: "36 வது வார்டு மக்கள் குறைகள் தீர்வு மையம். பொதுமக்கள் தங்கள் புகார்களை இணையதளம், வாட்ஸ் அப் அல்லது கைபேசி மூலம் தெரிவிக்கலாம்.", teamAlt: "நவல்பட்டு S. விஜி, திருவெறும்பூர் சட்டமன்ற உறுப்பினர்",
@@ -14,6 +15,7 @@ Object.assign(T.ta, {
   wEyebrow: "முடிந்த பணிகள்", wTitle: "முன் / பின்", wSub: "வார்டு 38 இல் தீர்க்கப்பட்ட புகார்கள். மக்களின் அனுமதியுடன் மட்டும்."
 });
 Object.assign(T.en, {
+  fCatHint: "Tap the one that matches your problem",
   teamEyebrow: "Tamilaga Vettri Kazhagam", teamTitle: "For the people... with the people...", teamName: "Navalpattu S. Viji",
   teamRoles: ["Member of the Legislative Assembly, Thiruverumbur", "District Secretary, Tiruchirappalli Suburban South District"],
   teamNote: "Ward 36 People's Grievance Redressal Centre. Citizens can report complaints through the website, WhatsApp or by phone.", teamAlt: "Navalpattu S. Viji, Member of the Legislative Assembly, Thiruverumbur",
