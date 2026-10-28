@@ -8,8 +8,8 @@
   --maroon:#5E0A11;
   --ink:#1A0A0C;
   --yellow:#FFD60A;
-  --paper:#EDF0F4;
-  --section:#E2E7EE;
+  --paper:#FFF5B8;
+  --section:#FBDCD9;
   --soft:#FAF6F0;
   --line:#EBE1D4;
   --mute:#6C5B5C;
@@ -67,7 +67,7 @@ html[lang="en"] .sec-head h2{font-size:clamp(40px,5.4vw,68px)}
 .btn:disabled{opacity:.55;cursor:not-allowed}
 
 /* ticker (desktop only) */
-.ticker{display:none;background:#0F172A;color:#ffffffb8;font-size:12.5px}
+.ticker{display:none;background:#240609;color:#ffffffb8;font-size:12.5px}
 .ticker .wrap{display:flex;align-items:center;gap:10px;padding-top:8px;padding-bottom:8px}
 .ticker .dot{width:6px;height:6px;border-radius:50%;background:var(--flag-yellow)}
 .ticker a{margin-left:auto;color:#fff;font-weight:600}
@@ -100,7 +100,7 @@ html[lang="en"] .brand-text b{font-size:19px;letter-spacing:.03em;font-weight:60
 .toast.show{opacity:1;transform:translate(-50%,0)}
 
 /* footer */
-.foot{position:relative;background:#111827;color:#fff;overflow:hidden}
+.foot{position:relative;background:#1f0508;color:#fff;overflow:hidden}
 .foot-icons{display:flex;gap:10px;margin-top:18px}
 .foot-icons a{display:grid;place-items:center;width:46px;height:46px;border-radius:50%;border:1px solid #ffffff40;color:#fff;transition:all .2s}
 .foot-icons a:hover{background:var(--flag-yellow);color:var(--ink);border-color:var(--flag-yellow)}
