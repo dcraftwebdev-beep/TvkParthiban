@@ -5,13 +5,9 @@ export function Footer({ t, lang }) {
   const year = new Date().getFullYear();
   return (
     <footer className="foot">
-      <div className="wrap foot-top">
-        <div className="foot-photo"><img src="/portrait.jpg" alt={CFG.leaderName[lang]} loading="lazy" /></div>
-        <div className="foot-cta">
-          <p className="eyebrow">{t.fEyebrow}</p>
-          <h2>{t.fTitle}</h2>
-          <p className="foot-text">{t.fText}</p>
-          <a className="btn primary" href="#complaint">{t.ctaRaise}<Icon n="out" size={18} /></a>
+      <div className="wrap foot-mid">
+        <div>
+          <p className="foot-brand">{t.fBrand}</p>
           <div className="foot-icons">
             <a href={wa()} target="_blank" rel="noopener" aria-label="WhatsApp"><Icon n="wa" size={22} /></a>
             <a href={`tel:+${CFG.phone}`} aria-label={t.qCall}><Icon n="phone" size={22} /></a>
@@ -19,10 +15,6 @@ export function Footer({ t, lang }) {
             <a href="https://www.facebook.com/TVKVijayHQ/" target="_blank" rel="noopener" aria-label="Facebook"><Icon n="fb" size={20} /></a>
           </div>
         </div>
-      </div>
-
-      <div className="wrap foot-mid">
-        <p className="foot-brand">{t.fBrand}</p>
         <div className="foot-cols">
           <div>
             <h4>{t.fCol1}</h4>
