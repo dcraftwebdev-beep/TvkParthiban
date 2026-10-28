@@ -1,6 +1,6 @@
 import { TVK_SITE } from "../i18n/tvk.js";
 import { LazyVideo } from "../components/LazyVideo.jsx";
-import { wa, Icon, P, Head } from "../components/ui.jsx";
+import { wa, Icon, Head } from "../components/ui.jsx";
 
 export function Tvk({ t }) {
   return (
@@ -52,7 +52,7 @@ export function Join({ t }) {
         <p className="sub">{t.joinText}</p>
         <div className="join-cta">
           <a className="btn primary" href={TVK_SITE} target="_blank" rel="noopener">{t.joinBtn}</a>
-          <a className="btn ghost" href={wa()} target="_blank" rel="noopener"><Icon d={P.chat} size={18} />{t.joinWard}</a>
+          <a className="btn ghost" href={wa()} target="_blank" rel="noopener"><Icon n="wa" size={18} />{t.joinWard}</a>
         </div>
       </div>
     </div></section>

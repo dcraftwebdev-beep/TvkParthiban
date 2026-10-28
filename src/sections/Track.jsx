@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { CFG, CATS } from "../lib/config.js";
 import { api } from "../lib/api.js";
-import { wa, Icon, P, Head } from "../components/ui.jsx";
+import { wa, Icon, Head } from "../components/ui.jsx";
 
 const dayMs = 86400000;
 
@@ -25,7 +25,7 @@ export function TrackCard({ c, t, lang, n, open, onToggle }) {
           <span className="t-line2"><strong>{cat}</strong> · {c.snippet}</span>
           <span className="t-mini" aria-hidden="true">{[0, 1, 2].map(k => <i key={k} className={k <= c.status ? "f" : ""} />)}</span>
         </span>
-        <span className="t-chev"><Icon d="M6 9l6 6 6-6" size={18} /></span>
+        <span className="t-chev"><Icon n="down" size={18} /></span>
       </button>
 
       {open && (
@@ -33,7 +33,7 @@ export function TrackCard({ c, t, lang, n, open, onToggle }) {
           <ol className="t-steps">
             {[0, 1, 2].map(k => (
               <li key={k} className={(k <= c.status ? "on" : "") + (k === c.status ? " now" : "")}>
-                <span className="t-dot">{k <= c.status ? <Icon d={P.tick} size={13} /> : k + 1}</span>
+                <span className="t-dot">{k <= c.status ? <Icon n="tick" size={13} /> : k + 1}</span>
                 <div>
                   <b>{t.st[k]}</b>
                   <small>{stepAt[k] && k <= c.status ? <>{date(stepAt[k])}<br />{time(stepAt[k])}</> : t.tWaiting}</small>
@@ -48,7 +48,7 @@ export function TrackCard({ c, t, lang, n, open, onToggle }) {
             <div><dt>{done ? t.tTaken : t.tOpenFor}</dt><dd>{took}</dd></div>
           </dl>
 
-          {c.street && <p className="t-loc"><Icon d={P.pin} size={14} />{c.street}</p>}
+          {c.street && <p className="t-loc"><Icon n="pin" size={14} />{c.street}</p>}
           {c.note && <p className="t-note"><b>{t.tNote}</b>{c.note}</p>}
           {c.result && (
             <a className="t-result" href={c.result} target="_blank" rel="noopener">
@@ -56,9 +56,9 @@ export function TrackCard({ c, t, lang, n, open, onToggle }) {
             </a>
           )}
           <div className="t-contact">
-            <button type="button" onClick={copy}><Icon d={copied ? P.tick : P.copy} size={16} />{copied ? t.copied : t.copy}</button>
-            <a href={`tel:+${CFG.phone}`}><Icon d={P.phone} size={16} />{t.qCall}</a>
-            <a href={wa(`${c.id}`)} target="_blank" rel="noopener"><Icon d={P.chat} size={16} />WhatsApp</a>
+            <button type="button" onClick={copy}><Icon n={copied ? "tick" : "copy"} size={16} />{copied ? t.copied : t.copy}</button>
+            <a href={`tel:+${CFG.phone}`}><Icon n="phone" size={16} />{t.qCall}</a>
+            <a href={wa(`${c.id}`)} target="_blank" rel="noopener"><Icon n="wa" size={16} />WhatsApp</a>
           </div>
         </div>
       )}

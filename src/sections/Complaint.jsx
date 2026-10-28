@@ -4,7 +4,7 @@ import { T } from "../i18n/index.js";
 import { api } from "../lib/api.js";
 import { subscribePush, pushSupported } from "../lib/push.js";
 import { canRecord, startRecording, blobToBase64, clock, MAX_SECS } from "../lib/recorder.js";
-import { wa, Icon, P } from "../components/ui.jsx";
+import { wa, Icon } from "../components/ui.jsx";
 
 export function Complaint({ t, lang, say, onDone, micReq }) {
   const [step, setStep] = useState(0);
@@ -138,19 +138,19 @@ export function Complaint({ t, lang, say, onDone, micReq }) {
         <h2>{t.cTitle}</h2>
         <p className="sub">{t.cSub}</p>
         <ul className="cx-points">
-          {[[P.mic, t.cB1], [P.tick, t.cB2], [P.search, t.cB3]].map(([d, x]) => <li key={x}><span><Icon d={d} size={18} /></span>{x}</li>)}
+          {[["mic", t.cB1], ["tick", t.cB2], ["search", t.cB3]].map(([n, x]) => <li key={x}><span><Icon n={n} size={18} /></span>{x}</li>)}
         </ul>
         <div className="cx-alt">
           <p>{t.cOr}</p>
-          <a className="btn wa" href={wa()} target="_blank" rel="noopener"><Icon d={P.chat} size={18} />WhatsApp</a>
-          <a className="btn ghost" href={`tel:+${CFG.phone}`}><Icon d={P.phone} size={18} />{t.qCall}</a>
+          <a className="btn wa" href={wa()} target="_blank" rel="noopener"><Icon n="wa" size={18} />WhatsApp</a>
+          <a className="btn ghost" href={`tel:+${CFG.phone}`}><Icon n="phone" size={18} />{t.qCall}</a>
         </div>
       </aside>
 
       <div className="cx-card rv">
         <div className="cx-bar" role="progressbar" aria-valuemin={1} aria-valuemax={4} aria-valuenow={step + 1}><i style={{ width: `${((step + 1) / 4) * 100}%` }} /></div>
         <div className="cx-meta">
-          {step > 0 ? <button type="button" className="cx-back" onClick={() => go(step - 1)} aria-label={t.back}><Icon d="M15 5l-7 7 7 7" size={20} /></button> : <span className="cx-back ph" />}
+          {step > 0 ? <button type="button" className="cx-back" onClick={() => go(step - 1)} aria-label={t.back}><Icon n="back" size={20} /></button> : <span className="cx-back ph" />}
           <div><small>{step + 1} / 4</small><b>{t.stepLabels[step]}</b></div>
           {catLabel && step > 0 && <span className="cx-pill">{catLabel}</span>}
         </div>
@@ -161,7 +161,7 @@ export function Complaint({ t, lang, say, onDone, micReq }) {
             <div className="cx-cats">
               {CATS.map(c => (
                 <button key={c.id} type="button" className={"cx-cat" + (cat === c.id ? " on" : "")} onClick={() => pick(c.id)}>
-                  <span className="cx-ico"><Icon d={c.d} size={24} /></span><b>{c[lang]}</b>
+                  <span className="cx-ico"><Icon n={c.icon} size={24} /></span><b>{c[lang]}</b>
                 </button>
               ))}
             </div>
@@ -185,7 +185,7 @@ export function Complaint({ t, lang, say, onDone, micReq }) {
               </div>
             ) : !voice ? (
               <button type="button" className="mic-big" onClick={toggleRecord}>
-                <span className="mic-orb"><Icon d={P.mic} size={28} /></span>
+                <span className="mic-orb"><Icon n="mic" size={28} /></span>
                 <span className="mic-txt">
                   <b>{t.recTap}</b>
                   <small>{t.recHint}</small>
@@ -194,13 +194,13 @@ export function Complaint({ t, lang, say, onDone, micReq }) {
             ) : (
               <div className="voice-done">
                 <div className="vd-row">
-                  <span className="vd-ico"><Icon d={P.tick} size={18} /></span>
+                  <span className="vd-ico"><Icon n="tick" size={18} /></span>
                   <b>{t.recSaved} · {clock(voice.secs)}</b>
                 </div>
                 <audio controls src={voice.url} preload="metadata" />
                 <div className="vd-actions">
-                  <button type="button" onClick={toggleRecord}><Icon d={P.mic} size={16} />{t.recAgain}</button>
-                  <button type="button" onClick={clearVoice}><Icon d="M6 6l12 12M18 6 6 18" size={16} />{t.remove}</button>
+                  <button type="button" onClick={toggleRecord}><Icon n="mic" size={16} />{t.recAgain}</button>
+                  <button type="button" onClick={clearVoice}><Icon n="x" size={16} />{t.remove}</button>
                 </div>
               </div>
             )}
@@ -210,12 +210,12 @@ export function Complaint({ t, lang, say, onDone, micReq }) {
               {photos.map((p, k) => (
                 <div className="cx-thumb" key={k}>
                   <img src={p} alt="" />
-                  <button type="button" onClick={() => setPhotos(list => list.filter((_, n) => n !== k))} aria-label={t.remove}><Icon d="M6 6l12 12M18 6 6 18" size={14} /></button>
+                  <button type="button" onClick={() => setPhotos(list => list.filter((_, n) => n !== k))} aria-label={t.remove}><Icon n="x" size={14} /></button>
                 </div>
               ))}
               {photos.length < 4 && (
                 <label className="cx-add">
-                  <Icon d={P.cam} size={24} />
+                  <Icon n="cam" size={24} />
                   <b>{photos.length ? t.addMore : t.fPhoto}</b>
                   <small>{photos.length}/4</small>
                   <input type="file" accept="image/*" multiple hidden onChange={onPhotos} />
@@ -228,7 +228,7 @@ export function Complaint({ t, lang, say, onDone, micReq }) {
           {step === 2 && (<>
             <h3>{t.fPlace}</h3>
             <button type="button" className={"cx-opt" + (coords ? " ok" : "")} onClick={gps}>
-              <span className="cx-ico"><Icon d={coords ? P.tick : P.pin} size={22} /></span>
+              <span className="cx-ico"><Icon n={coords ? "tick" : "pin"} size={22} /></span>
               <span><b>{t.fGps}</b><small>{gpsMsg || t.gpsHelp}</small></span>
             </button>
             <div className="cx-or"><span>{t.orType}</span></div>
@@ -257,7 +257,7 @@ export function Complaint({ t, lang, say, onDone, micReq }) {
           {step === 2 && <button type="button" className="btn dark wide" onClick={() => go(3)}>{t.next}</button>}
           {step === 3 && (<>
             <button type="button" className="btn dark wide" disabled={busy} onClick={submit}>{busy ? t.sending : t.fSubmit}</button>
-            {down && <div className="cx-down"><p>{t.serverDown}</p><a className="btn wa wide" href={down} target="_blank" rel="noopener"><Icon d={P.chat} size={18} />{t.fSubmitWa}</a></div>}
+            {down && <div className="cx-down"><p>{t.serverDown}</p><a className="btn wa wide" href={down} target="_blank" rel="noopener"><Icon n="wa" size={18} />{t.fSubmitWa}</a></div>}
           </>)}
         </div>
       </div>

@@ -1,5 +1,5 @@
 import { CFG } from "../../lib/config.js";
-import { wa, Icon, P, WaGlyph } from "../ui.jsx";
+import { wa, Icon } from "../ui.jsx";
 
 export function Footer({ t, lang }) {
   const year = new Date().getFullYear();
@@ -11,12 +11,12 @@ export function Footer({ t, lang }) {
           <p className="eyebrow">{t.fEyebrow}</p>
           <h2>{t.fTitle}</h2>
           <p className="foot-text">{t.fText}</p>
-          <a className="btn primary" href="#complaint">{t.ctaRaise}<Icon d="M7 17 17 7M8 7h9v9" size={18} /></a>
+          <a className="btn primary" href="#complaint">{t.ctaRaise}<Icon n="out" size={18} /></a>
           <div className="foot-icons">
-            <a href={wa()} target="_blank" rel="noopener" aria-label="WhatsApp"><WaGlyph size={22} /></a>
-            <a href={`tel:+${CFG.phone}`} aria-label={t.qCall}><Icon d={P.phone} size={22} /></a>
-            <a href="https://www.instagram.com/tvkvijayhq/" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3.5" y="3.5" width="17" height="17" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none" /></svg></a>
-            <a href="https://www.facebook.com/TVKVijayHQ/" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.5-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4v2.2H7.800v3h2.600V21z" /></svg></a>
+            <a href={wa()} target="_blank" rel="noopener" aria-label="WhatsApp"><Icon n="wa" size={22} /></a>
+            <a href={`tel:+${CFG.phone}`} aria-label={t.qCall}><Icon n="phone" size={22} /></a>
+            <a href="https://www.instagram.com/tvkvijayhq/" target="_blank" rel="noopener" aria-label="Instagram"><Icon n="ig" size={22} /></a>
+            <a href="https://www.facebook.com/TVKVijayHQ/" target="_blank" rel="noopener" aria-label="Facebook"><Icon n="fb" size={20} /></a>
           </div>
         </div>
       </div>

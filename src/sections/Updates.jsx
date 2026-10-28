@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { CFG } from "../lib/config.js";
-import { wa, Flag, WaGlyph } from "../components/ui.jsx";
+import { wa, Flag, Icon } from "../components/ui.jsx";
 
 export function Updates({ t }) {
   const [all, setAll] = useState(false);
@@ -18,7 +18,7 @@ export function Updates({ t }) {
         <div className="wa-head">
           <span className="wa-av"><Flag /></span>
           <div><b>{t.uChannel}</b><small>{t.uChannelSub}</small></div>
-          <a className="wa-join" href={wa()} target="_blank" rel="noopener" aria-label={t.uJoin}><WaGlyph size={18} /><span>{t.uJoinShort}</span></a>
+          <a className="wa-join" href={wa()} target="_blank" rel="noopener" aria-label={t.uJoin}><Icon n="wa" size={18} /><span>{t.uJoinShort}</span></a>
         </div>
         <div className="wa-feed">
           {(
@@ -37,7 +37,7 @@ export function Updates({ t }) {
               <p>{body}</p>
               <div className="wa-row">
                 <a href={src} target="_blank" rel="noopener">{t.uSrc}</a>
-                <a className="wa-share" href={share(title, body)} target="_blank" rel="noopener"><WaGlyph size={16} />{t.uShare}</a>
+                <a className="wa-share" href={share(title, body)} target="_blank" rel="noopener"><Icon n="wa" size={16} />{t.uShare}</a>
               </div>
             </article>
           ))}

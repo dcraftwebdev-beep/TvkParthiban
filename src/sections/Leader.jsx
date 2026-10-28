@@ -1,5 +1,5 @@
 import { CFG } from "../lib/config.js";
-import { wa, Icon, P } from "../components/ui.jsx";
+import { wa, Icon } from "../components/ui.jsx";
 
 export function Leader({ t, lang }) {
   return (
@@ -13,8 +13,8 @@ export function Leader({ t, lang }) {
         <p className="role-line"><b>{t.lRole}</b></p>
         <p className="role-line sub">{t.lRole2}</p>
         <p className="body">{t.lText}</p>
-        <ul className="ticks">{[t.lP1, t.lP2, t.lP3].map(x => <li key={x}><Icon d={P.tick} size={18} />{x}</li>)}</ul>
-        <div className="leader-cta"><a className="btn dark" href={wa()} target="_blank" rel="noopener"><Icon d={P.chat} size={18} />{t.lCta}</a></div>
+        <ul className="ticks">{[t.lP1, t.lP2, t.lP3].map(x => <li key={x}><Icon n="tick" size={18} />{x}</li>)}</ul>
+        <div className="leader-cta"><a className="btn dark" href={wa()} target="_blank" rel="noopener"><Icon n="wa" size={18} />{t.lCta}</a></div>
       </div>
     </div></section>
   );

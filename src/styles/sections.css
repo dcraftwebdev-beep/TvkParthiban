@@ -162,7 +162,8 @@ html[lang="en"] .join-copy h2{font-size:clamp(44px,6.4vw,76px)}
   .quick{margin-top:-52px}
   .quick-in{gap:14px}
   .tile{flex-direction:row;justify-content:flex-start;text-align:left;gap:14px;padding:18px 20px}
-  .tile .ic{width:46px;height:46px;padding:12px}
+  .tile .ti{width:50px;height:50px}
+  .tile .ti .ic{width:25px;height:25px;padding:0}
   .tile b{font-size:15px}
   .tile small{display:block;margin-top:1px}
   .stats{padding:44px 0 0}
