@@ -43,23 +43,47 @@ const I = {
 /* ---------- login ---------- */
 function Login({ onOk }) {
   const [pw, setPw] = useState(""), [err, setErr] = useState(""), [busy, setBusy] = useState(false);
+  const [show, setShow] = useState(false), [caps, setCaps] = useState(false), [shake, setShake] = useState(0);
   const go = async e => {
-    e.preventDefault(); if (busy) return; setBusy(true); setErr("");
+    e.preventDefault(); if (busy || !pw) return; setBusy(true); setErr("");
     try { const r = await admin.login(pw); setToken(r.token); onOk(r.token); }
-    catch (x) { setErr(x.status === 429 ? "Too many attempts. Wait a few minutes." : x.status === 401 ? "Wrong password." : "Cannot reach the server."); }
+    catch (x) { setErr(x.status === 429 ? "Too many attempts. Please wait a few minutes and try again." : x.status === 401 ? "That password is not correct. Please try again." : "Cannot reach the server. Check your internet connection."); setShake(n => n + 1); }
     finally { setBusy(false); }
   };
   return (
     <div className="ad-login">
-      <form className="ad-login-card" onSubmit={go}>
-        <img src="/flag.jpg" alt="" className="ad-flag" />
-        <h1>Admin panel</h1>
-        <p>வார்டு 38 · காட்டூர் · TVK</p>
-        <input type="password" autoFocus value={pw} onChange={e => setPw(e.target.value)} placeholder="Password" autoComplete="current-password" />
-        {err && <div className="ad-err" role="alert">{err}</div>}
-        <button className="ad-btn primary" disabled={!pw || busy}>{busy ? "Signing in…" : "Sign in"}</button>
-        <a href="#home" className="ad-link">← Back to website</a>
-      </form>
+      <aside className="ad-login-art" aria-hidden="true">
+        <img src="/tvk/admin-login.webp" alt="" />
+        <div className="ad-login-over">
+          <img className="ad-login-logo" src="/flag.jpg" alt="" />
+          <h2>Ward 38 · Kattur</h2>
+          <p>Listen to every complaint. Follow it up until it is solved.</p>
+        </div>
+      </aside>
+      <main className="ad-login-side">
+        <form className={"ad-login-card" + (shake ? " shake" : "")} key={shake} onSubmit={go}>
+          <img src="/flag.jpg" alt="" className="ad-flag" />
+          <h1>Welcome back</h1>
+          <p>Sign in to manage the ward complaints.</p>
+          <label className="ad-field">
+            <span>Password</span>
+            <div className="ad-pw">
+              <span className="ad-pw-lock"><SiteIcon n="lock" size={18} /></span>
+              <input type={show ? "text" : "password"} autoFocus value={pw} onChange={e => { setPw(e.target.value); if (err) setErr(""); }}
+                onKeyUp={e => setCaps(!!e.getModifierState?.("CapsLock"))} onBlur={() => setCaps(false)}
+                placeholder="Enter your password" autoComplete="current-password" aria-invalid={!!err} />
+              <button type="button" className="ad-eye" onClick={() => setShow(v => !v)} aria-label={show ? "Hide password" : "Show password"} aria-pressed={show} data-tip={show ? "Hide password" : "Show password"}>
+                <SiteIcon n={show ? "eyeoff" : "eye"} size={19} />
+              </button>
+            </div>
+          </label>
+          {caps && <div className="ad-hint" role="status">Caps Lock is on</div>}
+          {err && <div className="ad-err" role="alert">{err}</div>}
+          <button className="ad-btn primary ad-signin" disabled={!pw || busy}>{busy ? <><i className="ad-spin" />Signing in…</> : "Sign in"}</button>
+          <a href="#home" className="ad-link">← Back to website</a>
+          <small className="ad-foot"><SiteIcon n="lock" size={13} /> Ward office staff only</small>
+        </form>
+      </main>
     </div>
   );
 }
