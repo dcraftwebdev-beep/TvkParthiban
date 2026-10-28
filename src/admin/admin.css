@@ -410,3 +410,17 @@ body:has(.ad)::before,body:has(.ad-login)::before{display:none}
 .ad-login{color:#0F172A}
 .ad-login-card{color:#0F172A;--ink:#0F172A;--mute:#64748B}
 .ad-login .ad-pw input{padding:13px 46px 13px 44px}
+/* phones and tablets: the same photo as a banner on top, the form below it */
+@media (max-width:899px){
+  .ad-login{grid-template-columns:1fr;grid-template-rows:auto 1fr;background:#fff}
+  .ad-login-art{display:block;height:clamp(170px,34vh,260px)}
+  .ad-login-art>img{object-position:72% 22%}
+  .ad-login-over{padding:18px 20px 40px;gap:2px;background:linear-gradient(180deg,#0f172a59 0%,#0f172a26 40%,#0f172ad9 100%)}
+  .ad-login-logo{display:none}
+  .ad-login-over h2{font-size:22px}
+  .ad-login-over p{font-size:13px;max-width:none}
+  .ad-login-side{position:relative;z-index:1;margin-top:-22px;padding:26px 20px 32px;background:#fff;border-radius:24px 24px 0 0;align-items:start;justify-items:center}
+  .ad-login-card{padding:0;max-width:420px}
+  .ad-login-card .ad-flag{display:none}
+  .ad-lang-float{position:fixed;top:12px;right:12px}
+}
