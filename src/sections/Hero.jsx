@@ -14,7 +14,7 @@ export function Hero({ t }) {
   const wide = useWide();
   return (
     <section className="hero" id="home">
-      <img className="hero-photo" src="/tvk/hero-mobile.jpg" alt="" fetchpriority="high" />
+      <img className="hero-photo" src="/tvk/banner-mobile-800.webp" srcSet="/tvk/banner-mobile-800.webp 800w, /tvk/banner-mobile-1200.webp 1200w" sizes="100vw" width="1877" height="838" fetchpriority="high" alt="TVK leaders and the party flag" />
       {wide && <video className="hero-video" autoPlay muted loop playsInline preload="metadata" aria-hidden="true"><source src="/hero.mp4" type="video/mp4" /></video>}
       <div className="hero-shade" />
       <div className="wrap hero-grid">
