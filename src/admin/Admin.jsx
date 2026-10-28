@@ -84,7 +84,7 @@ function Login({ onOk }) {
           {caps && <div className="ad-hint" role="status">{t("Caps Lock is on")}</div>}
           {err && <div className="ad-err" role="alert">{err}</div>}
           <button className="ad-btn primary ad-signin" disabled={!pw || busy}>{busy ? <><i className="ad-spin" />{t("Signing in…")}</> : t("Sign in")}</button>
-          <a href="#home" className="ad-link">{t("← Back to website")}</a>
+          <a href="#home" className="ad-link"><SiteIcon n="arrowleft" size={16} />{t("Back to website")}</a>
           <small className="ad-foot"><SiteIcon n="lock" size={13} /> {t("Ward office staff only")}</small>
         </form>
       </div>

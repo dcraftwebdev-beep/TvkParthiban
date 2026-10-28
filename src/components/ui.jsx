@@ -1,4 +1,4 @@
-import { LuHouse, LuUser, LuPlus, LuSearch, LuPhone, LuMic, LuMapPin, LuCamera, LuCheck, LuCopy, LuX, LuChevronDown, LuChevronLeft, LuArrowUpRight, LuBell, LuDownload, LuRoute, LuDroplets, LuWaves, LuLightbulb, LuTrash2, LuZap, LuEllipsis, LuPointer, LuChevronRight, LuToilet, LuBug, LuDog, LuConstruction, LuTreePine, LuTrees, LuBus, LuShieldAlert, LuEye, LuEyeOff, LuLock } from "react-icons/lu";
+import { LuHouse, LuUser, LuPlus, LuSearch, LuPhone, LuMic, LuMapPin, LuCamera, LuCheck, LuCopy, LuX, LuChevronDown, LuChevronLeft, LuArrowUpRight, LuBell, LuDownload, LuRoute, LuDroplets, LuWaves, LuLightbulb, LuTrash2, LuZap, LuEllipsis, LuPointer, LuChevronRight, LuToilet, LuBug, LuDog, LuConstruction, LuTreePine, LuTrees, LuBus, LuShieldAlert, LuEye, LuEyeOff, LuLock, LuArrowLeft } from "react-icons/lu";
 import { FaWhatsapp, FaInstagram, FaFacebookF } from "react-icons/fa6";
 import { CFG } from "../lib/config.js";
 import { useCount } from "../hooks/index.js";
@@ -10,7 +10,7 @@ const ICONS = {
   home: LuHouse, user: LuUser, plus: LuPlus, search: LuSearch, phone: LuPhone, mic: LuMic, pin: LuMapPin, cam: LuCamera,
   tick: LuCheck, copy: LuCopy, x: LuX, down: LuChevronDown, back: LuChevronLeft, out: LuArrowUpRight, bell: LuBell, download: LuDownload,
   road: LuRoute, water: LuDroplets, drain: LuWaves, light: LuLightbulb, trash: LuTrash2, power: LuZap, other: LuEllipsis, tap: LuPointer, right: LuChevronRight,
-  toilet: LuToilet, health: LuBug, animal: LuDog, encroach: LuConstruction, tree: LuTreePine, park: LuTrees, bus: LuBus, safety: LuShieldAlert, eye: LuEye, eyeoff: LuEyeOff, lock: LuLock,
+  toilet: LuToilet, health: LuBug, animal: LuDog, encroach: LuConstruction, tree: LuTreePine, park: LuTrees, bus: LuBus, safety: LuShieldAlert, eye: LuEye, eyeoff: LuEyeOff, lock: LuLock, arrowleft: LuArrowLeft,
   wa: FaWhatsapp, ig: FaInstagram, fb: FaFacebookF
 };
 export const Icon = ({ n, size = 22 }) => {

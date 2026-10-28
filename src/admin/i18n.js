@@ -24,7 +24,7 @@ export const TA = {
   "Caps Lock is on": "Caps Lock இயக்கத்தில் உள்ளது",
   "Signing in…": "உள்நுழைகிறது…",
   "Sign in": "உள்நுழை",
-  "← Back to website": "← இணையதளத்துக்குத் திரும்பு",
+  "Back to website": "இணையதளத்துக்குத் திரும்பு",
   "Ward office staff only": "வார்டு அலுவலக ஊழியர்களுக்கு மட்டும்",
   "Complaints admin": "புகார் நிர்வாகம்",
   "Ward 38 · Kattur": "வார்டு 38 · காட்டூர்",

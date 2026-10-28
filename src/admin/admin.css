@@ -424,3 +424,22 @@ body:has(.ad)::before,body:has(.ad-login)::before{display:none}
   .ad-login-card .ad-flag{display:none}
   .ad-lang-float{position:fixed;top:12px;right:12px}
 }
+/* login: the TVK maroon over the crowd photo with the flower pattern, no white background */
+.ad-login-side{background:linear-gradient(180deg,#5e0a11eb,#240609f5),url(/tvk/crowd.webp) center/cover;color:#fff}
+.ad-login-card{background:transparent;color:#fff;--ink:#fff;--mute:#ffffffbf}
+.ad-login-card h1{color:#fff}
+.ad-login-card>p{color:#ffffffc7}
+.ad-field>span{color:#fff}
+.ad-login input{color:#0F172A}
+.ad-login input::placeholder{color:#94A3B8}
+.ad-pw-lock,.ad-eye{color:#64748B}
+.ad-login .ad-signin{background:#FFD60A;border-color:#FFD60A;color:#1A0A0C}
+.ad-login .ad-signin:hover:not(:disabled){background:#FFE14D;border-color:#FFE14D}
+.ad-login .ad-signin:disabled{opacity:.55}
+.ad-spin{border-color:#1a0a0c33;border-top-color:#1A0A0C}
+.ad-link{display:inline-flex;align-items:center;gap:6px;color:#ffffffd9}
+.ad-link:hover{color:#FFD60A;background:#ffffff14}
+.ad-foot{color:#ffffffa6}
+.ad-hint{background:#FEF3C7;color:#92400E}
+@media (min-width:900px){.ad-login{background:#240609}.ad-login-side{background:linear-gradient(180deg,#5e0a11eb,#240609f5),url(/tvk/crowd.webp) center/cover}.ad-login-card{padding:0}}
+@media (max-width:899px){.ad-login{background:#240609}.ad-login-side{background:linear-gradient(180deg,#5e0a11,#240609)}}
