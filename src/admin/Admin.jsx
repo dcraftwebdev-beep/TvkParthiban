@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { admin, api, getToken, setToken } from "../lib/api.js";
 import { subscribePush, pushSupported } from "../lib/push.js";
 import { CATS, CFG } from "../lib/config.js";
+import { Icon as SiteIcon } from "../components/ui.jsx";
 import "./admin.css";
 
 const ST = ["புதியது", "நடவடிக்கையில்", "தீர்க்கப்பட்டது"];
@@ -157,7 +158,7 @@ async function composeBeforeAfter({ beforeUrls, afterData, id, raisedAt, doneAt 
 }
 
 /* ---------- detail drawer ---------- */
-function Detail({ id, token, onClose, onChanged, flash }) {
+function Detail({ id, token, onClose, onChanged, flash, dock }) {
   const [c, setC] = useState(null);
   const [status, setStatus] = useState(0);
   const [note, setNote] = useState("");
@@ -167,15 +168,18 @@ function Detail({ id, token, onClose, onChanged, flash }) {
 
   useEffect(() => {
     let live = true;
+    setC(null); setAfters([]); setComposed("");
+    if (!id) return undefined;
     admin.one(token, id).then(r => { if (live) { setC(r); setStatus(r.status); setNote(r.note || ""); } }).catch(() => flash("Could not load complaint"));
     return () => { live = false; };
   }, [id, token, flash]);
 
   useEffect(() => {
+    if (dock) return undefined;
     const k = e => { if (e.key === "Escape") onClose(); };
     document.body.style.overflow = "hidden"; window.addEventListener("keydown", k);
     return () => { document.body.style.overflow = ""; window.removeEventListener("keydown", k); };
-  }, [onClose]);
+  }, [onClose, dock]);
 
   const pickAfter = async e => {
     const files = [...e.target.files].slice(0, 3); e.target.value = ""; if (!files.length) return;
@@ -241,163 +245,272 @@ function Detail({ id, token, onClose, onChanged, flash }) {
   };
   const copy = async () => { try { await navigator.clipboard.writeText(link); flash("Link copied"); } catch { flash(link); } };
 
+  const cat = c ? CATS.find(x => x.id === c.cat) : null;
+  const steps = c ? [
+    [ST_EN[0], c.createdAt],
+    [ST_EN[1], c.progressAt || (c.status >= 1 ? c.updatedAt : null)],
+    [ST_EN[2], c.resolvedAt || (c.status === 2 ? c.updatedAt : null)]
+  ] : [];
+
+  const body = !id ? (
+    <div className="ad-emptyside">
+      <span className="ad-emptyico"><SiteIcon n="search" size={26} /></span>
+      <h3>Select a complaint</h3>
+      <p>Click any complaint in the list to see the citizen, photos, voice message and update its status here.</p>
+    </div>
+  ) : !c ? <p className="ad-pad">Loading…</p> : (
+    <div className="ad-db">
+      <section className="ad-sum">
+        <div className="ad-sum-top">
+          <span className="ad-catico"><SiteIcon n={cat?.icon || "other"} size={22} /></span>
+          <div><small>{cat ? `${cat.ta} · ${cat.en}` : c.cat}</small><b>{c.id}</b></div>
+          <span className={"ad-pill s" + c.status}>{ST_EN[c.status]}</span>
+        </div>
+        <p className="ad-desc">{c.desc}</p>
+        <dl className="ad-facts">
+          <div><dt>Raised</dt><dd>{when(c.createdAt)}</dd></div>
+          <div><dt>Open for</dt><dd>{ago(c.createdAt).replace(" ago", "")}</dd></div>
+          <div className="wide"><dt>Location</dt><dd>{c.street || "Not given"}{c.lat != null && <a className="ad-maplink" href={`https://maps.google.com/?q=${c.lat},${c.lng}`} target="_blank" rel="noopener">Open map</a>}</dd></div>
+        </dl>
+      </section>
+
+      <section className="ad-person">
+        <span className="ad-avatar">{(c.name || "?").trim().charAt(0).toUpperCase()}</span>
+        <div className="ad-who"><b>{c.name}</b><span>{c.phone}</span></div>
+        <div className="ad-round">
+          <a href={`tel:+${intl(c.phone)}`} aria-label="Call" data-tip="Call"><Ico d={I.phone} /></a>
+          <a className="wa" href={`https://wa.me/${intl(c.phone)}`} target="_blank" rel="noopener" aria-label="WhatsApp" data-tip="WhatsApp"><Ico d={I.chat} /></a>
+        </div>
+      </section>
+
+      {c.hasVoice && (
+        <section className="ad-voice">
+          <span className="ad-vico"><Ico d={I.mic} /></span>
+          <div>
+            <b>Voice message <small>{c.voiceSecs}s</small></b>
+            <audio controls preload="none" src={admin.voiceUrl(token, c.id)} />
+          </div>
+        </section>
+      )}
+
+      <section className="ad-compare">
+        <div className="ad-col">
+          <h4>Before <small>citizen</small></h4>
+          {c.photoCount > 0 ? (
+            <div className="ad-thumbs">
+              {Array.from({ length: c.photoCount }, (_, i) => (
+                <a key={i} href={admin.photoUrl(token, c.id, i)} target="_blank" rel="noopener"><img src={admin.photoUrl(token, c.id, i)} alt={`Photo ${i + 1}`} loading="lazy" /></a>
+              ))}
+            </div>
+          ) : <p className="ad-none">No photos added</p>}
+        </div>
+        <div className="ad-col after">
+          <h4>After <small>you</small></h4>
+          <div className="ad-thumbs">
+            {afters.map((p, k) => (
+              <div className="ad-thumb" key={k}><img src={p} alt={`After ${k + 1}`} /><button type="button" onClick={() => dropAfter(k)} aria-label="Remove"><Ico d={I.x} s={12} /></button></div>
+            ))}
+            {afters.length < 3 && (
+              <label className="ad-addtile">
+                <Ico d={I.cam} s={22} />
+                <span>{afters.length || c.hasResult ? "Add more" : "Add photos"}</span>
+                <input type="file" accept="image/*" multiple hidden onChange={pickAfter} />
+              </label>
+            )}
+          </div>
+          {c.hasResult && !afters.length && <p className="ad-none">After photos saved. Add new ones to replace.</p>}
+        </div>
+      </section>
+
+      <section className="ad-panel">
+        <h3>Update status</h3>
+        <div className="ad-seg">
+          {ST_EN.map((l, i) => <button key={l} className={status === i ? "on s" + i : ""} onClick={() => setStatus(i)}>{l}</button>)}
+        </div>
+        <input className="ad-line" type="text" maxLength={300} value={note} onChange={e => setNote(e.target.value)} placeholder="Note for the citizen (optional)" />
+        {composed && <img className="ad-preview" src={composed} alt="Before and after preview" />}
+        <button className="ad-btn primary ad-save" disabled={busy} onClick={save}>{busy ? "Working…" : "Save changes"}</button>
+        {c.canPush && <p className="ad-meta">The citizen will get a phone alert when the status changes.</p>}
+      </section>
+
+      <section className="ad-time">
+        <h3>Progress</h3>
+        <ol>
+          {steps.map(([l, at], k) => (
+            <li key={l} className={(k <= c.status ? "on" : "") + (k === c.status ? " now" : "")}>
+              <span className="ad-tdot">{k <= c.status ? <Ico d="M5 12.5l4.5 4.5L19 7.5" s={12} /> : k + 1}</span>
+              <div><b>{l}</b><small>{at && k <= c.status ? when(at) : "Waiting"}</small></div>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      {c.hasResult && (
+        <section className="ad-result">
+          <h3>Result photo</h3>
+          <img src={c.resultUrl} alt="Before and after" />
+          <div className="ad-round">
+            <a className="wa" href={waLink("resolved")} target="_blank" rel="noopener" aria-label="Send on WhatsApp" data-tip="Send on WhatsApp"><Ico d={I.chat} /></a>
+            {typeof navigator !== "undefined" && navigator.canShare && <button onClick={share} aria-label="Share photo" data-tip="Share photo"><Ico d={I.share} /></button>}
+            <a href={c.resultUrl} download={`${c.id}-before-after.jpg`} aria-label="Download" data-tip="Download"><Ico d={I.dl} /></a>
+            <button onClick={copy} aria-label="Copy link" data-tip="Copy link"><Ico d={I.link} /></button>
+          </div>
+          <label className="ad-switch">
+            <input type="checkbox" checked={c.consent} onChange={e => publish(e.target.checked)} />
+            <span><b>Show on the website</b><small>{c.consent ? "Visible on the Work done page" : "Hidden from the public"}</small></span>
+          </label>
+        </section>
+      )}
+
+      <details className="ad-more">
+        <summary>Send a WhatsApp message</summary>
+        <div className="ad-chips">
+          <a href={waLink("received")} target="_blank" rel="noopener">Received</a>
+          <a href={waLink("progress")} target="_blank" rel="noopener">In progress</a>
+          <a href={waLink("resolved")} target="_blank" rel="noopener">Resolved</a>
+        </div>
+      </details>
+
+      {c.notifications?.length > 0 && (
+        <details className="ad-more">
+          <summary>WhatsApp delivery log</summary>
+          <ul className="ad-log">
+            {c.notifications.map((n, i) => (
+              <li key={i} className={n.ok ? "ok" : n.pending ? "wait" : "bad"}>
+                <b>{n.ok ? "Sent" : n.pending ? "Queued" : "Failed"}</b> · {n.audience} · {n.kind} · {when(n.at)}
+                {!n.ok && n.error && <em>{n.error}</em>}
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+    </div>
+  );
+
+  if (dock) return <aside className="ad-dock" aria-label="Complaint details">{id && <header className="ad-dockhead"><span>Complaint details</span></header>}{body}</aside>;
   return (
     <div className="ad-drawer-wrap" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
       <aside className="ad-drawer" role="dialog" aria-modal="true" aria-label="Complaint details">
         <header className="ad-dh">
-          <div><small>{c ? catName(c.cat) : ""}</small><h2>{id}</h2></div>
+          <div><small>{cat ? catName(cat.id) : ""}</small><h2>{id}</h2></div>
           {c && <span className={"ad-pill s" + c.status}>{ST_EN[c.status]}</span>}
           <button className="ad-icon" onClick={onClose} aria-label="Close"><Ico d={I.x} /></button>
         </header>
-        {!c ? <p className="ad-pad">Loading…</p> : (
-          <div className="ad-db">
-            <section className="ad-top1">
-              <p className="ad-desc">{c.desc}</p>
-              <p className="ad-meta">{when(c.createdAt)} · {ago(c.createdAt)}</p>
-            </section>
-
-            <section className="ad-person">
-              <div className="ad-who"><b>{c.name}</b><span>{c.phone}</span>{c.street && <span className="ad-loc"><Ico d={I.pin} s={14} />{c.street}</span>}</div>
-              <div className="ad-round">
-                <a href={`tel:+${intl(c.phone)}`} aria-label="Call" title="Call"><Ico d={I.phone} /></a>
-                <a className="wa" href={`https://wa.me/${intl(c.phone)}`} target="_blank" rel="noopener" aria-label="WhatsApp" title="WhatsApp"><Ico d={I.chat} /></a>
-                {c.lat != null && <a href={`https://maps.google.com/?q=${c.lat},${c.lng}`} target="_blank" rel="noopener" aria-label="Map" title="Map"><Ico d={I.pin} /></a>}
-              </div>
-            </section>
-
-            {c.hasVoice && (
-              <section className="ad-voice">
-                <span className="ad-vico"><Ico d={I.mic} /></span>
-                <div>
-                  <b>Voice message <small>{c.voiceSecs}s</small></b>
-                  <audio controls preload="none" src={admin.voiceUrl(token, c.id)} />
-                </div>
-              </section>
-            )}
-
-            <section className="ad-compare">
-              <div className="ad-col">
-                <h4>Before <small>citizen</small></h4>
-                {c.photoCount > 0 ? (
-                  <div className="ad-thumbs">
-                    {Array.from({ length: c.photoCount }, (_, i) => (
-                      <a key={i} href={admin.photoUrl(token, c.id, i)} target="_blank" rel="noopener"><img src={admin.photoUrl(token, c.id, i)} alt={`Photo ${i + 1}`} loading="lazy" /></a>
-                    ))}
-                  </div>
-                ) : <p className="ad-none">No photos added</p>}
-              </div>
-              <div className="ad-col after">
-                <h4>After <small>you</small></h4>
-                <div className="ad-thumbs">
-                  {afters.map((p, k) => (
-                    <div className="ad-thumb" key={k}><img src={p} alt={`After ${k + 1}`} /><button type="button" onClick={() => dropAfter(k)} aria-label="Remove"><Ico d={I.x} s={12} /></button></div>
-                  ))}
-                  {afters.length < 3 && (
-                    <label className="ad-addtile">
-                      <Ico d={I.cam} s={22} />
-                      <span>{afters.length || c.hasResult ? "Add more" : "Add photos"}</span>
-                      <input type="file" accept="image/*" multiple hidden onChange={pickAfter} />
-                    </label>
-                  )}
-                </div>
-                {c.hasResult && !afters.length && <p className="ad-none">After photos saved. Add new ones to replace.</p>}
-              </div>
-            </section>
-
-            <section className="ad-panel">
-              <div className="ad-seg">
-                {ST_EN.map((l, i) => <button key={l} className={status === i ? "on s" + i : ""} onClick={() => setStatus(i)}>{l}</button>)}
-              </div>
-              <input className="ad-line" type="text" maxLength={300} value={note} onChange={e => setNote(e.target.value)} placeholder="Note for the citizen (optional)" />
-
-              {composed && <img className="ad-preview" src={composed} alt="Before and after preview" />}
-
-              <button className="ad-btn primary ad-save" disabled={busy} onClick={save}>{busy ? "Working…" : "Save"}</button>
-              {c.canPush && <p className="ad-meta">The citizen will get a phone alert when the status changes.</p>}
-            </section>
-
-            {c.hasResult && (
-              <section className="ad-result">
-                <img src={c.resultUrl} alt="Before and after" />
-                <div className="ad-round">
-                  <a className="wa" href={waLink("resolved")} target="_blank" rel="noopener" aria-label="Send on WhatsApp" title="Send on WhatsApp"><Ico d={I.chat} /></a>
-                  {typeof navigator !== "undefined" && navigator.canShare && <button onClick={share} aria-label="Share photo" title="Share photo"><Ico d={I.share} /></button>}
-                  <a href={c.resultUrl} download={`${c.id}-before-after.jpg`} aria-label="Download" title="Download"><Ico d={I.dl} /></a>
-                  <button onClick={copy} aria-label="Copy link" title="Copy link"><Ico d={I.link} /></button>
-                </div>
-                <label className="ad-switch">
-                  <input type="checkbox" checked={c.consent} onChange={e => publish(e.target.checked)} />
-                  <span><b>Show on the website</b><small>{c.consent ? "Visible on the Work done page" : "Hidden from the public"}</small></span>
-                </label>
-              </section>
-            )}
-
-            <details className="ad-more">
-              <summary>Send a WhatsApp message</summary>
-              <div className="ad-chips">
-                <a href={waLink("received")} target="_blank" rel="noopener">Received</a>
-                <a href={waLink("progress")} target="_blank" rel="noopener">In progress</a>
-                <a href={waLink("resolved")} target="_blank" rel="noopener">Resolved</a>
-              </div>
-            </details>
-
-            {c.notifications?.length > 0 && (
-              <details className="ad-more">
-                <summary>WhatsApp delivery log</summary>
-                <ul className="ad-log">
-                  {c.notifications.map((n, i) => (
-                    <li key={i} className={n.ok ? "ok" : n.pending ? "wait" : "bad"}>
-                      <b>{n.ok ? "Sent" : n.pending ? "Queued" : "Failed"}</b> · {n.audience} · {n.kind} · {when(n.at)}
-                      {!n.ok && n.error && <em>{n.error}</em>}
-                    </li>
-                  ))}
-                </ul>
-              </details>
-            )}
-          </div>
-        )}
+        {body}
       </aside>
     </div>
   );
 }
 
-/* ---------- alerts on this device ---------- */
-function AlertsButton({ token, flash }) {
-  const [on, setOn] = useState(() => typeof Notification !== "undefined" && Notification.permission === "granted" && (() => { try { return localStorage.getItem("tvk38.adminAlerts") === "1"; } catch { return false; } })());
-  if (!pushSupported()) return null;
+/* ---------- header icon button with a tooltip ---------- */
+function IB({ tip, children, className = "", ...rest }) {
+  const Tag = rest.href ? "a" : "button";
+  return <Tag className={"ad-ib " + className} data-tip={tip} aria-label={tip} {...rest}>{children}</Tag>;
+}
+
+/* ---------- bell: new complaints and phone alerts ---------- */
+const seenKey = "tvk38.adminSeenAt";
+const readSeen = () => { try { return +localStorage.getItem(seenKey) || 0; } catch { return 0; } };
+
+function Notifs({ token, fresh, onOpenComplaint, flash }) {
+  const [open, setOpen] = useState(false);
+  const [seenAt, setSeenAt] = useState(readSeen);
+  const [alertsOn, setAlertsOn] = useState(() => { try { return typeof Notification !== "undefined" && Notification.permission === "granted" && localStorage.getItem("tvk38.adminAlerts") === "1"; } catch { return false; } });
+  const [busy, setBusy] = useState(false);
+  const box = useRef(null);
+  const supported = pushSupported();
+
+  const unseen = fresh.filter(c => c.createdAt > seenAt).length;
+
+  useEffect(() => {
+    if (!open) return;
+    const away = e => { if (box.current && !box.current.contains(e.target)) setOpen(false); };
+    const esc = e => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("mousedown", away); document.addEventListener("keydown", esc);
+    return () => { document.removeEventListener("mousedown", away); document.removeEventListener("keydown", esc); };
+  }, [open]);
+
+  const toggle = () => {
+    setOpen(o => !o);
+    if (!open) { const t = Date.now(); setSeenAt(t); try { localStorage.setItem(seenKey, String(t)); } catch { /* ignore */ } }
+  };
+
   const enable = async () => {
+    setBusy(true);
     try {
       const { key } = await api.pushKey();
-      if (!key) return flash("Push is not configured on the server yet");
+      if (!key) { flash("Phone alerts are not set up on the server yet"); return; }
       const sub = await subscribePush(key);
-      if (!sub) return flash("Notifications were blocked in this browser");
+      if (!sub) { flash("Notifications are blocked in this browser. Allow them in the site settings"); return; }
       await admin.savePush(token, sub);
       try { localStorage.setItem("tvk38.adminAlerts", "1"); } catch { /* ignore */ }
-      setOn(true); flash("New complaint alerts are on for this device");
+      setAlertsOn(true); flash("Phone alerts are on for this device");
     } catch { flash("Could not turn on alerts"); }
+    finally { setBusy(false); }
   };
-  return <button className={"ad-icon" + (on ? " on" : "")} onClick={enable} aria-label="Alerts for new complaints" title="Alerts for new complaints"><Ico d={I.bell} /></button>;
+
+  return (
+    <div className="ad-notif" ref={box}>
+      <IB tip="Notifications" onClick={toggle} aria-expanded={open} className={open ? "open" : ""}>
+        <Ico d={I.bell} />
+        {unseen > 0 && <span className="ad-badge">{unseen > 9 ? "9+" : unseen}</span>}
+      </IB>
+      {open && (
+        <div className="ad-pop" role="dialog" aria-label="Notifications">
+          <header><b>Notifications</b><span>{fresh.length} new</span></header>
+          <ul>
+            {!fresh.length && <li className="ad-popempty">You are all caught up. New complaints appear here.</li>}
+            {fresh.slice(0, 6).map(c => {
+              const k = CATS.find(x => x.id === c.cat);
+              return (
+                <li key={c.id}>
+                  <button onClick={() => { onOpenComplaint(c.id); setOpen(false); }}>
+                    <span className="ad-catico sm"><SiteIcon n={k?.icon || "other"} size={16} /></span>
+                    <span className="ad-pbody"><b>{c.id} <em>{k?.en}</em></b><small>{c.desc}</small></span>
+                    <span className="ad-ptime">{ago(c.createdAt)}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+          <footer>
+            <div><b>Phone alerts</b><small>{!supported ? "This browser does not support push alerts." : alertsOn ? "On for this device. You get an alert for every new complaint." : "Get an alert on this device for every new complaint."}</small></div>
+            {supported && (alertsOn ? <span className="ad-on">On</span> : <button className="ad-btn primary sm" onClick={enable} disabled={busy}>{busy ? "…" : "Turn on"}</button>)}
+          </footer>
+        </div>
+      )}
+    </div>
+  );
 }
+
+const useMedia = q => {
+  const [m, setM] = useState(() => typeof matchMedia !== "undefined" && matchMedia(q).matches);
+  useEffect(() => { const mq = matchMedia(q), f = () => setM(mq.matches); mq.addEventListener("change", f); return () => mq.removeEventListener("change", f); }, [q]);
+  return m;
+};
 
 /* ---------- main ---------- */
 function Panel({ token, onLogout }) {
   const [stats, setStats] = useState(null);
   const [items, setItems] = useState([]);
+  const [fresh, setFresh] = useState([]);
   const [status, setStatus] = useState("");
   const [cat, setCat] = useState("");
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(null);
   const [toast, setToast] = useState("");
   const [loading, setLoading] = useState(true);
+  const [spin, setSpin] = useState(false);
   const seen = useRef(null);
   const tm = useRef(0);
+  const dock = useMedia("(min-width: 1100px)");
 
-  const flash = useCallback(m => { setToast(m); clearTimeout(tm.current); tm.current = setTimeout(() => setToast(""), 2600); }, []);
+  const flash = useCallback(m => { setToast(m); clearTimeout(tm.current); tm.current = setTimeout(() => setToast(""), 2800); }, []);
 
   const load = useCallback(async (quiet) => {
     try {
-      const [s, l] = await Promise.all([admin.stats(token), admin.list(token, { status, cat, q: search })]);
-      setStats(s); setItems(l.items);
+      const [s, l, f] = await Promise.all([admin.stats(token), admin.list(token, { status, cat, q: search }), admin.list(token, { status: "0" })]);
+      setStats(s); setItems(l.items); setFresh(f.items);
       if (seen.current !== null && s.total > seen.current && quiet) { flash(`${s.total - seen.current} new complaint${s.total - seen.current > 1 ? "s" : ""}`); chime(); }
       seen.current = s.total;
     } catch (e) { if (e.status === 401) onLogout(); else flash("Connection problem"); }
@@ -407,21 +520,31 @@ function Panel({ token, onLogout }) {
   useEffect(() => { const h = setTimeout(() => load(false), search ? 250 : 0); return () => clearTimeout(h); }, [load, search]);
   useEffect(() => { const h = setInterval(() => load(true), 15000); return () => clearInterval(h); }, [load]);
 
+  // on a wide screen the side panel is always showing a complaint
+  useEffect(() => { if (dock && !open && items.length) setOpen(items[0].id); }, [dock, open, items]);
+
+  const refresh = async () => { setSpin(true); setLoading(true); await load(false); setTimeout(() => setSpin(false), 400); flash("Updated"); };
+
   const cards = useMemo(() => stats ? [
-    ["New", stats.received, "s0", ""], ["In progress", stats.progress, "s1", "1"], ["Resolved", stats.resolved, "s2", "2"], ["Last 7 days", stats.week, "s3", null]
+    ["New", stats.received, "s0", "0", "Waiting for action"], ["In progress", stats.progress, "s1", "1", "Being worked on"], ["Resolved", stats.resolved, "s2", "2", "Completed"], ["Last 7 days", stats.week, "s3", null, "Complaints received"]
   ] : [], [stats]);
 
-  const tabs = [["", "All"], ["0", "New"], ["1", "In progress"], ["2", "Resolved"]];
+  const tabs = [["", "All", stats?.total], ["0", "New", stats?.received], ["1", "In progress", stats?.progress], ["2", "Resolved", stats?.resolved]];
 
   return (
-    <div className="ad">
+    <div className={"ad" + (dock ? " has-dock" : "")}>
       <header className="ad-top">
         <div className="ad-brand"><img src="/flag.jpg" alt="" /><div><b>Complaints admin</b><small>Ward 38 · Kattur</small></div></div>
+        <div className="ad-topsearch">
+          <Ico d="M11 5a6 6 0 1 0 0 12 6 6 0 0 0 0-12zM20 20l-4.2-4.2" s={18} />
+          <input type="search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search ID, phone, name or street" aria-label="Search complaints" />
+        </div>
         <div className="ad-top-r">
-          <AlertsButton token={token} flash={flash} />
-          <button className="ad-icon" onClick={() => { setLoading(true); load(false); }} aria-label="Refresh" title="Refresh"><Ico d={I.re} /></button>
-          <a className="ad-icon" href={admin.csvUrl(token)} aria-label="Export CSV" title="Export CSV"><Ico d={I.dl} /></a>
-          <button className="ad-icon" onClick={onLogout} aria-label="Sign out" title="Sign out"><Ico d={I.out} /></button>
+          <Notifs token={token} fresh={fresh} onOpenComplaint={setOpen} flash={flash} />
+          <IB tip="Refresh" onClick={refresh} className={spin ? "spin" : ""}><Ico d={I.re} /></IB>
+          <IB tip="Export CSV" href={admin.csvUrl(token)}><Ico d={I.dl} /></IB>
+          <IB tip="Open website" href="#home" target="_blank" rel="noopener"><Ico d={I.link} /></IB>
+          <IB tip="Sign out" className="out" onClick={() => { if (window.confirm("Sign out of the admin panel?")) onLogout(); }}><Ico d={I.out} /></IB>
         </div>
       </header>
 
@@ -433,20 +556,23 @@ function Panel({ token, onLogout }) {
           <div className="ad-banner">{stats.pending} WhatsApp message{stats.pending > 1 ? "s are" : " is"} waiting to be sent. Make sure the WhatsApp worker (npm run worker) is running and the phone is linked.</div>
         )}
 
+        <div className="ad-pagehead"><h1>Complaints</h1><p>Tap a complaint to see the details and update it.</p></div>
+
         <section className="ad-stats">
-          {cards.map(([l, n, k, f]) => (
-            <button key={l} className={"ad-stat " + k + (f !== null && status === f && f !== "" ? " on" : "")} onClick={() => f !== null && setStatus(f)} disabled={f === null}>
-              <b>{n}</b><span>{l}</span>
+          {cards.map(([l, n, k, f, sub]) => (
+            <button key={l} className={"ad-stat " + k + (f !== null && status === f ? " on" : "")} onClick={() => f !== null && setStatus(status === f ? "" : f)} disabled={f === null}>
+              <span className="ad-statdot" aria-hidden="true" />
+              <b>{n}</b><span>{l}</span><small>{sub}</small>
             </button>
           ))}
         </section>
 
         <section className="ad-filters">
           <div className="ad-seg scroll">
-            {tabs.map(([v, l]) => <button key={l} className={status === v ? "on" : ""} onClick={() => setStatus(v)}>{l}</button>)}
+            {tabs.map(([v, l, n]) => <button key={l} className={status === v ? "on" : ""} onClick={() => setStatus(v)}>{l}{n != null && <i>{n}</i>}</button>)}
           </div>
           <div className="ad-row">
-            <input className="ad-search" type="search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search ID, phone, name, street" />
+            <input className="ad-search ad-mobsearch" type="search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search ID, phone, name, street" />
             <select value={cat} onChange={e => setCat(e.target.value)} aria-label="Category">
               <option value="">All categories</option>
               {CATS.map(c => <option key={c.id} value={c.id}>{c.en}</option>)}
@@ -456,20 +582,30 @@ function Panel({ token, onLogout }) {
 
         <section className="ad-list" aria-busy={loading}>
           {!loading && !items.length && <div className="ad-empty">No complaints found.</div>}
-          {items.map(c => (
-            <button key={c.id} className="ad-card" onClick={() => setOpen(c.id)}>
-              <span className={"ad-dot s" + c.status} aria-hidden="true" />
-              <div className="ad-cbody">
-                <div className="ad-ctop"><b>{c.id}</b><span className={"ad-pill s" + c.status}>{ST_EN[c.status]}</span></div>
-                <p className="ad-clamp">{c.desc}</p>
-                <div className="ad-cmeta">{c.hasVoice && <span className="ad-vtag"><Ico d={I.mic} s={13} />{c.voiceSecs}s</span>}<span>{catName(c.cat)}</span><span>{c.name} · {c.phone}</span><span>{ago(c.createdAt)}</span></div>
-              </div>
-            </button>
-          ))}
+          {items.map(c => {
+            const k = CATS.find(x => x.id === c.cat);
+            return (
+              <button key={c.id} className={"ad-card" + (open === c.id ? " on" : "") + " s" + c.status} onClick={() => setOpen(c.id)}>
+                <span className="ad-catico"><SiteIcon n={k?.icon || "other"} size={20} /></span>
+                <div className="ad-cbody">
+                  <div className="ad-ctop"><b>{c.id}</b><span className="ad-ctime">{ago(c.createdAt)}</span></div>
+                  <p className="ad-clamp">{c.desc}</p>
+                  <div className="ad-cmeta">
+                    <span>{k?.en}</span><span>{c.name}</span>
+                    {c.hasVoice && <span className="ad-vtag"><Ico d={I.mic} s={13} />{c.voiceSecs}s</span>}
+                    {c.photoCount > 0 && <span className="ad-vtag ph"><Ico d={I.cam} s={13} />{c.photoCount}</span>}
+                  </div>
+                </div>
+                <span className={"ad-pill s" + c.status}>{ST_EN[c.status]}</span>
+              </button>
+            );
+          })}
         </section>
       </main>
 
-      {open && <Detail id={open} token={token} onClose={() => setOpen(null)} onChanged={() => load(false)} flash={flash} />}
+      {dock
+        ? <div className="ad-side"><Detail key="dock" id={open} token={token} onClose={() => setOpen(null)} onChanged={() => load(false)} flash={flash} dock /></div>
+        : open && <Detail id={open} token={token} onClose={() => setOpen(null)} onChanged={() => load(false)} flash={flash} />}
       <div className={"ad-toast" + (toast ? " show" : "")} role="status">{toast}</div>
     </div>
   );

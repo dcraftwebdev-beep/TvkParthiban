@@ -8,6 +8,8 @@ import { wa, Icon } from "../components/ui.jsx";
 
 export function Complaint({ t, lang, say, onDone, micReq }) {
   const [step, setStep] = useState(0);
+  const cardRef = useRef(null);
+  const firstStep = useRef(true);
   const [cat, setCat] = useState(null);
   const [desc, setDesc] = useState("");
   const [street, setStreet] = useState("");
@@ -53,6 +55,13 @@ export function Complaint({ t, lang, say, onDone, micReq }) {
   }, [live, canRec, t, say]);
 
   // "Voice complaint" tile elsewhere: jump to the details step and start recording
+  // every step starts at the top of the form: after tapping a long list the next step would otherwise show half way down
+  useEffect(() => {
+    if (firstStep.current) { firstStep.current = false; return; }
+    const el = cardRef.current; if (!el) return;
+    if (el.getBoundingClientRect().top < 72) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [step]);
+
   const lastReq = useRef(0);
   useEffect(() => {
     if (micReq && micReq !== lastReq.current) { lastReq.current = micReq; setStep(1); setTimeout(toggleRecord, 700); }
@@ -147,7 +156,7 @@ export function Complaint({ t, lang, say, onDone, micReq }) {
         </div>
       </aside>
 
-      <div className="cx-card rv">
+      <div className="cx-card rv" ref={cardRef}>
         <div className="cx-bar" role="progressbar" aria-valuemin={1} aria-valuemax={4} aria-valuenow={step + 1}><i style={{ width: `${((step + 1) / 4) * 100}%` }} /></div>
         <div className="cx-meta">
           {step > 0 ? <button type="button" className="cx-back" onClick={() => go(step - 1)} aria-label={t.back}><Icon n="back" size={20} /></button> : <span className="cx-back ph" />}

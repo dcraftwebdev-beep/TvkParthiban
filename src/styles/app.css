@@ -15,7 +15,7 @@ html[lang="en"] .cx-side h2{font-size:clamp(40px,5.4vw,68px)}
 .cx-alt .btn{min-height:46px;margin-right:8px;font-size:14px;padding:0 20px}
 .cx-alt .btn.ghost{border-color:var(--line);color:var(--ink)}
 
-.cx-card{background:#fff;border:1px solid var(--line);border-radius:var(--r-l);overflow:hidden;display:flex;flex-direction:column}
+.cx-card{scroll-margin-top:76px;background:#fff;border:1px solid var(--line);border-radius:var(--r-l);overflow:hidden;display:flex;flex-direction:column}
 .cx-bar{height:5px;background:#f1e9dd}
 .cx-bar i{display:block;height:100%;background:var(--red);border-radius:0 4px 4px 0;transition:width .4s ease}
 .cx-meta{display:flex;align-items:center;gap:12px;padding:18px 18px 4px}
