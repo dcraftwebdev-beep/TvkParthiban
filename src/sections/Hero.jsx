@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { CFG } from "../lib/config.js";
-import { wa, Icon, P } from "../components/ui.jsx";
+import { wa, Icon, P, WaGlyph } from "../components/ui.jsx";
 
 // the video is for wide screens only; phones get a light photo so they do not download it
 const useWide = () => {
@@ -37,10 +37,10 @@ export function Hero({ t }) {
 export function Quick({ t, onVoice }) {
   return (
     <section className="quick"><div className="wrap quick-in">
-      <a className="tile" href="#complaint"><Icon d={P.plus} /><div><b>{t.qComplaint}</b><small>{t.qComplaintSub}</small></div></a>
-      <a className="tile" href="#complaint" onClick={onVoice}><Icon d={P.mic} /><div><b>{t.qVoice}</b><small>{t.qVoiceSub}</small></div></a>
-      <a className="tile" href={wa()} target="_blank" rel="noopener"><Icon d={P.chat} /><div><b>WhatsApp</b><small>{t.qWaSub}</small></div></a>
-      <a className="tile" href={`tel:+${CFG.phone}`}><Icon d={P.phone} /><div><b>{t.qCall}</b><small>{t.qCallSub}</small></div></a>
+      <a className="tile" href="#complaint"><span className="ti ti-add"><Icon d={P.plus} /></span><div><b>{t.qComplaint}</b><small>{t.qComplaintSub}</small></div></a>
+      <a className="tile" href="#complaint" onClick={onVoice}><span className="ti ti-mic"><Icon d={P.mic} /></span><div><b>{t.qVoice}</b><small>{t.qVoiceSub}</small></div></a>
+      <a className="tile" href={wa()} target="_blank" rel="noopener"><span className="ti ti-wa"><WaGlyph size={24} /></span><div><b>WhatsApp</b><small>{t.qWaSub}</small></div></a>
+      <a className="tile" href={`tel:+${CFG.phone}`}><span className="ti ti-call"><Icon d={P.phone} /></span><div><b>{t.qCall}</b><small>{t.qCallSub}</small></div></a>
     </div></section>
   );
 }
