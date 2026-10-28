@@ -16,8 +16,8 @@ export function Footer({ t, lang }) {
           <div className="foot-icons">
             <a href={wa()} target="_blank" rel="noopener" aria-label="WhatsApp"><WaGlyph size={22} /></a>
             <a href={`tel:+${CFG.phone}`} aria-label={t.qCall}><Icon d={P.phone} size={22} /></a>
-            <a href="https://x.com/TVKVijayHQ" target="_blank" rel="noopener" aria-label="X: TVK Vijay"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z" /></svg></a>
-            <a href="https://x.com/TVKPartyHQ" target="_blank" rel="noopener" aria-label="X: TVK Party HQ"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z" /></svg></a>
+            <a href="https://www.instagram.com/tvkvijayhq/" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3.5" y="3.5" width="17" height="17" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none" /></svg></a>
+            <a href="https://www.facebook.com/TVKVijayHQ/" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.5-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4v2.2H7.800v3h2.600V21z" /></svg></a>
           </div>
         </div>
       </div>
