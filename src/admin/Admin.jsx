@@ -3,18 +3,20 @@ import { admin, api, getToken, setToken } from "../lib/api.js";
 import { subscribePush, pushSupported } from "../lib/push.js";
 import { CATS, CFG } from "../lib/config.js";
 import { Icon as SiteIcon } from "../components/ui.jsx";
+import { LangCtx, makeT, useT } from "./i18n.js";
 import "./admin.css";
 
 const ST = ["புதியது", "நடவடிக்கையில்", "தீர்க்கப்பட்டது"];
 const ST_EN = ["New", "In progress", "Resolved"];
 const catName = id => { const c = CATS.find(x => x.id === id); return c ? `${c.ta} · ${c.en}` : id; };
 const intl = p => (String(p).length === 10 ? "91" + p : p);
-const when = ms => new Date(ms).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
-const ago = ms => {
-  const m = Math.round((Date.now() - ms) / 60000);
-  if (m < 1) return "just now"; if (m < 60) return `${m}m ago`;
-  const h = Math.round(m / 60); if (h < 24) return `${h}h ago`;
-  return `${Math.round(h / 24)}d ago`;
+const when = (ms, lang) => new Date(ms).toLocaleString(lang === "ta" ? "ta-IN" : "en-IN", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
+const ago = (ms, t, short) => {
+  const m = Math.round((Date.now() - ms) / 60000), sfx = short ? "" : " ago";
+  const k = u => "{n}" + u + sfx;
+  if (m < 1) return t("just now"); if (m < 60) return t(k("m").replace(" ago", short ? "" : " ago"), { n: m });
+  const h = Math.round(m / 60); if (h < 24) return t(k("h"), { n: h });
+  return t(k("d"), { n: Math.round(h / 24) });
 };
 
 /** Two short tones. Browsers allow sound after the admin has tapped anything on the page (the login tap counts). */
@@ -42,12 +44,13 @@ const I = {
 
 /* ---------- login ---------- */
 function Login({ onOk }) {
+  const t = useT();
   const [pw, setPw] = useState(""), [err, setErr] = useState(""), [busy, setBusy] = useState(false);
   const [show, setShow] = useState(false), [caps, setCaps] = useState(false), [shake, setShake] = useState(0);
   const go = async e => {
     e.preventDefault(); if (busy || !pw) return; setBusy(true); setErr("");
     try { const r = await admin.login(pw); setToken(r.token); onOk(r.token); }
-    catch (x) { setErr(x.status === 429 ? "Too many attempts. Please wait a few minutes and try again." : x.status === 401 ? "That password is not correct. Please try again." : "Cannot reach the server. Check your internet connection."); setShake(n => n + 1); }
+    catch (x) { setErr(x.status === 429 ? t("Too many attempts. Please wait a few minutes and try again.") : x.status === 401 ? t("That password is not correct. Please try again.") : t("Cannot reach the server. Check your internet connection.")); setShake(n => n + 1); }
     finally { setBusy(false); }
   };
   return (
@@ -56,32 +59,33 @@ function Login({ onOk }) {
         <img src="/tvk/admin-login.webp" alt="" />
         <div className="ad-login-over">
           <img className="ad-login-logo" src="/flag.jpg" alt="" />
-          <h2>Ward 38 · Kattur</h2>
-          <p>Listen to every complaint. Follow it up until it is solved.</p>
+          <h2>{t("Ward 38 · Kattur")}</h2>
+          <p>{t("Listen to every complaint. Follow it up until it is solved.")}</p>
         </div>
       </aside>
       <main className="ad-login-side">
+        <LangSwitch className="ad-lang-float" />
         <form className={"ad-login-card" + (shake ? " shake" : "")} key={shake} onSubmit={go}>
           <img src="/flag.jpg" alt="" className="ad-flag" />
-          <h1>Welcome back</h1>
-          <p>Sign in to manage the ward complaints.</p>
+          <h1>{t("Welcome back")}</h1>
+          <p>{t("Sign in to manage the ward complaints.")}</p>
           <label className="ad-field">
-            <span>Password</span>
+            <span>{t("Password")}</span>
             <div className="ad-pw">
               <span className="ad-pw-lock"><SiteIcon n="lock" size={18} /></span>
               <input type={show ? "text" : "password"} autoFocus value={pw} onChange={e => { setPw(e.target.value); if (err) setErr(""); }}
                 onKeyUp={e => setCaps(!!e.getModifierState?.("CapsLock"))} onBlur={() => setCaps(false)}
-                placeholder="Enter your password" autoComplete="current-password" aria-invalid={!!err} />
-              <button type="button" className="ad-eye" onClick={() => setShow(v => !v)} aria-label={show ? "Hide password" : "Show password"} aria-pressed={show} data-tip={show ? "Hide password" : "Show password"}>
+                placeholder={t("Enter your password")} autoComplete="current-password" aria-invalid={!!err} />
+              <button type="button" className="ad-eye" onClick={() => setShow(v => !v)} aria-label={show ? t("Hide password") : t("Show password")} aria-pressed={show} data-tip={show ? t("Hide password") : t("Show password")}>
                 <SiteIcon n={show ? "eyeoff" : "eye"} size={19} />
               </button>
             </div>
           </label>
-          {caps && <div className="ad-hint" role="status">Caps Lock is on</div>}
+          {caps && <div className="ad-hint" role="status">{t("Caps Lock is on")}</div>}
           {err && <div className="ad-err" role="alert">{err}</div>}
-          <button className="ad-btn primary ad-signin" disabled={!pw || busy}>{busy ? <><i className="ad-spin" />Signing in…</> : "Sign in"}</button>
-          <a href="#home" className="ad-link">← Back to website</a>
-          <small className="ad-foot"><SiteIcon n="lock" size={13} /> Ward office staff only</small>
+          <button className="ad-btn primary ad-signin" disabled={!pw || busy}>{busy ? <><i className="ad-spin" />{t("Signing in…")}</> : t("Sign in")}</button>
+          <a href="#home" className="ad-link">{t("← Back to website")}</a>
+          <small className="ad-foot"><SiteIcon n="lock" size={13} /> {t("Ward office staff only")}</small>
         </form>
       </main>
     </div>
@@ -183,6 +187,7 @@ async function composeBeforeAfter({ beforeUrls, afterData, id, raisedAt, doneAt 
 
 /* ---------- detail drawer ---------- */
 function Detail({ id, token, onClose, onChanged, flash, dock }) {
+  const t = useT();
   const [c, setC] = useState(null);
   const [status, setStatus] = useState(0);
   const [note, setNote] = useState("");
@@ -194,7 +199,7 @@ function Detail({ id, token, onClose, onChanged, flash, dock }) {
     let live = true;
     setC(null); setAfters([]); setComposed("");
     if (!id) return undefined;
-    admin.one(token, id).then(r => { if (live) { setC(r); setStatus(r.status); setNote(r.note || ""); } }).catch(() => flash("Could not load complaint"));
+    admin.one(token, id).then(r => { if (live) { setC(r); setStatus(r.status); setNote(r.note || ""); } }).catch(() => flash(t("Could not load complaint")));
     return () => { live = false; };
   }, [id, token, flash]);
 
@@ -212,7 +217,7 @@ function Detail({ id, token, onClose, onChanged, flash, dock }) {
       const data = await Promise.all(files.map(f => fileToJpeg(f, 900)));
       const all = [...afters, ...data].slice(0, 3);
       await rebuild(all); setStatus(2);
-    } catch { flash("Could not read those photos"); }
+    } catch { flash(t("Could not read those photos")); }
     finally { setBusy(false); }
   };
   const rebuild = async list => {
@@ -231,14 +236,14 @@ function Detail({ id, token, onClose, onChanged, flash, dock }) {
       if (status === 2 && afters.length && composed) { body.after = afters[0]; body.result = composed; }
       const r = await admin.patch(token, id, body);
       setC(p => ({ ...p, ...r })); setAfters([]); setComposed(""); onChanged();
-      flash(r.pushed ? "Saved. The citizen's phone was notified" : "Saved");
-    } catch (e) { flash(e.status === 400 ? "Photo was rejected, try a smaller one" : "Save failed"); }
+      flash(r.pushed ? t("Saved. The citizen's phone was notified") : t("Saved"));
+    } catch (e) { flash(e.status === 400 ? t("Photo was rejected, try a smaller one") : t("Save failed")); }
     finally { setBusy(false); }
   };
 
   const publish = async on => {
-    try { const r = await admin.patch(token, id, { publish: on, notify: false }); setC(p => ({ ...p, consent: r.consent })); flash(on ? "Shown on the website" : "Hidden from the website"); onChanged(); }
-    catch { flash("Could not change this"); }
+    try { const r = await admin.patch(token, id, { publish: on, notify: false }); setC(p => ({ ...p, consent: r.consent })); flash(on ? t("Shown on the website") : t("Hidden from the website")); onChanged(); }
+    catch { flash(t("Could not change this")); }
   };
 
   const link = c?.resultPage;
@@ -264,10 +269,10 @@ function Detail({ id, token, onClose, onChanged, flash, dock }) {
       const blob = await (await fetch(c.resultUrl)).blob();
       const file = new File([blob], `${c.id}-before-after.jpg`, { type: "image/jpeg" });
       if (navigator.canShare?.({ files: [file] })) await navigator.share({ files: [file], text: link });
-      else flash("Sharing files is not supported here. Use Download");
+      else flash(t("Sharing files is not supported here. Use Download"));
     } catch { /* cancelled */ }
   };
-  const copy = async () => { try { await navigator.clipboard.writeText(link); flash("Link copied"); } catch { flash(link); } };
+  const copy = async () => { try { await navigator.clipboard.writeText(link); flash(t("Link copied")); } catch { flash(link); } };
 
   const cat = c ? CATS.find(x => x.id === c.cat) : null;
   const steps = c ? [
@@ -279,22 +284,22 @@ function Detail({ id, token, onClose, onChanged, flash, dock }) {
   const body = !id ? (
     <div className="ad-emptyside">
       <span className="ad-emptyico"><SiteIcon n="search" size={26} /></span>
-      <h3>Select a complaint</h3>
-      <p>Click any complaint in the list to see the citizen, photos, voice message and update its status here.</p>
+      <h3>{t("Select a complaint")}</h3>
+      <p>{t("Click any complaint in the list to see the citizen, photos, voice message and update its status here.")}</p>
     </div>
-  ) : !c ? <p className="ad-pad">Loading…</p> : (
+  ) : !c ? <p className="ad-pad">{t("Loading…")}</p> : (
     <div className="ad-db">
       <section className="ad-sum">
         <div className="ad-sum-top">
           <span className="ad-catico"><SiteIcon n={cat?.icon || "other"} size={22} /></span>
           <div><small>{cat ? `${cat.ta} · ${cat.en}` : c.cat}</small><b>{c.id}</b></div>
-          <span className={"ad-pill s" + c.status}>{ST_EN[c.status]}</span>
+          <span className={"ad-pill s" + c.status}>{t(ST_EN[c.status])}</span>
         </div>
         <p className="ad-desc">{c.desc}</p>
         <dl className="ad-facts">
-          <div><dt>Raised</dt><dd>{when(c.createdAt)}</dd></div>
-          <div><dt>Open for</dt><dd>{ago(c.createdAt).replace(" ago", "")}</dd></div>
-          <div className="wide"><dt>Location</dt><dd>{c.street || "Not given"}{c.lat != null && <a className="ad-maplink" href={`https://maps.google.com/?q=${c.lat},${c.lng}`} target="_blank" rel="noopener">Open map</a>}</dd></div>
+          <div><dt>{t("Raised")}</dt><dd>{when(c.createdAt, t.lang)}</dd></div>
+          <div><dt>{t("Open for")}</dt><dd>{ago(c.createdAt, t, true)}</dd></div>
+          <div className="wide"><dt>{t("Location")}</dt><dd>{c.street || t("Not given")}{c.lat != null && <a className="ad-maplink" href={`https://maps.google.com/?q=${c.lat},${c.lng}`} target="_blank" rel="noopener">{t("Open map")}</a>}</dd></div>
         </dl>
       </section>
 
@@ -302,7 +307,7 @@ function Detail({ id, token, onClose, onChanged, flash, dock }) {
         <span className="ad-avatar">{(c.name || "?").trim().charAt(0).toUpperCase()}</span>
         <div className="ad-who"><b>{c.name}</b><span>{c.phone}</span></div>
         <div className="ad-round">
-          <a href={`tel:+${intl(c.phone)}`} aria-label="Call" data-tip="Call"><Ico d={I.phone} /></a>
+          <a href={`tel:+${intl(c.phone)}`} aria-label={t("Call")} data-tip={t("Call")}><Ico d={I.phone} /></a>
           <a className="wa" href={`https://wa.me/${intl(c.phone)}`} target="_blank" rel="noopener" aria-label="WhatsApp" data-tip="WhatsApp"><Ico d={I.chat} /></a>
         </div>
       </section>
@@ -311,7 +316,7 @@ function Detail({ id, token, onClose, onChanged, flash, dock }) {
         <section className="ad-voice">
           <span className="ad-vico"><Ico d={I.mic} /></span>
           <div>
-            <b>Voice message <small>{c.voiceSecs}s</small></b>
+            <b>{t("Voice message")} <small>{c.voiceSecs}s</small></b>
             <audio controls preload="none" src={admin.voiceUrl(token, c.id)} />
           </div>
         </section>
@@ -319,51 +324,51 @@ function Detail({ id, token, onClose, onChanged, flash, dock }) {
 
       <section className="ad-compare">
         <div className="ad-col">
-          <h4>Before <small>citizen</small></h4>
+          <h4>{t("Before")} <small>{t("citizen")}</small></h4>
           {c.photoCount > 0 ? (
             <div className="ad-thumbs">
               {Array.from({ length: c.photoCount }, (_, i) => (
                 <a key={i} href={admin.photoUrl(token, c.id, i)} target="_blank" rel="noopener"><img src={admin.photoUrl(token, c.id, i)} alt={`Photo ${i + 1}`} loading="lazy" /></a>
               ))}
             </div>
-          ) : <p className="ad-none">No photos added</p>}
+          ) : <p className="ad-none">{t("No photos added")}</p>}
         </div>
         <div className="ad-col after">
-          <h4>After <small>you</small></h4>
+          <h4>{t("After")} <small>{t("you")}</small></h4>
           <div className="ad-thumbs">
             {afters.map((p, k) => (
-              <div className="ad-thumb" key={k}><img src={p} alt={`After ${k + 1}`} /><button type="button" onClick={() => dropAfter(k)} aria-label="Remove"><Ico d={I.x} s={12} /></button></div>
+              <div className="ad-thumb" key={k}><img src={p} alt={`After ${k + 1}`} /><button type="button" onClick={() => dropAfter(k)} aria-label={t("Remove")}><Ico d={I.x} s={12} /></button></div>
             ))}
             {afters.length < 3 && (
               <label className="ad-addtile">
                 <Ico d={I.cam} s={22} />
-                <span>{afters.length || c.hasResult ? "Add more" : "Add photos"}</span>
+                <span>{afters.length || c.hasResult ? t("Add more") : t("Add photos")}</span>
                 <input type="file" accept="image/*" multiple hidden onChange={pickAfter} />
               </label>
             )}
           </div>
-          {c.hasResult && !afters.length && <p className="ad-none">After photos saved. Add new ones to replace.</p>}
+          {c.hasResult && !afters.length && <p className="ad-none">{t("After photos saved. Add new ones to replace.")}</p>}
         </div>
       </section>
 
       <section className="ad-panel">
-        <h3>Update status</h3>
+        <h3>{t("Update status")}</h3>
         <div className="ad-seg">
-          {ST_EN.map((l, i) => <button key={l} className={status === i ? "on s" + i : ""} onClick={() => setStatus(i)}>{l}</button>)}
+          {ST_EN.map((l, i) => <button key={l} className={status === i ? "on s" + i : ""} onClick={() => setStatus(i)}>{t(l)}</button>)}
         </div>
-        <input className="ad-line" type="text" maxLength={300} value={note} onChange={e => setNote(e.target.value)} placeholder="Note for the citizen (optional)" />
-        {composed && <img className="ad-preview" src={composed} alt="Before and after preview" />}
-        <button className="ad-btn primary ad-save" disabled={busy} onClick={save}>{busy ? "Working…" : "Save changes"}</button>
-        {c.canPush && <p className="ad-meta">The citizen will get a phone alert when the status changes.</p>}
+        <input className="ad-line" type="text" maxLength={300} value={note} onChange={e => setNote(e.target.value)} placeholder={t("Note for the citizen (optional)")} />
+        {composed && <img className="ad-preview" src={composed} alt={t("Before and after preview")} />}
+        <button className="ad-btn primary ad-save" disabled={busy} onClick={save}>{busy ? t("Working…") : t("Save changes")}</button>
+        {c.canPush && <p className="ad-meta">{t("The citizen will get a phone alert when the status changes.")}</p>}
       </section>
 
       <section className="ad-time">
-        <h3>Progress</h3>
+        <h3>{t("Progress")}</h3>
         <ol>
           {steps.map(([l, at], k) => (
             <li key={l} className={(k <= c.status ? "on" : "") + (k === c.status ? " now" : "")}>
               <span className="ad-tdot">{k <= c.status ? <Ico d="M5 12.5l4.5 4.5L19 7.5" s={12} /> : k + 1}</span>
-              <div><b>{l}</b><small>{at && k <= c.status ? when(at) : "Waiting"}</small></div>
+              <div><b>{t(l)}</b><small>{at && k <= c.status ? when(at, t.lang) : t("Waiting")}</small></div>
             </li>
           ))}
         </ol>
@@ -371,37 +376,37 @@ function Detail({ id, token, onClose, onChanged, flash, dock }) {
 
       {c.hasResult && (
         <section className="ad-result">
-          <h3>Result photo</h3>
-          <img src={c.resultUrl} alt="Before and after" />
+          <h3>{t("Result photo")}</h3>
+          <img src={c.resultUrl} alt={t("Before and after")} />
           <div className="ad-round">
-            <a className="wa" href={waLink("resolved")} target="_blank" rel="noopener" aria-label="Send on WhatsApp" data-tip="Send on WhatsApp"><Ico d={I.chat} /></a>
-            {typeof navigator !== "undefined" && navigator.canShare && <button onClick={share} aria-label="Share photo" data-tip="Share photo"><Ico d={I.share} /></button>}
-            <a href={c.resultUrl} download={`${c.id}-before-after.jpg`} aria-label="Download" data-tip="Download"><Ico d={I.dl} /></a>
-            <button onClick={copy} aria-label="Copy link" data-tip="Copy link"><Ico d={I.link} /></button>
+            <a className="wa" href={waLink("resolved")} target="_blank" rel="noopener" aria-label={t("Send on WhatsApp")} data-tip={t("Send on WhatsApp")}><Ico d={I.chat} /></a>
+            {typeof navigator !== "undefined" && navigator.canShare && <button onClick={share} aria-label={t("Share photo")} data-tip={t("Share photo")}><Ico d={I.share} /></button>}
+            <a href={c.resultUrl} download={`${c.id}-before-after.jpg`} aria-label={t("Download")} data-tip={t("Download")}><Ico d={I.dl} /></a>
+            <button onClick={copy} aria-label={t("Copy link")} data-tip={t("Copy link")}><Ico d={I.link} /></button>
           </div>
           <label className="ad-switch">
             <input type="checkbox" checked={c.consent} onChange={e => publish(e.target.checked)} />
-            <span><b>Show on the website</b><small>{c.consent ? "Visible on the Work done page" : "Hidden from the public"}</small></span>
+            <span><b>{t("Show on the website")}</b><small>{c.consent ? t("Visible on the Work done page") : t("Hidden from the public")}</small></span>
           </label>
         </section>
       )}
 
       <details className="ad-more">
-        <summary>Send a WhatsApp message</summary>
+        <summary>{t("Send a WhatsApp message")}</summary>
         <div className="ad-chips">
-          <a href={waLink("received")} target="_blank" rel="noopener">Received</a>
-          <a href={waLink("progress")} target="_blank" rel="noopener">In progress</a>
-          <a href={waLink("resolved")} target="_blank" rel="noopener">Resolved</a>
+          <a href={waLink("received")} target="_blank" rel="noopener">{t("Received")}</a>
+          <a href={waLink("progress")} target="_blank" rel="noopener">{t("In progress")}</a>
+          <a href={waLink("resolved")} target="_blank" rel="noopener">{t("Resolved")}</a>
         </div>
       </details>
 
       {c.notifications?.length > 0 && (
         <details className="ad-more">
-          <summary>WhatsApp delivery log</summary>
+          <summary>{t("WhatsApp delivery log")}</summary>
           <ul className="ad-log">
             {c.notifications.map((n, i) => (
               <li key={i} className={n.ok ? "ok" : n.pending ? "wait" : "bad"}>
-                <b>{n.ok ? "Sent" : n.pending ? "Queued" : "Failed"}</b> · {n.audience} · {n.kind} · {when(n.at)}
+                <b>{n.ok ? t("Sent") : n.pending ? t("Queued") : t("Failed")}</b> · {n.audience} · {n.kind} · {when(n.at, t.lang)}
                 {!n.ok && n.error && <em>{n.error}</em>}
               </li>
             ))}
@@ -411,17 +416,28 @@ function Detail({ id, token, onClose, onChanged, flash, dock }) {
     </div>
   );
 
-  if (dock) return <aside className="ad-dock" aria-label="Complaint details">{id && <header className="ad-dockhead"><span>Complaint details</span></header>}{body}</aside>;
+  if (dock) return <aside className="ad-dock" aria-label={t("Complaint details")}>{id && <header className="ad-dockhead"><span>{t("Complaint details")}</span></header>}{body}</aside>;
   return (
     <div className="ad-drawer-wrap" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
-      <aside className="ad-drawer" role="dialog" aria-modal="true" aria-label="Complaint details">
+      <aside className="ad-drawer" role="dialog" aria-modal="true" aria-label={t("Complaint details")}>
         <header className="ad-dh">
           <div><small>{cat ? catName(cat.id) : ""}</small><h2>{id}</h2></div>
-          {c && <span className={"ad-pill s" + c.status}>{ST_EN[c.status]}</span>}
-          <button className="ad-icon" onClick={onClose} aria-label="Close"><Ico d={I.x} /></button>
+          {c && <span className={"ad-pill s" + c.status}>{t(ST_EN[c.status])}</span>}
+          <button className="ad-icon" onClick={onClose} aria-label={t("Close")}><Ico d={I.x} /></button>
         </header>
         {body}
       </aside>
+    </div>
+  );
+}
+
+/* ---------- language switch: Tamil / English ---------- */
+function LangSwitch({ className = "" }) {
+  const t = useT();
+  return (
+    <div className={"ad-lang " + className} role="group" aria-label={t("Language")}>
+      <button type="button" className={t.lang === "ta" ? "on" : ""} onClick={() => t.setLang("ta")} aria-pressed={t.lang === "ta"}>த</button>
+      <button type="button" className={t.lang === "en" ? "on" : ""} onClick={() => t.setLang("en")} aria-pressed={t.lang === "en"}>EN</button>
     </div>
   );
 }
@@ -432,11 +448,43 @@ function IB({ tip, children, className = "", ...rest }) {
   return <Tag className={"ad-ib " + className} data-tip={tip} aria-label={tip} {...rest}>{children}</Tag>;
 }
 
+/* ---------- "more" menu for small screens ---------- */
+function MoreMenu({ items, label }) {
+  const [open, setOpen] = useState(false);
+  const box = useRef(null);
+  useEffect(() => {
+    if (!open) return undefined;
+    const away = e => { if (box.current && !box.current.contains(e.target)) setOpen(false); };
+    const esc = e => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("mousedown", away); document.addEventListener("keydown", esc);
+    return () => { document.removeEventListener("mousedown", away); document.removeEventListener("keydown", esc); };
+  }, [open]);
+  return (
+    <div className="ad-menu ad-mob-only" ref={box}>
+      <IB tip={label} onClick={() => setOpen(o => !o)} aria-expanded={open} className={open ? "open" : ""}><Ico d="M12 5v.01M12 12v.01M12 19v.01" s={22} /></IB>
+      {open && (
+        <div className="ad-pop menu" role="menu">
+          {items.map(it => {
+            const Tag = it.href ? "a" : "button";
+            return (
+              <Tag key={it.label} role="menuitem" className={"ad-mi" + (it.danger ? " danger" : "")} href={it.href} target={it.target} rel={it.target ? "noopener" : undefined}
+                onClick={() => { setOpen(false); it.onClick?.(); }}>
+                <Ico d={it.icon} s={18} />{it.label}
+              </Tag>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ---------- bell: new complaints and phone alerts ---------- */
 const seenKey = "tvk38.adminSeenAt";
 const readSeen = () => { try { return +localStorage.getItem(seenKey) || 0; } catch { return 0; } };
 
 function Notifs({ token, fresh, onOpenComplaint, flash }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [seenAt, setSeenAt] = useState(readSeen);
   const [alertsOn, setAlertsOn] = useState(() => { try { return typeof Notification !== "undefined" && Notification.permission === "granted" && localStorage.getItem("tvk38.adminAlerts") === "1"; } catch { return false; } });
@@ -463,43 +511,43 @@ function Notifs({ token, fresh, onOpenComplaint, flash }) {
     setBusy(true);
     try {
       const { key } = await api.pushKey();
-      if (!key) { flash("Phone alerts are not set up on the server yet"); return; }
+      if (!key) { flash(t("Phone alerts are not set up on the server yet")); return; }
       const sub = await subscribePush(key);
-      if (!sub) { flash("Notifications are blocked in this browser. Allow them in the site settings"); return; }
+      if (!sub) { flash(t("Notifications are blocked in this browser. Allow them in the site settings")); return; }
       await admin.savePush(token, sub);
       try { localStorage.setItem("tvk38.adminAlerts", "1"); } catch { /* ignore */ }
-      setAlertsOn(true); flash("Phone alerts are on for this device");
-    } catch { flash("Could not turn on alerts"); }
+      setAlertsOn(true); flash(t("Phone alerts are on for this device"));
+    } catch { flash(t("Could not turn on alerts")); }
     finally { setBusy(false); }
   };
 
   return (
     <div className="ad-notif" ref={box}>
-      <IB tip="Notifications" onClick={toggle} aria-expanded={open} className={open ? "open" : ""}>
+      <IB tip={t("Notifications")} onClick={toggle} aria-expanded={open} className={open ? "open" : ""}>
         <Ico d={I.bell} />
         {unseen > 0 && <span className="ad-badge">{unseen > 9 ? "9+" : unseen}</span>}
       </IB>
       {open && (
-        <div className="ad-pop" role="dialog" aria-label="Notifications">
-          <header><b>Notifications</b><span>{fresh.length} new</span></header>
+        <div className="ad-pop" role="dialog" aria-label={t("Notifications")}>
+          <header><b>{t("Notifications")}</b><span>{t("{n} new", { n: fresh.length })}</span></header>
           <ul>
-            {!fresh.length && <li className="ad-popempty">You are all caught up. New complaints appear here.</li>}
+            {!fresh.length && <li className="ad-popempty">{t("You are all caught up. New complaints appear here.")}</li>}
             {fresh.slice(0, 6).map(c => {
               const k = CATS.find(x => x.id === c.cat);
               return (
                 <li key={c.id}>
                   <button onClick={() => { onOpenComplaint(c.id); setOpen(false); }}>
                     <span className="ad-catico sm"><SiteIcon n={k?.icon || "other"} size={16} /></span>
-                    <span className="ad-pbody"><b>{c.id} <em>{k?.en}</em></b><small>{c.desc}</small></span>
-                    <span className="ad-ptime">{ago(c.createdAt)}</span>
+                    <span className="ad-pbody"><b>{c.id} <em>{k?.[t.lang]}</em></b><small>{c.desc}</small></span>
+                    <span className="ad-ptime">{ago(c.createdAt, t)}</span>
                   </button>
                 </li>
               );
             })}
           </ul>
           <footer>
-            <div><b>Phone alerts</b><small>{!supported ? "This browser does not support push alerts." : alertsOn ? "On for this device. You get an alert for every new complaint." : "Get an alert on this device for every new complaint."}</small></div>
-            {supported && (alertsOn ? <span className="ad-on">On</span> : <button className="ad-btn primary sm" onClick={enable} disabled={busy}>{busy ? "…" : "Turn on"}</button>)}
+            <div><b>{t("Phone alerts")}</b><small>{!supported ? t("This browser does not support push alerts.") : alertsOn ? t("On for this device. You get an alert for every new complaint.") : t("Get an alert on this device for every new complaint.")}</small></div>
+            {supported && (alertsOn ? <span className="ad-on">{t("On")}</span> : <button className="ad-btn primary sm" onClick={enable} disabled={busy}>{busy ? "…" : t("Turn on")}</button>)}
           </footer>
         </div>
       )}
@@ -515,6 +563,7 @@ const useMedia = q => {
 
 /* ---------- main ---------- */
 function Panel({ token, onLogout }) {
+  const t = useT();
   const [stats, setStats] = useState(null);
   const [items, setItems] = useState([]);
   const [fresh, setFresh] = useState([]);
@@ -535,11 +584,11 @@ function Panel({ token, onLogout }) {
     try {
       const [s, l, f] = await Promise.all([admin.stats(token), admin.list(token, { status, cat, q: search }), admin.list(token, { status: "0" })]);
       setStats(s); setItems(l.items); setFresh(f.items);
-      if (seen.current !== null && s.total > seen.current && quiet) { flash(`${s.total - seen.current} new complaint${s.total - seen.current > 1 ? "s" : ""}`); chime(); }
+      if (seen.current !== null && s.total > seen.current && quiet) { flash(t(s.total - seen.current > 1 ? "{n} new complaints" : "{n} new complaint", { n: s.total - seen.current })); chime(); }
       seen.current = s.total;
-    } catch (e) { if (e.status === 401) onLogout(); else flash("Connection problem"); }
+    } catch (e) { if (e.status === 401) onLogout(); else flash(t("Connection problem")); }
     finally { setLoading(false); }
-  }, [token, status, cat, search, flash, onLogout]);
+  }, [token, status, cat, search, flash, onLogout, t]);
 
   useEffect(() => { const h = setTimeout(() => load(false), search ? 250 : 0); return () => clearTimeout(h); }, [load, search]);
   useEffect(() => { const h = setInterval(() => load(true), 15000); return () => clearInterval(h); }, [load]);
@@ -547,7 +596,8 @@ function Panel({ token, onLogout }) {
   // on a wide screen the side panel is always showing a complaint
   useEffect(() => { if (dock && !open && items.length) setOpen(items[0].id); }, [dock, open, items]);
 
-  const refresh = async () => { setSpin(true); setLoading(true); await load(false); setTimeout(() => setSpin(false), 400); flash("Updated"); };
+  const signOut = () => { if (window.confirm(t("Sign out of the admin panel?"))) onLogout(); };
+  const refresh = async () => { setSpin(true); setLoading(true); await load(false); setTimeout(() => setSpin(false), 400); flash(t("Updated")); };
 
   const cards = useMemo(() => stats ? [
     ["New", stats.received, "s0", "0", "Waiting for action"], ["In progress", stats.progress, "s1", "1", "Being worked on"], ["Resolved", stats.resolved, "s2", "2", "Completed"], ["Last 7 days", stats.week, "s3", null, "Complaints received"]
@@ -558,17 +608,24 @@ function Panel({ token, onLogout }) {
   return (
     <div className={"ad" + (dock ? " has-dock" : "")}>
       <header className="ad-top">
-        <div className="ad-brand"><img src="/flag.jpg" alt="" /><div><b>Complaints admin</b><small>Ward 38 · Kattur</small></div></div>
+        <div className="ad-brand"><img src="/flag.jpg" alt="" /><div><b>{t("Complaints admin")}</b><small>{t("Ward 38 · Kattur")}</small></div></div>
         <div className="ad-topsearch">
           <Ico d="M11 5a6 6 0 1 0 0 12 6 6 0 0 0 0-12zM20 20l-4.2-4.2" s={18} />
-          <input type="search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search ID, phone, name or street" aria-label="Search complaints" />
+          <input type="search" value={search} onChange={e => setSearch(e.target.value)} placeholder={t("Search ID, phone, name or street")} aria-label={t("Search complaints")} />
         </div>
         <div className="ad-top-r">
+          <LangSwitch />
           <Notifs token={token} fresh={fresh} onOpenComplaint={setOpen} flash={flash} />
-          <IB tip="Refresh" onClick={refresh} className={spin ? "spin" : ""}><Ico d={I.re} /></IB>
-          <IB tip="Export CSV" href={admin.csvUrl(token)}><Ico d={I.dl} /></IB>
-          <IB tip="Open website" href="#home" target="_blank" rel="noopener"><Ico d={I.link} /></IB>
-          <IB tip="Sign out" className="out" onClick={() => { if (window.confirm("Sign out of the admin panel?")) onLogout(); }}><Ico d={I.out} /></IB>
+          <IB tip={t("Refresh")} onClick={refresh} className={"ad-desk-only" + (spin ? " spin" : "")}><Ico d={I.re} /></IB>
+          <IB tip={t("Export CSV")} href={admin.csvUrl(token)} className="ad-desk-only"><Ico d={I.dl} /></IB>
+          <IB tip={t("Open website")} href="#home" target="_blank" rel="noopener" className="ad-desk-only"><Ico d={I.link} /></IB>
+          <IB tip={t("Sign out")} className="out ad-desk-only" onClick={signOut}><Ico d={I.out} /></IB>
+          <MoreMenu items={[
+            { label: t("Refresh"), icon: I.re, onClick: refresh },
+            { label: t("Export CSV"), icon: I.dl, href: admin.csvUrl(token) },
+            { label: t("Open website"), icon: I.link, href: "#home", target: "_blank" },
+            { label: t("Sign out"), icon: I.out, onClick: signOut, danger: true }
+          ]} label={t("Menu")} />
         </div>
       </header>
 
@@ -580,47 +637,50 @@ function Panel({ token, onLogout }) {
           <div className="ad-banner">{stats.pending} WhatsApp message{stats.pending > 1 ? "s are" : " is"} waiting to be sent. Make sure the WhatsApp worker (npm run worker) is running and the phone is linked.</div>
         )}
 
-        <div className="ad-pagehead"><h1>Complaints</h1><p>Tap a complaint to see the details and update it.</p></div>
+        <div className="ad-pagehead"><h1>{t("Complaints")}</h1><p>{t("Tap a complaint to see the details and update it.")}</p></div>
 
         <section className="ad-stats">
           {cards.map(([l, n, k, f, sub]) => (
             <button key={l} className={"ad-stat " + k + (f !== null && status === f ? " on" : "")} onClick={() => f !== null && setStatus(status === f ? "" : f)} disabled={f === null}>
               <span className="ad-statdot" aria-hidden="true" />
-              <b>{n}</b><span>{l}</span><small>{sub}</small>
+              <b>{n}</b><span>{t(l)}</span><small>{t(sub)}</small>
             </button>
           ))}
         </section>
 
         <section className="ad-filters">
           <div className="ad-seg scroll">
-            {tabs.map(([v, l, n]) => <button key={l} className={status === v ? "on" : ""} onClick={() => setStatus(v)}>{l}{n != null && <i>{n}</i>}</button>)}
+            {tabs.map(([v, l, n]) => <button key={l} className={status === v ? "on" : ""} onClick={() => setStatus(v)}>{t(l)}{n != null && <i>{n}</i>}</button>)}
           </div>
           <div className="ad-row">
-            <input className="ad-search ad-mobsearch" type="search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search ID, phone, name, street" />
-            <select value={cat} onChange={e => setCat(e.target.value)} aria-label="Category">
-              <option value="">All categories</option>
-              {CATS.map(c => <option key={c.id} value={c.id}>{c.en}</option>)}
+            <input className="ad-search ad-mobsearch" type="search" value={search} onChange={e => setSearch(e.target.value)} placeholder={t("Search ID, phone, name, street")} />
+            <select value={cat} onChange={e => setCat(e.target.value)} aria-label={t("Category")}>
+              <option value="">{t("All categories")}</option>
+              {CATS.map(c => <option key={c.id} value={c.id}>{c[t.lang]}</option>)}
             </select>
           </div>
         </section>
 
         <section className="ad-list" aria-busy={loading}>
-          {!loading && !items.length && <div className="ad-empty">No complaints found.</div>}
+          {!loading && !items.length && <div className="ad-empty">{t("No complaints found.")}</div>}
           {items.map(c => {
             const k = CATS.find(x => x.id === c.cat);
             return (
               <button key={c.id} className={"ad-card" + (open === c.id ? " on" : "") + " s" + c.status} onClick={() => setOpen(c.id)}>
                 <span className="ad-catico"><SiteIcon n={k?.icon || "other"} size={20} /></span>
                 <div className="ad-cbody">
-                  <div className="ad-ctop"><b>{c.id}</b><span className="ad-ctime">{ago(c.createdAt)}</span></div>
+                  <div className="ad-ctop"><b>{c.id}</b><span className={"ad-pill s" + c.status}>{t(ST_EN[c.status])}</span></div>
                   <p className="ad-clamp">{c.desc}</p>
                   <div className="ad-cmeta">
-                    <span>{k?.en}</span><span>{c.name}</span>
-                    {c.hasVoice && <span className="ad-vtag"><Ico d={I.mic} s={13} />{c.voiceSecs}s</span>}
-                    {c.photoCount > 0 && <span className="ad-vtag ph"><Ico d={I.cam} s={13} />{c.photoCount}</span>}
+                    <span className="ad-ccat">{k?.[t.lang]}</span>
+                    <span className="ad-cname">{c.name}</span>
+                    <span className="ad-ctime">{ago(c.createdAt, t)}</span>
+                    {(c.hasVoice || c.photoCount > 0) && <span className="ad-ctags">
+                      {c.hasVoice && <span className="ad-vtag"><Ico d={I.mic} s={13} />{c.voiceSecs}s</span>}
+                      {c.photoCount > 0 && <span className="ad-vtag ph"><Ico d={I.cam} s={13} />{c.photoCount}</span>}
+                    </span>}
                   </div>
                 </div>
-                <span className={"ad-pill s" + c.status}>{ST_EN[c.status]}</span>
               </button>
             );
           })}
@@ -638,8 +698,10 @@ function Panel({ token, onLogout }) {
 export default function Admin() {
   const [token, setTok] = useState(getToken);
   const out = useCallback(() => { setToken(""); setTok(""); }, []);
-  useEffect(() => { document.title = "Admin | Ward 38 Kattur"; }, []);
-  return token ? <Panel token={token} onLogout={out} /> : <Login onOk={setTok} />;
+  const [lang, setLang] = useState(() => { try { return localStorage.getItem("tvk38.adminLang") === "ta" ? "ta" : "en"; } catch { return "en"; } });
+  const t = useMemo(() => makeT(lang, l => { setLang(l); try { localStorage.setItem("tvk38.adminLang", l); } catch { /* ignore */ } }), [lang]);
+  useEffect(() => { document.title = lang === "ta" ? "நிர்வாகம் | வார்டு 38 காட்டூர்" : "Admin | Ward 38 Kattur"; document.documentElement.lang = lang; }, [lang]);
+  return <LangCtx.Provider value={t}>{token ? <Panel token={token} onLogout={out} /> : <Login onOk={setTok} />}</LangCtx.Provider>;
 }
 
 export { ST, CFG };
