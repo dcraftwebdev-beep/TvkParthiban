@@ -1,0 +1,24 @@
+/* The typefaces used on tvkvijay.com.
+   Tamil:   headings -> TAU Neythal (Tamil Virtual Academy), body -> Tamil010
+   English: headings -> Teko, body -> Instrument Sans (both loaded from Google Fonts in index.html) */
+@font-face{font-family:"tamil010";src:url(/fonts/Tamil010.ttf) format("truetype");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"neythal";src:url(/fonts/TAU_Neythal.ttf) format("truetype");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"neythal";src:url(/fonts/TAU_Neythal-Bold.ttf) format("truetype");font-weight:700;font-style:normal;font-display:swap}
+
+:root{
+  --f-ta-body:"tamil010","Noto Sans Tamil",sans-serif;
+  --f-ta-head:"neythal","tamil010","Noto Sans Tamil",sans-serif;
+  --f-en-body:"Instrument Sans","Manrope",system-ui,sans-serif;
+  --f-en-head:"Teko","Instrument Sans",system-ui,sans-serif;
+}
+html[lang="ta"]{--f-body:var(--f-ta-body);--f-head:var(--f-ta-head);--f-strong:var(--f-ta-head)}
+html[lang="en"]{--f-body:var(--f-en-body);--f-head:var(--f-en-head);--f-strong:var(--f-en-body)}
+
+body,button,input,textarea,select{font-family:var(--f-body)}
+html[lang="ta"] body{font-synthesis:none}
+h1,h2,h3,.display{font-family:var(--f-head);font-weight:700}
+h4,h5,p,li,nav a{font-family:var(--f-body)}
+b,strong,label,dt,.btn,.eyebrow,.badge,.tile b,.tabbar a,.chip,.lang button{font-family:var(--f-strong)}
+html[lang="ta"] h1,html[lang="ta"] h2,html[lang="ta"] h3{letter-spacing:0}
+html[lang="en"] h1,html[lang="en"] h2{letter-spacing:.015em;line-height:1.02}
+html[lang="en"] h3{font-weight:600;letter-spacing:.01em}

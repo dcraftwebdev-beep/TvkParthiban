@@ -1,5 +1,5 @@
 // Strings for photos, notifications and the before/after work gallery.
-import { T } from "./i18n.js";
+import { T } from "./index.js";
 
 Object.assign(T.ta, {
   photoHelp: "படம் இருந்தால் தீர்வு விரைவாகும்", photoHelp2: "அதிகபட்சம் 4 படங்கள். தேவையில்லை, ஆனால் உதவியாக இருக்கும்.",
@@ -62,6 +62,8 @@ Object.assign(T.ta, {
   cTitle: "புகாரைப் பதிவு செய்யுங்கள்",
   recVoice: "குரல் செய்தியைப் பதிவு செய்", recHint: "அதிகபட்சம் 60 வினாடி. நிர்வாகி நேரடியாகக் கேட்பார்.",
   recording: "பதிவாகிறது", recStop: "நிறுத்த தொடவும்",
+  recTap: "பேசி புகாரைப் பதிவு செய்", recSpeak: "இப்போது பேசுங்கள். முடிந்ததும் கீழே உள்ள நிறுத்து பொத்தானைத் தொடவும்.",
+  recStopBtn: "பதிவை நிறுத்து", recCancel: "ரத்து செய்", recSaved: "குரல் பதிவு தயார்", recAgain: "மீண்டும் பதிவு",
   recNo: "இந்த உலாவியில் குரல் பதிவு இல்லை. Chrome பயன்படுத்தவும்.", recShort: "பதிவு மிகக் குறைவு. மீண்டும் முயலவும்.",
   recBig: "குரல் பதிவு மிகப் பெரியது. சிறியதாகப் பதிவு செய்யவும்.", voiceLabel: "குரல் செய்தி",
   orType: "அல்லது எழுதுங்கள்", cB1: "குரலில் சொன்னாலே போதும்"
@@ -70,6 +72,8 @@ Object.assign(T.en, {
   cTitle: "Register your complaint",
   recVoice: "Record a voice message", recHint: "Up to 60 seconds. The ward office listens to it directly.",
   recording: "Recording", recStop: "Tap to stop",
+  recTap: "Tap to record your complaint", recSpeak: "Speak now. When you are done, tap the Stop button below.",
+  recStopBtn: "Stop recording", recCancel: "Cancel", recSaved: "Voice message ready", recAgain: "Record again",
   recNo: "Voice recording is not supported here. Try Chrome.", recShort: "That was too short. Please try again.",
   recBig: "The voice message is too large. Please record a shorter one.", voiceLabel: "Voice message",
   orType: "or type it", cB1: "Just say it in your own voice"

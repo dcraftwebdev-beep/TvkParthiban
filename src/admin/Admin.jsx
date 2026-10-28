@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { admin, api, getToken, setToken } from "./api.js";
-import { subscribePush, pushSupported } from "./push.js";
-import { CATS, CFG } from "./config.js";
+import { admin, api, getToken, setToken } from "../lib/api.js";
+import { subscribePush, pushSupported } from "../lib/push.js";
+import { CATS, CFG } from "../lib/config.js";
 import "./admin.css";
 
 const ST = ["புதியது", "நடவடிக்கையில்", "தீர்க்கப்பட்டது"];

@@ -1,5 +1,5 @@
 // Content for the TVK sections. Based on the party's own site (tvkvijay.com, English and Tamil pages).
-import { T } from "./i18n.js";
+import { T } from "./index.js";
 
 export const TVK_SITE = "https://tvkvijay.com";
 

@@ -1,6 +1,6 @@
 export const T = {
   ta: {
-    brand: "மக்கள் குறைகள் மையம்", brandSub: "வார்டு 38 · காட்டூர் · பார்த்திபன்",
+    brand: "மக்கள் சேவை மையம்", brandSub: "வார்டு 38 · காட்டூர் · பார்த்திபன்",
     ticker: "திருச்சிராப்பள்ளி மாநகராட்சி · வார்டு 38 சிறப்பு மக்கள் குறைதீர் மையம்",
     navHome: "முகப்பு", navLeader: "பிரதிநிதி", navTvk: "TVK", navComplaint: "புகார்", navTrack: "நிலை", navHow: "செயல்முறை", navContact: "தொடர்பு",
     heroEyebrow: "வார்டு 38 · காட்டூர்",
@@ -51,13 +51,13 @@ export const T = {
     kEyebrow: "தொடர்பு", kTitle: "நேரடியாகத் தொடர்பு கொள்ளுங்கள்",
     kWa: "WhatsApp வாயிலாகப் புகார்", kCall: "கைபேசி வாயிலாகப் புகார்",
     kNote: "வார்டு 38 · காட்டூர் · திருச்சிராப்பள்ளி மாநகராட்சி",
-    footer: "தமிழக வெற்றிக் கழகம் · வார்டு 38 மக்கள் குறைகள் மையம்",
+    footer: "தமிழக வெற்றிக் கழகம் · வார்டு 38 மக்கள் சேவை மையம்",
     okTitle: "புகார் பதிவானது", okText: "இந்த எண்ணைக் குறித்து வைத்துக் கொள்ளுங்கள். நிலை அறிய இதைப் பயன்படுத்தலாம்.",
     okWa: "WhatsApp இல் உறுதிப்படுத்து", okClose: "மூடு",
     waHead: "புகார்", waCat: "வகை", waDesc: "விவரம்", waPlace: "இடம்", waName: "பெயர்", waPhone: "கைபேசி", waMap: "வரைபடம்"
   },
   en: {
-    brand: "People's Grievance Centre", brandSub: "Ward 38 · Kattur · Parthiban",
+    brand: "Makkal Sevai Mayyam", brandSub: "Ward 38 · Kattur · Parthiban",
     ticker: "Tiruchirappalli Corporation · Ward 38 Special Public Grievance Redressal Centre",
     navHome: "Home", navLeader: "Representative", navTvk: "TVK", navComplaint: "Complaint", navTrack: "Track", navHow: "How it works", navContact: "Contact",
     heroEyebrow: "Ward 38 · Kattur",
@@ -108,7 +108,7 @@ export const T = {
     kEyebrow: "Contact", kTitle: "Reach us directly",
     kWa: "Complaint via WhatsApp", kCall: "Complaint via phone",
     kNote: "Ward 38 · Kattur · Tiruchirappalli Corporation",
-    footer: "Tamilaga Vettri Kazhagam · Ward 38 Grievance Centre",
+    footer: "Tamilaga Vettri Kazhagam · Ward 38 Makkal Sevai Mayyam",
     okTitle: "Complaint registered", okText: "Keep this number safe. Use it to check the status later.",
     okWa: "Confirm on WhatsApp", okClose: "Close",
     waHead: "Complaint", waCat: "Category", waDesc: "Details", waPlace: "Location", waName: "Name", waPhone: "Mobile", waMap: "Map"
