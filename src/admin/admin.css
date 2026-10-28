@@ -379,3 +379,30 @@ body:has(.ad)::before,body:has(.ad-login)::before{display:none}
   .ad-ib{width:36px;height:36px}
 }
 .ad-card .ad-pill{margin-left:0}
+
+/* custom dropdown */
+.ad-row{display:flex;flex-wrap:wrap;gap:8px}
+.ad-dd{position:relative;min-width:0}
+.ad-dd.grow{flex:1;min-width:180px}
+.ad-dd-btn{display:flex;align-items:center;gap:10px;width:100%;min-height:46px;padding:0 12px;border:1.5px solid var(--ln);border-radius:12px;background:#fff;text-align:left;font-size:14.5px;font-weight:700;transition:border-color .15s,box-shadow .15s}
+.ad-dd-btn:hover{border-color:#94A3B8}
+.ad-dd-btn.open{border-color:var(--m);box-shadow:0 0 0 3px #b3141f1f}
+.ad-dd-ico{display:grid;place-items:center;width:28px;height:28px;border-radius:9px;background:#FEE2E2;color:var(--m);flex:none}
+.ad-dd-ico.none{background:transparent}
+.ad-dd-val{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ad-dd-chev{color:var(--mute);flex:none;transition:transform .15s}
+.ad-dd-btn.open .ad-dd-chev{transform:rotate(180deg)}
+.ad-dd-menu{position:absolute;z-index:45;top:calc(100% + 6px);left:0;min-width:100%;width:max-content;max-width:min(360px,92vw);max-height:340px;overflow-y:auto;list-style:none;padding:6px;background:#fff;border:1px solid var(--ln);border-radius:14px;box-shadow:0 18px 50px #0f172a2e;animation:adrise2 .15s ease}
+.ad-dd-menu li{list-style:none}
+.ad-dd-menu button{display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border:0;border-radius:10px;background:transparent;text-align:left;font-size:14px;font-weight:600}
+.ad-dd-menu button>span:nth-child(2){flex:1}
+.ad-dd-menu button.hi{background:var(--soft)}
+.ad-dd-menu button.sel{color:var(--m);font-weight:800}
+.ad-dd-menu button.sel .ad-dd-ico{background:var(--m);color:#fff}
+@media (max-width:520px){.ad-dd:not(.grow){flex:1 1 100%}.ad-dd.grow{flex:1 1 100%}.ad-dd-menu{max-width:100%}}
+/* groups in the list */
+.ad-group{display:flex;align-items:center;gap:8px;margin:10px 2px 0;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--m)}
+.ad-group.s1{color:#B45309}.ad-group.s2{color:#15803D}
+.ad-group:first-child{margin-top:0}
+.ad-group i{font-style:normal;font-size:11px;padding:1px 8px;border-radius:99px;background:#fff;border:1px solid var(--ln);color:var(--mute)}
+.ad-ctime.late{color:#B91C1C;font-weight:800}

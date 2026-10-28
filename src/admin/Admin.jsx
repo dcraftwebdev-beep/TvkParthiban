@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { admin, api, getToken, setToken } from "../lib/api.js";
 import { subscribePush, pushSupported } from "../lib/push.js";
 import { CATS, CFG } from "../lib/config.js";
@@ -431,6 +431,54 @@ function Detail({ id, token, onClose, onChanged, flash, dock }) {
   );
 }
 
+/* ---------- custom dropdown (replaces the browser's select) ---------- */
+function Dropdown({ value, onChange, options, label, className = "" }) {
+  const [open, setOpen] = useState(false);
+  const [hi, setHi] = useState(0);
+  const box = useRef(null);
+  const cur = options.find(o => o.value === value) || options[0];
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const away = e => { if (box.current && !box.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("mousedown", away);
+    return () => document.removeEventListener("mousedown", away);
+  }, [open]);
+
+  const pick = v => { onChange(v); setOpen(false); };
+  const key = e => {
+    if (e.key === "Escape") { setOpen(false); return; }
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      if (!open) { setOpen(true); setHi(Math.max(0, options.indexOf(cur))); return; }
+      setHi(i => (i + (e.key === "ArrowDown" ? 1 : -1) + options.length) % options.length);
+    } else if ((e.key === "Enter" || e.key === " ") && open) { e.preventDefault(); pick(options[hi].value); }
+  };
+
+  return (
+    <div className={"ad-dd " + className} ref={box} onKeyDown={key}>
+      <button type="button" className={"ad-dd-btn" + (open ? " open" : "")} onClick={() => { setOpen(o => !o); setHi(Math.max(0, options.indexOf(cur))); }} aria-haspopup="listbox" aria-expanded={open} aria-label={label}>
+        {cur.icon && <span className="ad-dd-ico"><SiteIcon n={cur.icon} size={17} /></span>}
+        <span className="ad-dd-val">{cur.label}</span>
+        <svg className="ad-dd-chev" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+      </button>
+      {open && (
+        <ul className="ad-dd-menu" role="listbox" aria-label={label}>
+          {options.map((o, i) => (
+            <li key={String(o.value)} role="option" aria-selected={o.value === value}>
+              <button type="button" className={(o.value === value ? "sel " : "") + (i === hi ? "hi" : "")} onMouseEnter={() => setHi(i)} onClick={() => pick(o.value)}>
+                {o.icon ? <span className="ad-dd-ico"><SiteIcon n={o.icon} size={17} /></span> : <span className="ad-dd-ico none" />}
+                <span>{o.label}</span>
+                {o.value === value && <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 /* ---------- language switch: Tamil / English ---------- */
 function LangSwitch({ className = "" }) {
   const t = useT();
@@ -569,6 +617,7 @@ function Panel({ token, onLogout }) {
   const [fresh, setFresh] = useState([]);
   const [status, setStatus] = useState("");
   const [cat, setCat] = useState("");
+  const [sort, setSort] = useState("attention");
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(null);
   const [toast, setToast] = useState("");
@@ -582,13 +631,13 @@ function Panel({ token, onLogout }) {
 
   const load = useCallback(async (quiet) => {
     try {
-      const [s, l, f] = await Promise.all([admin.stats(token), admin.list(token, { status, cat, q: search }), admin.list(token, { status: "0" })]);
+      const [s, l, f] = await Promise.all([admin.stats(token), admin.list(token, { status, cat, q: search, sort }), admin.list(token, { status: "0" })]);
       setStats(s); setItems(l.items); setFresh(f.items);
       if (seen.current !== null && s.total > seen.current && quiet) { flash(t(s.total - seen.current > 1 ? "{n} new complaints" : "{n} new complaint", { n: s.total - seen.current })); chime(); }
       seen.current = s.total;
     } catch (e) { if (e.status === 401) onLogout(); else flash(t("Connection problem")); }
     finally { setLoading(false); }
-  }, [token, status, cat, search, flash, onLogout, t]);
+  }, [token, status, cat, search, sort, flash, onLogout, t]);
 
   useEffect(() => { const h = setTimeout(() => load(false), search ? 250 : 0); return () => clearTimeout(h); }, [load, search]);
   useEffect(() => { const h = setInterval(() => load(true), 15000); return () => clearInterval(h); }, [load]);
@@ -654,19 +703,23 @@ function Panel({ token, onLogout }) {
           </div>
           <div className="ad-row">
             <input className="ad-search ad-mobsearch" type="search" value={search} onChange={e => setSearch(e.target.value)} placeholder={t("Search ID, phone, name, street")} />
-            <select value={cat} onChange={e => setCat(e.target.value)} aria-label={t("Category")}>
-              <option value="">{t("All categories")}</option>
-              {CATS.map(c => <option key={c.id} value={c.id}>{c[t.lang]}</option>)}
-            </select>
+            <Dropdown className="grow" value={cat} onChange={setCat} label={t("Category")}
+              options={[{ value: "", label: t("All categories"), icon: "other" }, ...CATS.map(c => ({ value: c.id, label: c[t.lang], icon: c.icon }))]} />
+            <Dropdown value={sort} onChange={setSort} label={t("Sort")}
+              options={[{ value: "attention", label: t("Needs action first") }, { value: "newest", label: t("Newest first") }, { value: "oldest", label: t("Oldest first") }]} />
           </div>
         </section>
 
         <section className="ad-list" aria-busy={loading}>
           {!loading && !items.length && <div className="ad-empty">{t("No complaints found.")}</div>}
-          {items.map(c => {
+          {items.map((c, n) => {
             const k = CATS.find(x => x.id === c.cat);
+            const late = c.status === 0 && Date.now() - c.createdAt > 864e5;
+            const head = sort === "attention" && status === "" && (n === 0 || items[n - 1].status !== c.status);
             return (
-              <button key={c.id} className={"ad-card" + (open === c.id ? " on" : "") + " s" + c.status} onClick={() => setOpen(c.id)}>
+              <Fragment key={c.id}>
+              {head && <h2 className={"ad-group s" + c.status}>{t(ST_EN[c.status])}<i>{items.filter(x => x.status === c.status).length}</i></h2>}
+              <button className={"ad-card" + (open === c.id ? " on" : "") + " s" + c.status} onClick={() => setOpen(c.id)}>
                 <span className="ad-catico"><SiteIcon n={k?.icon || "other"} size={20} /></span>
                 <div className="ad-cbody">
                   <div className="ad-ctop"><b>{c.id}</b><span className={"ad-pill s" + c.status}>{t(ST_EN[c.status])}</span></div>
@@ -674,7 +727,7 @@ function Panel({ token, onLogout }) {
                   <div className="ad-cmeta">
                     <span className="ad-ccat">{k?.[t.lang]}</span>
                     <span className="ad-cname">{c.name}</span>
-                    <span className="ad-ctime">{ago(c.createdAt, t)}</span>
+                    <span className={"ad-ctime" + (late ? " late" : "")}>{late ? t("Waiting {n}", { n: ago(c.createdAt, t, true) }) : ago(c.createdAt, t)}</span>
                     {(c.hasVoice || c.photoCount > 0) && <span className="ad-ctags">
                       {c.hasVoice && <span className="ad-vtag"><Ico d={I.mic} s={13} />{c.voiceSecs}s</span>}
                       {c.photoCount > 0 && <span className="ad-vtag ph"><Ico d={I.cam} s={13} />{c.photoCount}</span>}
@@ -682,6 +735,7 @@ function Panel({ token, onLogout }) {
                   </div>
                 </div>
               </button>
+              </Fragment>
             );
           })}
         </section>

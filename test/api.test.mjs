@@ -58,6 +58,15 @@ await t("Telegram alert goes to every chat, first one with the photo and the adm
   assert.equal(telegram[1].body.get("chat_id"), "222");
 });
 await t("public stats", async () => assert.deepEqual((await call("/api/stats")).data, { total: 2, open: 2, done: 0 }));
+await t("admin list shows what needs action first: new, then in progress, then resolved", async () => {
+  const tk = (await call("/api/admin/login", { method: "POST", body: { password: "secret-pass" } })).data.token;
+  const all = (await call("/api/admin/complaints", { token: tk })).data.items;
+  const ranks = all.map(c => c.status);
+  assert.deepEqual(ranks, [...ranks].sort((a, b) => a - b));
+  const oldest = (await call("/api/admin/complaints?sort=oldest", { token: tk })).data.items.map(c => c.createdAt);
+  assert.deepEqual(oldest, [...oldest].sort((a, b) => a - b));
+});
+
 await t("track by only the 6 digits of the id, or with the prefix and a space", async () => {
   const six = id.split("-")[1];
   for (const q of [six, `TVK38 ${six}`, `tvk38-${six}`]) {

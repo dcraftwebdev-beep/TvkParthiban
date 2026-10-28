@@ -290,7 +290,8 @@ h1{font-size:22px;margin:18px 0 6px}p{color:#ffffffbf;margin:0 0 18px}a{display:
 
         if (path === "/admin/complaints" && method === "GET") {
           const sp = url.searchParams;
-          const items = await db.list({ status: sp.get("status") ?? "", cat: sp.get("cat") || "", search: clean(sp.get("q"), 60) });
+          const sort = ["newest", "oldest"].includes(sp.get("sort")) ? sp.get("sort") : "attention";
+          const items = await db.list({ status: sp.get("status") ?? "", cat: sp.get("cat") || "", search: clean(sp.get("q"), 60), sort });
           return send(res, 200, { items: items.map(adminView) });
         }
 

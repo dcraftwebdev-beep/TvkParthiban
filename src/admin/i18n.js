@@ -122,7 +122,7 @@ export const TA = {
   "{n}m": "{n} நிமி",
   "{n}h": "{n} மணி",
   "{n}d": "{n} நாள்",
-  "Complaint": "புகார்", "Menu": "பட்டி"
+  "Complaint": "புகார்", "Menu": "பட்டி", "Sort": "வரிசை", "Needs action first": "நடவடிக்கை தேவையானவை முதலில்", "Newest first": "புதியவை முதலில்", "Oldest first": "பழையவை முதலில்", "Waiting {n}": "காத்திருப்பு {n}"
 };
 
 /** t("English text", { n: 3 }) gives the text in the chosen language. t.lang and t.setLang are attached. */

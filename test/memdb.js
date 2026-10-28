@@ -12,9 +12,11 @@ export function memDb() {
     async getPush(id) { return rows.find(x => x.id === id)?.push_sub || null; },
     async byPhone(p) { return rows.filter(r => r.phone === p).sort((a, b) => b.created_at - a.created_at).map(light); },
     async countSince(p, since) { return rows.filter(r => r.phone === p && r.created_at > since).length; },
-    async list({ status, cat, search }) {
-      return rows.filter(r => (status === "" || status === undefined || r.status === +status) && (!cat || r.cat === cat) &&
-        (!search || [r.id, r.phone, r.name, r.descr, r.street].some(v => String(v).toLowerCase().includes(search.toLowerCase())))).map(light).reverse();
+    async list({ status, cat, search, sort }) {
+      const out = rows.filter(r => (status === "" || status === undefined || r.status === +status) && (!cat || r.cat === cat) &&
+        (!search || [r.id, r.phone, r.name, r.descr, r.street].some(v => String(v).toLowerCase().includes(search.toLowerCase())))).map(light);
+      const byNew = (a, b) => b.created_at - a.created_at;
+      return out.sort(sort === "oldest" ? (a, b) => a.created_at - b.created_at : sort === "newest" ? byNew : (a, b) => a.status - b.status || byNew(a, b));
     },
     async update(id, patch) { Object.assign(rows.find(x => x.id === id), patch); },
     async summary() { return rows.map(({ cat, status, created_at }) => ({ cat, status, created_at })); },

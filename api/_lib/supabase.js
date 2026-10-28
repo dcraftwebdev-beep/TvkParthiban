@@ -28,8 +28,10 @@ export function supabaseDb(env = process.env) {
     async getPush(id) { return (await one(`/complaints?id=${eq(id)}&select=push_sub`))?.push_sub || null; },
     byPhone: (phone, limit = 20) => rest(`/complaints?phone=${eq(phone)}&select=${COLS}&order=created_at.desc&limit=${limit}`),
     async countSince(phone, since) { return (await rest(`/complaints?phone=${eq(phone)}&created_at=gt.${+since}&select=id`)).length; },
-    async list({ status, cat, search, limit = 200 }) {
-      const q = [`select=${COLS}`, "order=created_at.desc", `limit=${Math.min(+limit || 200, 1000)}`];
+    async list({ status, cat, search, sort, limit = 200 }) {
+      // default: what needs action first (New, then In progress, then Resolved), newest first inside each group
+      const order = sort === "oldest" ? "created_at.asc" : sort === "newest" ? "created_at.desc" : "status.asc,created_at.desc";
+      const q = [`select=${COLS}`, `order=${order}`, `limit=${Math.min(+limit || 200, 1000)}`];
       if (status !== undefined && status !== "" && !Number.isNaN(+status)) q.push(`status=eq.${+status}`);
       if (cat) q.push(`cat=${eq(cat)}`);
       if (search) {
