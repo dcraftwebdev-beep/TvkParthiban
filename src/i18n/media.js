@@ -66,7 +66,7 @@ Object.assign(T.en, { heroTag: "Tamilaga Vettri Kazhagam · Everyone deserves ev
 
 Object.assign(T.ta, {
   cTitle: "புகாரைப் பதிவு செய்யுங்கள்",
-  recVoice: "குரல் செய்தியைப் பதிவு செய்", recHint: "அதிகபட்சம் 60 வினாடி. நிர்வாகி நேரடியாகக் கேட்பார்.",
+  recVoice: "குரல் செய்தியைப் பதிவு செய்", recHint: "நிர்வாகி நேரடியாகக் கேட்பார்.",
   recording: "பதிவாகிறது", recStop: "நிறுத்த தொடவும்",
   recTap: "பேசி புகாரைப் பதிவு செய்", recSpeak: "இப்போது பேசுங்கள். முடிந்ததும் கீழே உள்ள நிறுத்து பொத்தானைத் தொடவும்.",
   recStopBtn: "பதிவை நிறுத்து", recCancel: "ரத்து செய்", recSaved: "குரல் பதிவு தயார்", recAgain: "மீண்டும் பதிவு",
@@ -76,7 +76,7 @@ Object.assign(T.ta, {
 });
 Object.assign(T.en, {
   cTitle: "Register your complaint",
-  recVoice: "Record a voice message", recHint: "Up to 60 seconds. The ward office listens to it directly.",
+  recVoice: "Record a voice message", recHint: "The ward office listens to it directly.",
   recording: "Recording", recStop: "Tap to stop",
   recTap: "Tap to record your complaint", recSpeak: "Speak now. When you are done, tap the Stop button below.",
   recStopBtn: "Stop recording", recCancel: "Cancel", recSaved: "Voice message ready", recAgain: "Record again",

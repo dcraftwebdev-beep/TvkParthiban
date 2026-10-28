@@ -3,7 +3,7 @@ import { CFG, CATS } from "../lib/config.js";
 import { T } from "../i18n/index.js";
 import { api } from "../lib/api.js";
 import { subscribePush, pushSupported } from "../lib/push.js";
-import { canRecord, startRecording, blobToBase64, clock, MAX_SECS } from "../lib/recorder.js";
+import { canRecord, startRecording, blobToBase64, clock } from "../lib/recorder.js";
 import { wa, Icon } from "../components/ui.jsx";
 
 export function Complaint({ t, lang, say, onDone, micReq }) {
@@ -174,9 +174,8 @@ export function Complaint({ t, lang, say, onDone, micReq }) {
                 <div className="rec-top">
                   <span className="rec-dot" aria-hidden="true" />
                   <b>{t.recording}</b>
-                  <span className="rec-time">{clock(secs)} <small>/ {clock(MAX_SECS)}</small></span>
+                  <span className="rec-time">{clock(secs)}</span>
                 </div>
-                <div className="rec-bar" aria-hidden="true"><i style={{ width: Math.min(100, (secs / MAX_SECS) * 100) + "%" }} /></div>
                 <p className="rec-say">{t.recSpeak}</p>
                 <button type="button" className="rec-stop" onClick={stopRec}>
                   <span className="rec-sq" aria-hidden="true" />{t.recStopBtn}

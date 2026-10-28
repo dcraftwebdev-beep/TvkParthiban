@@ -47,8 +47,6 @@ html[lang="en"] .cx-side h2{font-size:clamp(40px,5.4vw,68px)}
 @keyframes blink{50%{opacity:.25}}
 .rec-time{font-family:var(--f-head);font-size:26px;line-height:1;color:var(--ink);font-variant-numeric:tabular-nums}
 .rec-time small{font-size:15px;color:var(--mute)}
-.rec-bar{height:6px;border-radius:6px;background:#f0d2d3;overflow:hidden}
-.rec-bar i{display:block;height:100%;background:var(--red);transition:width .3s linear}
 .rec-say{font-size:14px;line-height:1.5;color:#4d3d3e}
 .rec-stop{display:flex;align-items:center;justify-content:center;gap:12px;min-height:60px;border:0;border-radius:99px;background:var(--red);color:#fff;font-weight:700;font-size:17px}
 .rec-stop:active{transform:scale(.98)}

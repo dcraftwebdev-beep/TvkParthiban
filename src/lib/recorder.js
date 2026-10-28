@@ -1,5 +1,6 @@
 // Records a voice message in the browser. The audio file itself is sent to the ward office (no speech to text).
-export const MAX_SECS = 60;
+// no limit is shown to citizens; recording only stops itself at 10 minutes, which keeps the upload within the 4.5 MB request size of the host
+const HARD_STOP_SECS = 600;
 export const canRecord = () => typeof navigator !== "undefined" && !!navigator.mediaDevices?.getUserMedia && typeof MediaRecorder !== "undefined";
 
 const pickMime = () => {
@@ -31,7 +32,7 @@ export async function startRecording(onTick) {
   timer = setInterval(() => {
     const s = Math.floor((Date.now() - t0) / 1000);
     onTick?.(s);
-    if (s >= MAX_SECS) stop();
+    if (s >= HARD_STOP_SECS) stop();
   }, 250);
   rec.start(500);
   return { stop, done };

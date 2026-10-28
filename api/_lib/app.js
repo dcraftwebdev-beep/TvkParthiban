@@ -167,8 +167,8 @@ export function makeHandler(getDb, env = process.env) {
         const v = b.voice;
         if (v && typeof v.data === "string") {
           const type = String(v.type || "").split(";")[0].toLowerCase();
-          if (!VOICE_TYPES.includes(type) || !/^[A-Za-z0-9+/=]+$/.test(v.data) || v.data.length > 1000000) return send(res, 400, { error: "voice" });
-          voice = v.data; voiceType = type; voiceSecs = Math.min(Math.max(Math.round(+v.secs || 0), 1), 90);
+          if (!VOICE_TYPES.includes(type) || !/^[A-Za-z0-9+/=]+$/.test(v.data) || v.data.length > 3000000) return send(res, 400, { error: "voice" });
+          voice = v.data; voiceType = type; voiceSecs = Math.min(Math.max(Math.round(+v.secs || 0), 1), 1800);
           if (descr.length < 3) descr = lang === "en" ? "(Voice message)" : "(குரல் செய்தி)";
         }
         if (!cat) return send(res, 400, { error: "category" });
