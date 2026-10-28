@@ -315,7 +315,7 @@ h1{font-size:22px;margin:18px 0 6px}p{color:#ffffffbf;margin:0 0 18px}a{display:
         if (m && method === "GET") {
           const p = await db.getPhoto(m[1], +(m[2] || 0));
           if (!p) return send(res, 404, { error: "not_found" });
-          return send(res, 200, Buffer.from(p, "base64"), "image/jpeg");
+          return send(res, 200, Buffer.from(p, "base64"), "image/jpeg", "private, max-age=86400");   // a photo never changes, so the browser keeps it
         }
 
         m = path.match(/^\/admin\/complaints\/([A-Za-z0-9-]+)(\/message)?$/);
@@ -324,8 +324,10 @@ h1{font-size:22px;margin:18px 0 6px}p{color:#ffffffbf;margin:0 0 18px}a{display:
           if (!c) return send(res, 404, { error: "not_found" });
 
           if (!m[2] && method === "GET") {
-            const notifications = queueWhatsApp ? (await db.outboxFor(c.id)).map(n => ({ audience: n.audience, kind: n.kind, ok: n.status === "sent", pending: n.status === "pending", error: n.error, at: n.sent_at || n.created_at })) : [];
-            return send(res, 200, { ...adminView(c), notifications, canPush: !!(await db.getPush(c.id)) });
+            // the two extra lookups run together instead of one after the other
+            const [log, sub] = await Promise.all([queueWhatsApp ? db.outboxFor(c.id) : [], db.getPush(c.id)]);
+            const notifications = log.map(n => ({ audience: n.audience, kind: n.kind, ok: n.status === "sent", pending: n.status === "pending", error: n.error, at: n.sent_at || n.created_at }));
+            return send(res, 200, { ...adminView(c), notifications, canPush: !!sub });
           }
 
           if (!m[2] && method === "PATCH") {

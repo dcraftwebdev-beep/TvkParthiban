@@ -22,7 +22,12 @@ export function supabaseDb(env = process.env) {
   return {
     async insertComplaint(row) { await rest("/complaints", { method: "POST", body: row, prefer: "return=minimal" }); },
     getComplaint: id => one(`/complaints?id=${eq(id)}&select=${COLS}`),
-    async getPhoto(id, i) { const r = await one(`/complaints?id=${eq(id)}&select=photos`); return r?.photos?.[i] || null; },
+    // only the one photo that is asked for, not the whole array; falls back to the old way if the database rejects the query
+    async getPhoto(id, i) {
+      const k = Math.max(0, Math.min(9, +i || 0));
+      try { const r = await one(`/complaints?id=${eq(id)}&select=p:photos->>${k}`); const v = r?.p ?? r?.[String(k)]; if (v) return v; if (r && "p" in r) return null; } catch { /* fall back below */ }
+      const r = await one(`/complaints?id=${eq(id)}&select=photos`); return r?.photos?.[k] || null;
+    },
     async getVoice(id) { return one(`/complaints?id=${eq(id)}&select=voice,voice_type`); },
     async getResult(id) { return (await one(`/complaints?id=${eq(id)}&select=result_image`))?.result_image || null; },
     async getPush(id) { return (await one(`/complaints?id=${eq(id)}&select=push_sub`))?.push_sub || null; },

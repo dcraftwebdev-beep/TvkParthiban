@@ -186,7 +186,16 @@ async function composeBeforeAfter({ beforeUrls, afterData, id, raisedAt, doneAt 
 }
 
 /* ---------- detail drawer ---------- */
-function Detail({ id, token, onClose, onChanged, flash, dock }) {
+// complaints already opened (or prefetched while the pointer is over a row) show instantly the next time
+const detailCache = new Map();
+const inflight = new Map();
+function prefetch(token, id) {
+  if (!id || detailCache.has(id) || inflight.has(id)) return;
+  const p = admin.one(token, id).then(r => detailCache.set(id, r)).catch(() => {}).finally(() => inflight.delete(id));
+  inflight.set(id, p);
+}
+
+function Detail({ id, token, onClose, onChanged, flash, dock, preview }) {
   const t = useT();
   const [c, setC] = useState(null);
   const [status, setStatus] = useState(0);
@@ -197,9 +206,14 @@ function Detail({ id, token, onClose, onChanged, flash, dock }) {
 
   useEffect(() => {
     let live = true;
-    setC(null); setAfters([]); setComposed("");
-    if (!id) return undefined;
-    admin.one(token, id).then(r => { if (live) { setC(r); setStatus(r.status); setNote(r.note || ""); } }).catch(() => flash(t("Could not load complaint")));
+    setAfters([]); setComposed("");
+    if (!id) { setC(null); return undefined; }
+    // show something straight away: the saved copy, or the row that was clicked
+    const seed = detailCache.get(id) || preview;
+    if (seed) { setC(seed); setStatus(seed.status); setNote(seed.note || ""); } else setC(null);
+    const show = r => { if (live) { setC(r); setStatus(r.status); setNote(r.note || ""); } };
+    const run = inflight.get(id) || admin.one(token, id).then(r => { detailCache.set(id, r); return r; });
+    Promise.resolve(run).then(() => { const r = detailCache.get(id); if (r) show(r); }).catch(() => flash(t("Could not load complaint")));
     return () => { live = false; };
   }, [id, token, flash]);
 
@@ -235,14 +249,14 @@ function Detail({ id, token, onClose, onChanged, flash, dock }) {
       const body = { status, note, notify: true };
       if (status === 2 && afters.length && composed) { body.after = afters[0]; body.result = composed; }
       const r = await admin.patch(token, id, body);
-      setC(p => ({ ...p, ...r })); setAfters([]); setComposed(""); onChanged();
+      detailCache.delete(id); setC(p => ({ ...p, ...r })); setAfters([]); setComposed(""); onChanged();
       flash(r.pushed ? t("Saved. The citizen's phone was notified") : t("Saved"));
     } catch (e) { flash(e.status === 400 ? t("Photo was rejected, try a smaller one") : t("Save failed")); }
     finally { setBusy(false); }
   };
 
   const publish = async on => {
-    try { const r = await admin.patch(token, id, { publish: on, notify: false }); setC(p => ({ ...p, consent: r.consent })); flash(on ? t("Shown on the website") : t("Hidden from the website")); onChanged(); }
+    try { const r = await admin.patch(token, id, { publish: on, notify: false }); detailCache.delete(id); setC(p => ({ ...p, consent: r.consent })); flash(on ? t("Shown on the website") : t("Hidden from the website")); onChanged(); }
     catch { flash(t("Could not change this")); }
   };
 
@@ -719,7 +733,7 @@ function Panel({ token, onLogout }) {
             return (
               <Fragment key={c.id}>
               {head && <h2 className={"ad-group s" + c.status}>{t(ST_EN[c.status])}<i>{items.filter(x => x.status === c.status).length}</i></h2>}
-              <button className={"ad-card" + (open === c.id ? " on" : "") + " s" + c.status} onClick={() => setOpen(c.id)}>
+              <button className={"ad-card" + (open === c.id ? " on" : "") + " s" + c.status} onClick={() => setOpen(c.id)} onMouseEnter={() => prefetch(token, c.id)} onTouchStart={() => prefetch(token, c.id)} onFocus={() => prefetch(token, c.id)}>
                 <span className="ad-catico"><SiteIcon n={k?.icon || "other"} size={20} /></span>
                 <div className="ad-cbody">
                   <div className="ad-ctop"><b>{c.id}</b><span className={"ad-pill s" + c.status}>{t(ST_EN[c.status])}</span></div>
@@ -742,8 +756,8 @@ function Panel({ token, onLogout }) {
       </main>
 
       {dock
-        ? <div className="ad-side"><Detail key="dock" id={open} token={token} onClose={() => setOpen(null)} onChanged={() => load(false)} flash={flash} dock /></div>
-        : open && <Detail id={open} token={token} onClose={() => setOpen(null)} onChanged={() => load(false)} flash={flash} />}
+        ? <div className="ad-side"><Detail key="dock" id={open} preview={items.find(x => x.id === open) || fresh.find(x => x.id === open)} token={token} onClose={() => setOpen(null)} onChanged={() => load(false)} flash={flash} dock /></div>
+        : open && <Detail id={open} preview={items.find(x => x.id === open) || fresh.find(x => x.id === open)} token={token} onClose={() => setOpen(null)} onChanged={() => load(false)} flash={flash} />}
       <div className={"ad-toast" + (toast ? " show" : "")} role="status">{toast}</div>
     </div>
   );
