@@ -9,7 +9,7 @@ html[lang="en"] .cx-side h2{font-size:clamp(40px,5.4vw,68px)}
 .cx-side .sub{font-size:15.5px;color:var(--mute);line-height:1.65;max-width:42ch}
 .cx-points{display:none;list-style:none;gap:12px;margin:26px 0}
 .cx-points li{display:flex;align-items:center;gap:12px;font-size:15px}
-.cx-points span{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--flag-yellow);color:var(--ink);flex:none}
+.cx-points span{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--flag-yellow);color:#1A0A0C;flex:none}
 .cx-alt{display:none}
 .cx-alt p{font-size:13.5px;color:var(--mute);margin-bottom:10px}
 .cx-alt .btn{min-height:46px;margin-right:8px;font-size:14px;padding:0 20px}
@@ -36,7 +36,7 @@ html[lang="en"] .cx-side h2{font-size:clamp(40px,5.4vw,68px)}
 .cx-ico{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:var(--soft);color:var(--red);flex:none}
 .cx-cat.on .cx-ico{background:var(--red);color:#fff}
 .mic-big{display:flex;align-items:center;gap:16px;width:100%;padding:14px;border-radius:18px;border:0;background:var(--red);color:#fff;text-align:left;transition:background .2s}
-.mic-orb{position:relative;display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:var(--flag-yellow);color:var(--ink);flex:none}
+.mic-orb{position:relative;display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:var(--flag-yellow);color:#1A0A0C;flex:none}
 @keyframes pulse{0%{transform:scale(1);opacity:.8}100%{transform:scale(1.9);opacity:0}}
 .mic-txt b{display:block;font-size:16px;line-height:1.3}
 .mic-txt small{display:block;margin-top:2px;font-size:12.5px;line-height:1.4;color:#ffffffd1}
@@ -107,7 +107,7 @@ html[lang="en"] .cx-side h2{font-size:clamp(40px,5.4vw,68px)}
 .t-card{background:#fff;border:1px solid var(--line);border-radius:var(--r-m);overflow:hidden}
 .t-card.is-done{border-color:#bfe6cd}
 .t-head{display:flex;align-items:flex-start;gap:12px;width:100%;padding:14px 14px 14px 12px;border:0;background:transparent;text-align:left}
-.t-num{flex:none;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--flag-yellow);color:var(--ink);font-weight:700;font-size:14px;font-family:var(--f-head)}
+.t-num{flex:none;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--flag-yellow);color:#1A0A0C;font-weight:700;font-size:14px;font-family:var(--f-head)}
 .t-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
 .t-line1{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .t-line1 b{font-size:15px;color:var(--red-d);letter-spacing:.03em}
@@ -142,7 +142,7 @@ html[lang="en"] .cx-side h2{font-size:clamp(40px,5.4vw,68px)}
 .t-note b{color:var(--red-d)}
 .t-result{display:block;margin-top:14px;border-radius:14px;overflow:hidden;border:2px solid var(--flag-yellow);position:relative}
 .t-result img{display:block;width:100%}
-.t-result span{position:absolute;left:10px;bottom:10px;background:var(--flag-yellow);color:var(--ink);font-weight:700;font-size:12px;padding:4px 12px;border-radius:99px}
+.t-result span{position:absolute;left:10px;bottom:10px;background:var(--flag-yellow);color:#1A0A0C;font-weight:700;font-size:12px;padding:4px 12px;border-radius:99px}
 .t-contact{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
 .t-contact a,.t-contact button{flex:1;min-width:96px;display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:42px;border-radius:12px;border:1px solid var(--line);background:#fff;font-weight:700;font-size:13px}
 .t-contact a:hover,.t-contact button:hover{border-color:var(--red);color:var(--red)}
@@ -254,3 +254,13 @@ html[lang="en"] .up-head h2{font-size:clamp(40px,5.4vw,68px)}
   .wp-chips{margin:0 0 20px;padding:0;flex-wrap:wrap}
 }
 @media (max-width:420px){.t-facts{grid-template-columns:1fr 1fr}.t-facts div:last-child{grid-column:1/-1}.track-form{flex-direction:column}.track-form .btn{width:100%}}
+
+/* ---------- page background: crowd photo under a maroon layer; text on it is light, cards stay white ---------- */
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(94,10,17,.76),rgba(36,6,9,.88)),url(/tvk/crowd.webp) center/cover no-repeat}
+main{--ink:#FFFFFF;--mute:#FFFFFFC7;--red:#FFD60A;--red-d:#FFD60A;--line:#FFFFFF33;--soft:#FFFFFF14;color:#fff}
+.tile,.cx-card,.t-card,.work-card,.pillar,.steps li,.c-card,.wa-channel,.track-form input,.wp-chips button,.join-art,.leader-art{--ink:#1A0A0C;--mute:#6C5B5C;--red:#D4151E;--red-d:#A30F17;--line:#EBE1D4;--soft:#FAF6F0;color:#1A0A0C}
+main .btn.dark{background:#FFD60A;color:#1A0A0C}
+main .btn.dark:hover{background:#FFE14D}
+.sec.soft,.complaint,.workdone,.workpage{background:var(--section)}
+.ideo li{background:#FFFFFF1F;border-color:#FFFFFF40;color:#fff}
+.kural{background:#240609d9}
