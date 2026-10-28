@@ -8,8 +8,7 @@ export function Team({ t }) {
       </figure>
       <div className="team-copy rv">
         <p className="eyebrow">{t.teamEyebrow}</p>
-        <h2>{t.teamTitle}</h2>
-        <p className="team-name">{t.teamName}</p>
+        <h2>{t.teamName}<span className="team-tag">{t.teamTitle}</span></h2>
         <ul className="team-roles">{t.teamRoles.map(r => <li key={r}>{r}</li>)}</ul>
         <p className="team-note">{t.teamNote}</p>
         <div className="leader-cta"><a className="btn dark" href={wa()} target="_blank" rel="noopener"><Icon n="wa" size={18} />{t.lCta}</a></div>
