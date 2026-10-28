@@ -1,10 +1,21 @@
+import { useEffect, useState } from "react";
 import { CFG } from "../lib/config.js";
 import { wa, Icon, P } from "../components/ui.jsx";
 
+// the video is for wide screens only; phones get a light photo so they do not download it
+const useWide = () => {
+  const q = "(min-width: 860px)";
+  const [wide, setWide] = useState(() => typeof matchMedia !== "undefined" && matchMedia(q).matches);
+  useEffect(() => { const m = matchMedia(q), f = () => setWide(m.matches); m.addEventListener("change", f); return () => m.removeEventListener("change", f); }, []);
+  return wide;
+};
+
 export function Hero({ t }) {
+  const wide = useWide();
   return (
     <section className="hero" id="home">
-      <video className="hero-video" autoPlay muted loop playsInline preload="metadata" aria-hidden="true"><source src="/hero.mp4" type="video/mp4" /></video>
+      <img className="hero-photo" src="/tvk/hero-mobile.jpg" alt="" fetchpriority="high" />
+      {wide && <video className="hero-video" autoPlay muted loop playsInline preload="metadata" aria-hidden="true"><source src="/hero.mp4" type="video/mp4" /></video>}
       <div className="hero-shade" />
       <div className="wrap hero-grid">
         <div className="hero-copy">

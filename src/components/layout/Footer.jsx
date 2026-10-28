@@ -1,5 +1,4 @@
 import { CFG } from "../../lib/config.js";
-import { TVK_SITE } from "../../i18n/tvk.js";
 import { wa, Icon, P, WaGlyph } from "../ui.jsx";
 
 export function Footer({ t, lang }) {
@@ -44,7 +43,6 @@ export function Footer({ t, lang }) {
 
       <div className="wrap foot-bot">
         <p>© {year} {t.footer}. {t.fRights}</p>
-        <a href={TVK_SITE} target="_blank" rel="noopener">tvkvijay.com</a>
       </div>
     </footer>
   );
