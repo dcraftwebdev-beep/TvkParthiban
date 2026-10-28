@@ -217,6 +217,11 @@ export function makeHandler(getDb, env = process.env) {
         let rows = [];
         if (/^TVK\d+-\d{6}$/i.test(s)) { const c = await db.getComplaint(s.toUpperCase()); if (c) rows = [c]; }
         else if (/^[6-9]\d{9}$/.test(digits)) rows = await db.byPhone(digits);
+        else {
+          // just the 6 digits of the ID (or "TVK38 123456") also works
+          const m = s.match(/^(?:[A-Za-z]+\d*[-_]?)?(\d{6})$/);
+          if (m) { const c = await db.getComplaint(`${prefix}-${m[1]}`); if (c) rows = [c]; }
+        }
         return send(res, 200, { items: rows.map(publicView) });
       }
 

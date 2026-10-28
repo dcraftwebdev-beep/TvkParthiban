@@ -58,6 +58,15 @@ await t("Telegram alert goes to every chat, first one with the photo and the adm
   assert.equal(telegram[1].body.get("chat_id"), "222");
 });
 await t("public stats", async () => assert.deepEqual((await call("/api/stats")).data, { total: 2, open: 2, done: 0 }));
+await t("track by only the 6 digits of the id, or with the prefix and a space", async () => {
+  const six = id.split("-")[1];
+  for (const q of [six, `TVK38 ${six}`, `tvk38-${six}`]) {
+    const items = (await call(`/api/track?q=${encodeURIComponent(q)}`)).data.items;
+    assert.equal(items.length, 1); assert.equal(items[0].id, id);
+  }
+  assert.equal((await call("/api/track?q=000000")).data.items.length, 0);
+});
+
 await t("track by id and by phone, no private data", async () => {
   const a = (await call(`/api/track?q=${id}`)).data.items[0], b = (await call("/api/track?q=9123456780")).data.items;
   assert.equal(a.id, id); assert.equal(b.length, 1); assert.equal(a.name, undefined); assert.equal(a.phone, undefined); assert.equal(a.result, null);

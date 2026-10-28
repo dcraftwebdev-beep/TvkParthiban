@@ -1,4 +1,5 @@
 import { TVK_SITE } from "../i18n/tvk.js";
+import { LazyVideo } from "../components/LazyVideo.jsx";
 import { wa, Icon, P, Head } from "../components/ui.jsx";
 
 export function Tvk({ t }) {
@@ -43,7 +44,7 @@ export function Join({ t }) {
   return (
     <section className="sec join" id="join"><div className="wrap join-in">
       <figure className="join-art rv">
-        <video src="/join.mp4" autoPlay muted loop playsInline preload="metadata" aria-hidden="true" />
+        <LazyVideo src="/join.mp4" aria-hidden="true" />
       </figure>
       <div className="join-copy rv">
         <p className="eyebrow">{t.joinEyebrow}</p>

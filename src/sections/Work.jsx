@@ -3,6 +3,8 @@ import { CFG, CATS } from "../lib/config.js";
 import { api } from "../lib/api.js";
 import { wa, Icon, Head, WaGlyph } from "../components/ui.jsx";
 
+const fmtDate = (ms, lang) => new Date(ms).toLocaleDateString(lang === "ta" ? "ta-IN" : "en-IN", { day: "numeric", month: "short", year: "numeric" });
+
 export function WorkCard({ w, t, lang, onOpen }) {
   const cat = CATS.find(x => x.id === w.cat)?.[lang];
   return (

@@ -3,6 +3,8 @@ import { CFG, CATS } from "../lib/config.js";
 import { api } from "../lib/api.js";
 import { wa, Icon, P, Head } from "../components/ui.jsx";
 
+const dayMs = 86400000;
+
 export function TrackCard({ c, t, lang, n, open, onToggle }) {
   const loc = lang === "ta" ? "ta-IN" : "en-IN";
   const date = ms => ms ? new Date(ms).toLocaleDateString(loc, { day: "numeric", month: "short", year: "numeric" }) : "";
