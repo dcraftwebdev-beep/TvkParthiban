@@ -2,6 +2,9 @@
 import { T } from "./index.js";
 
 Object.assign(T.ta, {
+  teamEyebrow: "தமிழக வெற்றிக் கழகம்", teamTitle: "மக்களுக்காக... மக்களுடன்...", teamName: "நவல்பட்டு S. விஜி",
+  teamRoles: ["திருவெறும்பூர் சட்டமன்ற உறுப்பினர்", "மாவட்டச் செயலாளர், திருச்சி புறநகர் தெற்கு மாவட்டம்"],
+  teamNote: "36 வது வார்டு மக்கள் குறைகள் தீர்வு மையம். பொதுமக்கள் தங்கள் புகார்களை இணையதளம், வாட்ஸ் அப் அல்லது கைபேசி மூலம் தெரிவிக்கலாம்.", teamAlt: "நவல்பட்டு S. விஜி, திருவெறும்பூர் சட்டமன்ற உறுப்பினர்",
   photoHelp: "படம் இருந்தால் தீர்வு விரைவாகும்", photoHelp2: "அதிகபட்சம் 4 படங்கள். தேவையில்லை, ஆனால் உதவியாக இருக்கும்.",
   addMore: "மேலும் சேர்", remove: "நீக்கு",
   notifyMe: "தீர்வு கிடைத்ததும் இந்த போனில் அறிவிப்பு", notifyHelp: "புகார் தீர்க்கப்பட்டதும் முன் / பின் படத்துடன் அறிவிப்பு வரும்.",
@@ -11,6 +14,9 @@ Object.assign(T.ta, {
   wEyebrow: "முடிந்த பணிகள்", wTitle: "முன் / பின்", wSub: "வார்டு 38 இல் தீர்க்கப்பட்ட புகார்கள். மக்களின் அனுமதியுடன் மட்டும்."
 });
 Object.assign(T.en, {
+  teamEyebrow: "Tamilaga Vettri Kazhagam", teamTitle: "For the people... with the people...", teamName: "Navalpattu S. Viji",
+  teamRoles: ["Member of the Legislative Assembly, Thiruverumbur", "District Secretary, Tiruchirappalli Suburban South District"],
+  teamNote: "Ward 36 People's Grievance Redressal Centre. Citizens can report complaints through the website, WhatsApp or by phone.", teamAlt: "Navalpattu S. Viji, Member of the Legislative Assembly, Thiruverumbur",
   photoHelp: "A photo helps us fix it faster", photoHelp2: "Up to 4 photos. Optional, but they help.",
   addMore: "Add more", remove: "Remove",
   notifyMe: "Notify this phone when it is resolved", notifyHelp: "You will get a notification with the before and after photo.",

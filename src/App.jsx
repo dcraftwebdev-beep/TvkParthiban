@@ -9,6 +9,7 @@ import { Footer } from "./components/layout/Footer.jsx";
 import { Sheet } from "./components/Sheet.jsx";
 import { Hero, Quick } from "./sections/Hero.jsx";
 import { Leader } from "./sections/Leader.jsx";
+import { Team } from "./sections/Team.jsx";
 import { Kural } from "./sections/Kural.jsx";
 import { Tvk, Journey, Join } from "./sections/Tvk.jsx";
 import { Complaint } from "./sections/Complaint.jsx";
@@ -56,7 +57,7 @@ function Portal({ view }) {
   }, []);
 
   useEffect(() => {
-    const map = { home: "home", leader: "leader", kural: "leader", tvk: "leader", journey: "leader", join: "leader", complaint: "complaint", track: "track", how: "contact", contact: "contact" };
+    const map = { home: "home", leader: "leader", team: "leader", kural: "leader", tvk: "leader", journey: "leader", join: "leader", complaint: "complaint", track: "track", how: "contact", contact: "contact" };
     const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) setTab(map[e.target.id]); }), { rootMargin: "-45% 0px -50% 0px" });
     Object.keys(map).forEach(id => { const el = document.getElementById(id); if (el) io.observe(el); });
     return () => io.disconnect();
@@ -81,8 +82,9 @@ function Portal({ view }) {
             <Stat to={srv.done} label={t.sDone} run={statIn} />
           </div>
         </section>
+                <Complaint t={t} lang={lang} say={say} onDone={c => { setDone(c); setStatKey(k => k + 1); }} micReq={micReq} micTrigger={micTrigger} />
+        <Team t={t} />
         <Leader t={t} lang={lang} />
-        <Complaint t={t} lang={lang} say={say} onDone={c => { setDone(c); setStatKey(k => k + 1); }} micReq={micReq} micTrigger={micTrigger} />
         <Kural lang={lang} t={t} />
         <Tvk t={t} />
         <Journey t={t} />

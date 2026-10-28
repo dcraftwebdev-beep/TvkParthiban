@@ -68,6 +68,18 @@ html[lang="en"] .leader-copy h2{font-size:clamp(46px,6.4vw,80px)}
 .ticks .ic{width:24px;height:24px;padding:4px;border-radius:50%;background:var(--flag-yellow);color:#1A0A0C}
 .leader-cta{display:flex;flex-wrap:wrap;gap:10px}
 
+/* ---------- district leader poster ---------- */
+.team-in{display:grid;gap:30px;align-items:center}
+.team-art{margin:0;justify-self:center;width:min(100%,460px);border-radius:var(--r-l);overflow:hidden;border:1px solid var(--line);background:#e0b800}
+.team-art img{display:block;width:100%;height:auto}
+.team-copy h2{font-size:clamp(30px,5vw,54px);line-height:1.12;color:var(--red-d)}
+html[lang="en"] .team-copy h2{font-size:clamp(42px,6vw,72px)}
+.team-name{margin-top:12px;font-family:var(--f-head);font-weight:700;font-size:clamp(24px,3.4vw,36px);line-height:1.2;color:var(--ink)}
+.team-roles{list-style:none;margin:10px 0 0;display:grid;gap:4px}
+.team-roles li{font-size:clamp(16px,1.6vw,18px);line-height:1.5;color:var(--ink)}
+.team-roles li+li{color:var(--mute);font-size:15px}
+.team-note{margin:18px 0 24px;max-width:50ch;font-size:15.5px;line-height:1.75;color:#FFFFFFD9}
+
 /* ---------- kural ---------- */
 .kural{background:var(--maroon);color:#fff;text-align:center;padding:clamp(48px,7vw,88px) 0;position:relative}
 .kural::after{content:"";position:absolute;left:0;right:0;bottom:0;height:6px;background:linear-gradient(90deg,var(--flag-red),var(--flag-yellow),var(--flag-red))}
@@ -146,6 +158,8 @@ html[lang="en"] .join-copy h2{font-size:clamp(44px,6.4vw,76px)}
   .contact-grid{grid-template-columns:1fr 1fr}
 }
 @media (min-width:860px){
+  .team-in{grid-template-columns:6fr 5fr;gap:80px}
+  .team-art{order:2}
   .hero-photo{display:none}
   .hero-shade{display:block}
   .hero{display:flex;align-items:flex-end;min-height:min(680px,calc(100vh - 34px))}
